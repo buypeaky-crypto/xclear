@@ -14,7 +14,7 @@ type CheckResult = {
 }
 
 export default function Home() {
-  const [username, setUsername] = useState('GutNews247')
+  const [username, setUsername] = useState("elonmusk")
   const [result, setResult] = useState<CheckResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [showCrypto, setShowCrypto] = useState(false)
