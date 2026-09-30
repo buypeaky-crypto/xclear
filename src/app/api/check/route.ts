@@ -1,45 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Redis } from '@upstash/redis'
-const redis = Redis.fromEnv()
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
+function getRedis() {
+  try {
+    const url = process.env.UPSTASH_REDIS_REST_URL
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN
+    if (!url || !token) return null
+    const { Redis } = require('@upstash/redis')
+    return new Redis({ url, token })
+  } catch {
+    return null
+  }
+}
 
 export async function GET(req: NextRequest) {
   const raw = req.nextUrl.searchParams.get('username')?.trim().replace(/^@/, '') || ''
   if (!raw) return NextResponse.json({ error: 'Username required' }, { status: 400 })
   const username = raw.toLowerCase()
   const cacheKey = `check:${username}`
+  const redis = getRedis()
 
-  // DISABLED READ - comment this out until X_BEARER is fixed
-  // try {
-  //   const cached:any = await redis.get(cacheKey)
-  //   if (cached && !cached.error && !cached.notFound && cached.username) {
-  //     return NextResponse.json(cached)
-  //   }
-  // } catch {}
+  if (redis) {
+    try {
+      const cached: any = await redis.get(cacheKey)
+      if (cached && cached.username && !cached.error && !cached.notFound) {
+        return NextResponse.json(cached)
+      }
+    } catch {}
+  }
 
   try {
     let user: any = null
-    const bearer = process.env.X_BEARER || process.env.TWITTER_BEARER_TOKEN
+    const bearer = process.env.X_BEARER
     if (bearer) {
-      const r = await fetch(`https://api.twitter.com/2/users/by/username/${username}?user.fields=id,username,name`, {
+      const r = await fetch(`https://api.twitter.com/2/users/by/username/${username}`, {
         headers: { Authorization: `Bearer ${bearer}` },
         cache: 'no-store'
       })
-      const j = await r.json().catch(()=>({}))
+      const j = await r.json().catch(()=>null)
       if (r.ok && j?.data) user = j.data
-      else console.log('X API fail', r.status, JSON.stringify(j).slice(0,300))
     }
 
     if (!user) {
       const fx = await fetch(`https://api.fxtwitter.com/${username}`, { cache: 'no-store' })
       const fj: any = await fx.json()
-      if (fj?.code === 200 && fj?.user?.screen_name) {
+      if (fj?.code === 200 && fj?.user) {
         user = { id: fj.user.id, username: fj.user.screen_name, name: fj.user.name }
       } else if (fj?.code === 404) {
         return NextResponse.json({ notFound: true, username }, { status: 404 })
       }
     }
 
-    if (!user) return NextResponse.json({ error: 'X_BEARER expired and fallback failed' }, { status: 502 })
+    if (!user) return NextResponse.json({ error: 'X_BEARER expired' }, { status: 502 })
 
     const result = {
       username: user.username,
@@ -52,9 +65,12 @@ export async function GET(req: NextRequest) {
       banned: false,
       isBanned: false,
     }
-    await redis.set(cacheKey, result, { ex: 60 * 60 * 6 })
+
+    if (redis) {
+      try { await redis.set(cacheKey, result, { ex: 60*60*6 }) } catch {}
+    }
     return NextResponse.json(result)
-  } catch (e: any) {
+  } catch (e:any) {
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
 }
