@@ -43,9 +43,10 @@ export default function Home() {
             <div className="flex gap-2 text-green-400"><CheckCircle size={20}/> @{result.handle} looks clear</div>
           ) : (
             <div className="flex gap-2 text-red-400"><AlertCircle size={20}/> Shadowban detected</div>
-          )}
-          <p className="text-xs text-zinc-500 mt-2">Checked at {new Date(result.checkedAt).toLocaleTimeString()}</p>
-        </div>
+          )
+
+
+<p className="text-xs text-zinc-500 mt-2">Checked at {new Date().toLocaleString()} • {result.ms}ms</p>        </div>
       )}
 
       <div className="mt-12 flex flex-col items-center gap-3">
