@@ -4,30 +4,38 @@ import { useState } from 'react'
 type CheckResult = { handle: string; status: 'clear' | 'shadowban'; ms: number }
 
 const checks = [
-  { key: 'exists', pass: (h:string)=>`@${h} exists.`, fail: (h:string)=>`@${h} does not exist.`, info: 'We verified the profile exists on X.' },
-  { key: 'suggestion', pass: ()=>'No search suggestion ban.', fail: ()=>'Search suggestion ban.', info: 'Search suggestion ban hides your profile from autocomplete.' },
-  { key: 'search', pass: ()=>'No search ban.', fail: ()=>'Search ban.', info: 'Search ban hides your tweets from search results.' },
-  { key: 'ghost', pass: ()=>'No ghost ban.', fail: ()=>'Ghost ban.', info: 'Ghost ban makes your replies invisible to others.' },
-  { key: 'deboost', pass: ()=>'No reply deboosting detected.', fail: ()=>'Reply deboosting detected.', info: 'Reply deboosting reduces visibility of your replies.' },
+  { key: 'exists', pass: (h:string)=>`@${h} exists.`, fail: (h:string)=>`@${h} does not exist.`, info: 'Profile exists.' },
+  { key: 'suggestion', pass: ()=>'No search suggestion ban.', fail: ()=>'Search suggestion ban.', info: 'Hidden from autocomplete.' },
+  { key: 'search', pass: ()=>'No search ban.', fail: ()=>'Search ban.', info: 'Hidden from search.' },
+  { key: 'ghost', pass: ()=>'No ghost ban.', fail: ()=>'Ghost ban.', info: 'Replies invisible.' },
+  { key: 'deboost', pass: ()=>'No reply deboosting detected.', fail: ()=>'Reply deboosting detected.', info: 'Replies deboosted.' },
 ]
+
+const ADDR = {
+  btc: 'bc1qham6hxw6hx9p95rhq27nnzlmzyrr39w6p2gfm2',
+  eth: '0x438E7Be244e46D414f097B211cC4fa7549fB3C3b',
+  sol: 'G2dYPPTMorSSoUb68fKYbX55pARzrT1FcoRfJgYQFy9V',
+}
 
 export default function Home() {
   const [handle, setHandle] = useState('GutNews247')
   const [result, setResult] = useState<CheckResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState<string | null>(null)
+  const [showCrypto, setShowCrypto] = useState(false)
+  const [copied, setCopied] = useState<string | null>(null)
+
+  function copyAddr(a: string, t: string) {
+    navigator.clipboard.writeText(a)
+    setCopied(t)
+    setTimeout(()=>setCopied(null), 2000)
+  }
 
   async function check() {
     if(!handle) return
-    setLoading(true)
-    setResult(null)
-    try {
-      const res = await fetch(`/api/check?handle=${handle.replace('@','')}`)
-      const data = await res.json()
-      setResult(data)
-    } catch {
-      setResult({ handle, status: 'clear', ms: 726 })
-    }
+    setLoading(true); setResult(null)
+    try { const r = await fetch(`/api/check?handle=${handle.replace('@','')}`); const d = await r.json(); setResult(d) }
+    catch { setResult({ handle, status: 'clear', ms: 726 }) }
     setLoading(false)
   }
 
@@ -41,14 +49,14 @@ export default function Home() {
               <span className="text-[#a33e9c] text-2xl font-bold">@</span>
               <input value={handle} onChange={e=>setHandle(e.target.value)} onKeyDown={e=>e.key==='Enter'&&check()} className="border-b border-zinc-300 focus:border-[#0a7eb0] outline-none text-[#a33e9c] font-medium text-lg min-w- pb-1 bg-transparent" placeholder="GutNews247" />
             </div>
-            <button onClick={check} disabled={loading} className="border border-[#0a7eb0] text-[#0a7eb0] rounded-full px-7 py-2 text-sm font-medium hover:bg-[#0a7eb0] hover:text-white transition disabled:opacity-50">{loading?'CHECKING...':'CHECK'}</button>
+            <button onClick={check} disabled={loading} className="border border-[#0a7eb0] text-[#0a7eb0] rounded-full px-7 py-2 text-sm font-medium hover:bg-[#0a7eb0] hover:text-white transition">{loading?'CHECKING...':'CHECK'}</button>
           </div>
         </div>
       </div>
 
       {result && (
         <div className="max-w-4xl mx-auto bg-white shadow-md overflow-hidden">
-          {checks.map((c)=>{
+          {checks.map(c=>{
             const isFail = result.status!=='clear' && (c.key==='search' || c.key==='suggestion')
             const label = isFail? c.fail(result.handle) : c.pass(result.handle)
             return (
@@ -68,11 +76,23 @@ export default function Home() {
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto mt-12 flex justify-center">
-        <a href="https://paypal.me/BDXII" target="_blank" className="bg-[#FFDD00] text-black px-7 py-3 rounded-full font-bold flex items-center gap-2 text-sm shadow hover:scale-105 transition">
-          ☕ Buy Me a Coffee
-        </a>
+      <div className="max-w-4xl mx-auto mt-12 flex justify-center gap-3 flex-wrap">
+        <a href="https://paypal.me/BDXII" target="_blank" className="bg-[#FFDD00] text-black px-7 py-3 rounded-full font-bold flex items-center gap-2 text-sm shadow hover:scale-105 transition">☕ Buy Me a Coffee</a>
+        <button onClick={()=>setShowCrypto(true)} className="bg-zinc-900 text-white px-7 py-3 rounded-full font-bold text-sm shadow hover:bg-black transition">₿ Crypto</button>
       </div>
+
+      {showCrypto && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={()=>setShowCrypto(false)}>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl" onClick={e=>e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-5"><h3 className="font-bold text-lg">Support with Crypto</h3><button onClick={()=>setShowCrypto(false)} className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200">✕</button></div>
+            <div className="space-y-3">
+              <div className="border rounded-xl p-3 bg-orange-50"><div className="flex justify-between mb-2"><span className="font-bold text-sm">₿ Bitcoin (BTC)</span><button onClick={()=>copyAddr(ADDR.btc,'btc')} className="text-xs bg-white border px-3 py-1 rounded-full">{copied==='btc'?'Copied!':'Copy'}</button></div><div className="text- font-mono break-all bg-white p-2 rounded border">{ADDR.btc}</div></div>
+              <div className="border rounded-xl p-3 bg-blue-50"><div className="flex justify-between mb-2"><span className="font-bold text-sm">♦ ETH / EVM</span><button onClick={()=>copyAddr(ADDR.eth,'eth')} className="text-xs bg-white border px-3 py-1 rounded-full">{copied==='eth'?'Copied!':'Copy'}</button></div><div className="text- font-mono break-all bg-white p-2 rounded border">{ADDR.eth}</div></div>
+              <div className="border rounded-xl p-3 bg-purple-50"><div className="flex justify-between mb-2"><span className="font-bold text-sm">◎ Solana (SOL)</span><button onClick={()=>copyAddr(ADDR.sol,'sol')} className="text-xs bg-white border px-3 py-1 rounded-full">{copied==='sol'?'Copied!':'Copy'}</button></div><div className="text- font-mono break-all bg-white p-2 rounded border">{ADDR.sol}</div></div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
