@@ -8,29 +8,27 @@ export async function GET(req: NextRequest) {
   const username = raw.toLowerCase()
   const cacheKey = `check:${username}`
 
-  try {
-    const cached: any = await redis.get(cacheKey)
-    if (cached && !cached.error && !cached.notFound && cached.username) {
-      return NextResponse.json(cached)
-    }
-  } catch {}
+  // DISABLED READ - comment this out until X_BEARER is fixed
+  // try {
+  //   const cached:any = await redis.get(cacheKey)
+  //   if (cached && !cached.error && !cached.notFound && cached.username) {
+  //     return NextResponse.json(cached)
+  //   }
+  // } catch {}
 
   try {
     let user: any = null
-
-    // 1. Try your X_BEARER if it exists
     const bearer = process.env.X_BEARER || process.env.TWITTER_BEARER_TOKEN
     if (bearer) {
       const r = await fetch(`https://api.twitter.com/2/users/by/username/${username}?user.fields=id,username,name`, {
         headers: { Authorization: `Bearer ${bearer}` },
         cache: 'no-store'
       })
-      const j = await r.json()
+      const j = await r.json().catch(()=>({}))
       if (r.ok && j?.data) user = j.data
       else console.log('X API fail', r.status, JSON.stringify(j).slice(0,300))
     }
 
-    // 2. Fallback - free, no token - fixes your 401 Unauthorized
     if (!user) {
       const fx = await fetch(`https://api.fxtwitter.com/${username}`, { cache: 'no-store' })
       const fj: any = await fx.json()
@@ -41,9 +39,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    if (!user) {
-      return NextResponse.json({ error: 'X_BEARER expired - using fallback failed' }, { status: 502 })
-    }
+    if (!user) return NextResponse.json({ error: 'X_BEARER expired and fallback failed' }, { status: 502 })
 
     const result = {
       username: user.username,
@@ -58,9 +54,7 @@ export async function GET(req: NextRequest) {
     }
     await redis.set(cacheKey, result, { ex: 60 * 60 * 6 })
     return NextResponse.json(result)
-
   } catch (e: any) {
-    console.error(e)
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
-} 
+}
