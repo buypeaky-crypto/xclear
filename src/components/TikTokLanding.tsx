@@ -1,5 +1,6 @@
 import { tiktokCopies, type TikTokLocale } from "../lib/i18n/tiktok";
 import TikTokChecker from "./TikTokChecker";
+import DonationButtons from "./DonationButtons";
 
 export default function TikTokLanding({ locale }: { locale: TikTokLocale }) {
   const content = tiktokCopies[locale];
@@ -12,6 +13,7 @@ export default function TikTokLanding({ locale }: { locale: TikTokLocale }) {
         <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-stone-600">{content.intro}</p>
       </section>
       {locale === "en" && <TikTokChecker />}
+      <DonationButtons />
       <section aria-labelledby="tiktok-faq-title" className="mx-auto mt-14 max-w-3xl border-t border-stone-300 pt-8">
         <h2 id="tiktok-faq-title" className="text-2xl font-bold">TikTok Shadowban FAQs</h2>
         <div className="mt-5 divide-y divide-stone-200">

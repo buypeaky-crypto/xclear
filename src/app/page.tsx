@@ -6,6 +6,7 @@ import type { LocaleDictionary } from "../lib/i18n/dictionaries"
 import { baseUrl } from "../lib/i18n/config"
 import type { InstagramCopy } from "../lib/i18n/instagram"
 import { checkInstagram, type IGCheckResult } from "../lib/instagram/checker"
+import DonationButtons from "../components/DonationButtons"
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -78,7 +79,6 @@ export default function Home({
   })
   const [instagramResult, setInstagramResult] = useState<IGCheckResult | null>(null)
   const [loading, setLoading] = useState(false)
-  const [showCrypto, setShowCrypto] = useState(false)
   const [openInfo, setOpenInfo] = useState<string | null>(null)
 
   const handleCheck = async () => {
@@ -264,6 +264,8 @@ export default function Home({
           </div>
         )}
 
+        <DonationButtons />
+
         <section id="how-it-works" className="mt-8 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
           <h2 className="border-b border-stone-200 px-6 py-4 text-lg font-bold text-stone-900">
             {content?.faqTitle ?? "Frequently asked questions"}
@@ -290,25 +292,9 @@ export default function Home({
           </div>
         </section>
 
-        <div className="flex justify-center gap-3 mt-10">
-          <a href="https://paypal.me/BDXII" target="_blank" rel="noopener noreferrer" className="bg-amber-400 text-stone-900 rounded-full px-7 py-2.5 font-semibold text-[14px] shadow-sm transition-colors hover:bg-amber-300">☕ Buy Me a Coffee</a>
-          <button onClick={() => setShowCrypto(true)} className="bg-stone-900 text-white rounded-full px-7 py-2.5 text-[14px] shadow-sm transition-colors hover:bg-black">₿ Crypto</button>
-        </div>
-
         <div className="text-center text-[12px] text-stone-500 mt-10">Made in Germany by <a href="https://x.com/shadowban_eu" target="_blank" className="text-violet-600">@shadowban_eu</a>, rebuilt by <a href="https://x.com/gutnews247" target="_blank" className="text-violet-600">@gutnews247</a></div>
       </div>
 
-      {showCrypto && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setShowCrypto(false)}>
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full space-y-3 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-bold text-center text-lg">Donate Crypto</h3>
-            <div><p className="text-xs font-bold mb-1 text-stone-800">BTC</p><p className="text-[10px] break-all bg-stone-100 p-2 rounded select-all">bc1qham6hxw6hx9p95rhq27nnzlmzyrr39w6p2gfm2</p></div>
-            <div><p className="text-xs font-bold mb-1 text-stone-800">ETH</p><p className="text-[10px] break-all bg-stone-100 p-2 rounded select-all">0x438E7Be244e46D414f097B211cC4fa7549fB3C3b</p></div>
-            <div><p className="text-xs font-bold mb-1 text-stone-800">SOL</p><p className="text-[10px] break-all bg-stone-100 p-2 rounded select-all">G2dYPPTMorSSoUb68fKYbX55pARzrT1FccRfjgYQFy9V</p></div>
-            <button onClick={() => setShowCrypto(false)} className="w-full bg-stone-900 text-white rounded-full py-2.5 mt-2 transition-colors hover:bg-black">Close</button>
-          </div>
-        </div>
-      )}
       {!content && (
         <>
           <script
