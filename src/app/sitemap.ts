@@ -11,6 +11,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
       images: [`${baseUrl}/og-image.png`],
     },
+    ...["de", "id"].map((locale) => ({
+      url: `${baseUrl}/${locale}`,
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.9,
+    })),
     ...["privacy", "terms", "about", "cookies", "contact"].map((page) => ({
       url: `${baseUrl}/${page}`,
       lastModified: new Date(),

@@ -18,7 +18,7 @@ export function getLocaleMetadata(locale: LocalizedLocale): Metadata {
     openGraph: {
       type: "website",
       url: getLocaleUrl(locale),
-      siteName: "ShadowbannChecker",
+      siteName: "ShadowbanChecker",
       title: dictionary.title,
       description: dictionary.description,
       locale,

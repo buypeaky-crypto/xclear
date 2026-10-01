@@ -3,7 +3,7 @@ import Link from "next/link";
 import { baseUrl, getEnglishLanguageAlternates } from "../../lib/i18n/config";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | ShadowbannChecker Rules",
+  title: "Terms of Service | ShadowbanChecker Rules",
   description:
     "Read the terms for using ShadowbannChecker’s free public-profile and hashtag visibility tools.",
   keywords: ["shadowban checker terms", "instagram shadowban test terms"],

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { baseUrl, getEnglishLanguageAlternates } from "../../lib/i18n/config";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy | ShadowbannChecker",
+  title: "Cookie Policy | ShadowbanChecker",
   description:
     "Learn how ShadowbannChecker uses Vercel and Google Analytics technologies without advertising cookies.",
   keywords: ["shadowban checker cookie policy", "shadowban test privacy"],

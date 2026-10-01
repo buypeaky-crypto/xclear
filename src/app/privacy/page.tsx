@@ -3,7 +3,7 @@ import Link from "next/link";
 import { baseUrl, getEnglishLanguageAlternates } from "../../lib/i18n/config";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | ShadowbannChecker - 100% Private Shadowban Test",
+  title: "Privacy Policy | ShadowbanChecker - 100% Private Shadowban Test",
   description:
     "Privacy policy for ShadowbannChecker: no login or data sold; successful X/Twitter profile lookups may be cached for up to six hours.",
   keywords: [

@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   ...getRedditMetadata(),
-  title: "Reddit Profile Visibility Check | ShadowbannChecker",
+  title: "Reddit Profile Visibility Check | ShadowbanChecker",
   robots: { index: false, follow: true },
 };
 

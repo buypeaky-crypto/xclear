@@ -4,7 +4,7 @@ import { baseUrl, getEnglishLanguageAlternates } from "../../lib/i18n/config";
 import ContactForm from "./ContactForm";
 
 export const metadata: Metadata = {
-  title: "Contact Us | ShadowbannChecker Support",
+  title: "Contact Us | ShadowbanChecker Support",
   description:
     "Contact the ShadowbannChecker team for help with checker results, privacy questions, or bug reports.",
   keywords: [

@@ -43,32 +43,32 @@ export type InstagramCopy = {
 
 const instagramMetadata: Record<InstagramLocale, { title: string; description: string }> = {
   en: {
-    title: "Instagram Shadowban Checker | ShadowbannChecker",
+    title: "Instagram Shadowban Checker | ShadowbanChecker",
     description:
       "Check an Instagram username and submitted hashtags for visibility risk signals with a free, login-free heuristic checker.",
   },
   de: {
-    title: "Instagram-Shadowban-Test | ShadowbannChecker",
+    title: "Instagram-Shadowban-Test | ShadowbanChecker",
     description:
       "Prüfe einen Instagram-Benutzernamen und eingegebene Hashtags kostenlos und ohne Anmeldung auf mögliche Hinweise zur Sichtbarkeit.",
   },
   id: {
-    title: "Cek Shadowban Instagram | ShadowbannChecker",
+    title: "Cek Shadowban Instagram | ShadowbanChecker",
     description:
       "Periksa nama pengguna dan hashtag Instagram secara gratis tanpa login untuk mengetahui kemungkinan sinyal masalah visibilitas.",
   },
   pt: {
-    title: "Teste de Shadowban no Instagram | ShadowbannChecker",
+    title: "Teste de Shadowban no Instagram | ShadowbanChecker",
     description:
       "Verifique um nome de usuário e hashtags do Instagram gratuitamente, sem login, em busca de possíveis sinais de visibilidade limitada.",
   },
   es: {
-    title: "Comprobar Shadowban en Instagram | ShadowbannChecker",
+    title: "Comprobar Shadowban en Instagram | ShadowbanChecker",
     description:
       "Comprueba gratis y sin iniciar sesión un nombre de usuario y hashtags de Instagram para detectar posibles señales de visibilidad limitada.",
   },
   it: {
-    title: "Test Shadowban Instagram | ShadowbannChecker",
+    title: "Test Shadowban Instagram | ShadowbanChecker",
     description:
       "Controlla gratuitamente e senza accesso un nome utente e gli hashtag di Instagram per individuare possibili segnali di visibilità limitata.",
   },

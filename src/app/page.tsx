@@ -2,7 +2,6 @@
 import { useState } from "react"
 import { Fraunces, Sora } from "next/font/google"
 import type { LocaleDictionary } from "../lib/i18n/dictionaries"
-import { baseUrl } from "../lib/i18n/config"
 import type { InstagramCopy } from "../lib/i18n/instagram"
 import { checkInstagram, type IGCheckResult } from "../lib/instagram/checker"
 import DonationButtons from "../components/DonationButtons"
@@ -137,14 +136,14 @@ export default function Home({
             {content ? (
               <span className="text-stone-800">{content.h1}</span>
             ) : (
-              <>
-                <span className="text-stone-800">Is </span>
-                <span className="text-violet-600">@{username}</span>
-                <br />
-                <span className="text-stone-800">shadowbanned on Twitter?</span>
-              </>
+              <span className="text-stone-800">Twitter Shadowban Test 2026</span>
             )}
           </h1>
+          {!content && (
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">
+              Use this free Twitter shadowban test and Twitter shadowban checker to check whether your account may have search bans, ghost bans, or reply deboosting. Wondering &quot;is my Twitter shadowbanned?&quot; Check a public username instantly, without logging in.
+            </p>
+          )}
           {content && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">{content.subtitle}</p>}
           <PlatformSwitcher activePlatform={platform} />
           <SupportUsButton />
@@ -288,21 +287,6 @@ export default function Home({
 
       {!content && (
         <>
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "SoftwareApplication",
-                name: "Twitter Shadowban Checker",
-                url: `${baseUrl}/`,
-                description: "A free tool to check public X/Twitter profile information.",
-                applicationCategory: "UtilitiesApplication",
-                operatingSystem: "Any",
-                offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-              }),
-            }}
-          />
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{

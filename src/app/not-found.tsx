@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Page Not Found | ShadowbannChecker",
+  title: "Page Not Found | ShadowbanChecker",
   description: "This ShadowbannChecker page could not be found.",
   robots: { index: false, follow: false },
 };

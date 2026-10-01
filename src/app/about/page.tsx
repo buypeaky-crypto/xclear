@@ -3,7 +3,7 @@ import Link from "next/link";
 import { baseUrl, getEnglishLanguageAlternates } from "../../lib/i18n/config";
 
 export const metadata: Metadata = {
-  title: "About ShadowbannChecker | Our Authors and Method",
+  title: "About ShadowbanChecker | Our Authors and Method",
   description:
     "Meet the authors and learn how ShadowbannChecker researches visibility signals to help creators investigate possible reach restrictions.",
   keywords: [

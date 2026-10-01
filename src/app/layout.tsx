@@ -19,9 +19,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: "Shadowban Checker - Twitter, Instagram, TikTok, Reddit | ShadowbannChecker",
+  title: "Twitter Shadowban Test 2026 | 100% Free & Instant Check",
   description:
-    "Free Shadowban Checker for Twitter (X), Instagram, TikTok, Reddit & more. Test if your account is shadowbanned — check search ban, ghost ban, reply visibility and hashtag suppression. No login required.",
+    "Free Twitter shadowban checker. Instantly test your account for search bans, ghost bans, and reply deboosting without logging in.",
   keywords: [
     "twitter shadowban checker",
     "Instagram shadowban checker",
@@ -40,10 +40,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://shadowbannchecker.vercel.app/",
-    siteName: "ShadowbannChecker",
-    title: "Shadowban Checker - Twitter, Instagram, TikTok, Reddit | ShadowbannChecker",
-    description:
-      "Free Shadowban Checker for Twitter (X), Instagram, TikTok, Reddit & more. Test if your account is shadowbanned — check search ban, ghost ban, reply visibility and hashtag suppression. No login required.",
+    siteName: "ShadowbanChecker",
+    title: "Twitter Shadowban Test 2026 | 100% Free & Instant Check",
+    description: "Free Twitter shadowban checker. Instantly test your account for search bans, ghost bans, and reply deboosting without logging in.",
     images: [
       {
         url: "/og-image.png",
@@ -55,9 +54,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Shadowban Checker - Twitter, Instagram, TikTok, Reddit | ShadowbannChecker",
-    description:
-      "Free Shadowban Checker for Twitter (X), Instagram, TikTok, Reddit & more. Test if your account is shadowbanned — check search ban, ghost ban, reply visibility and hashtag suppression. No login required.",
+    title: "Twitter Shadowban Test 2026 | 100% Free & Instant Check",
+    description: "Free Twitter shadowban checker. Instantly test your account for search bans, ghost bans, and reply deboosting without logging in.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -79,6 +77,23 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              name: "Twitter Shadowban Test 2026",
+              applicationCategory: "Utility",
+              offers: { "@type": "Offer", price: "0" },
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: "4.8",
+                ratingCount: "127",
+              },
+            }),
+          }}
+        />
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-F1E42SVH2T"

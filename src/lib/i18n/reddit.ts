@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { baseUrl, getEnglishLanguageAlternates } from "./config";
 
 export const redditMetadata = {
-  title: "Reddit Shadowban Checker | ShadowbannChecker",
+  title: "Reddit Shadowban Checker | ShadowbanChecker",
   description:
     "Free Reddit shadowban checker. Enter a username to see if the profile is visible logged out, if recent comments show, and what was removed.",
 };

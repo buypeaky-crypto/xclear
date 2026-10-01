@@ -25,7 +25,7 @@ type TikTokCopy = {
 
 export const tiktokCopies: Record<TikTokLocale, TikTokCopy> = {
   en: {
-    title: "TikTok Shadowban Checker | ShadowbannChecker",
+    title: "TikTok Shadowban Checker | ShadowbanChecker",
     description:
       "Check if your TikTok account is shadowbanned for free. Test username, video visibility, hashtag suppression and For You Page (FYP) reach risk without login.",
     h1: "TikTok Shadowban Checker",
@@ -57,7 +57,7 @@ export const tiktokCopies: Record<TikTokLocale, TikTokCopy> = {
     ],
   },
   de: {
-    title: "TikTok-Shadowban-Test | ShadowbannChecker",
+    title: "TikTok-Shadowban-Test | ShadowbanChecker",
     description:
       "Prüfe kostenlos, ob dein TikTok-Konto im Shadowban ist. Teste Sichtbarkeit von Videos, Hashtags und For-You-Page-Reichweite ohne Login.",
     h1: "TikTok-Shadowban-Test",
@@ -89,7 +89,7 @@ export const tiktokCopies: Record<TikTokLocale, TikTokCopy> = {
     ],
   },
   id: {
-    title: "Cek Shadowban TikTok | ShadowbannChecker",
+    title: "Cek Shadowban TikTok | ShadowbanChecker",
     description:
       "Periksa gratis apakah akun TikTok Anda terkena shadowban. Uji risiko visibilitas video, pembatasan hashtag, dan jangkauan For You Page (FYP) tanpa login.",
     h1: "Pemeriksa Shadowban TikTok",
@@ -121,7 +121,7 @@ export const tiktokCopies: Record<TikTokLocale, TikTokCopy> = {
     ],
   },
   pt: {
-    title: "Teste de Shadowban no TikTok | ShadowbannChecker",
+    title: "Teste de Shadowban no TikTok | ShadowbanChecker",
     description:
       "Verifique gratuitamente se sua conta do TikTok está sofrendo shadowban. Avalie riscos de visibilidade de vídeos, hashtags e alcance da For You Page (FYP), sem login.",
     h1: "Teste de Shadowban no TikTok",
@@ -153,7 +153,7 @@ export const tiktokCopies: Record<TikTokLocale, TikTokCopy> = {
     ],
   },
   es: {
-    title: "Comprobar Shadowban en TikTok | ShadowbannChecker",
+    title: "Comprobar Shadowban en TikTok | ShadowbanChecker",
     description:
       "Comprueba gratis si tu cuenta de TikTok tiene shadowban. Evalúa riesgos de visibilidad de videos, hashtags y alcance de la página Para ti (FYP), sin iniciar sesión.",
     h1: "Comprobar shadowban en TikTok",
@@ -185,7 +185,7 @@ export const tiktokCopies: Record<TikTokLocale, TikTokCopy> = {
     ],
   },
   it: {
-    title: "Test Shadowban TikTok | ShadowbannChecker",
+    title: "Test Shadowban TikTok | ShadowbanChecker",
     description:
       "Controlla gratis se il tuo account TikTok è soggetto a shadowban. Valuta i rischi per visibilità dei video, hashtag e copertura nella pagina Per Te (FYP), senza accesso.",
     h1: "Test Shadowban TikTok",
@@ -217,7 +217,7 @@ export const tiktokCopies: Record<TikTokLocale, TikTokCopy> = {
     ],
   },
   th: {
-    title: "เช็ก Shadowban TikTok | ShadowbannChecker",
+    title: "เช็ก Shadowban TikTok | ShadowbanChecker",
     description:
       "ตรวจสอบฟรีว่าบัญชี TikTok ของคุณอาจถูกจำกัดการมองเห็นหรือไม่ ประเมินความเสี่ยงด้านการมองเห็นวิดีโอ แฮชแท็ก และการเข้าถึงหน้า For You (FYP) โดยไม่ต้องเข้าสู่ระบบ",
     h1: "เครื่องมือตรวจสอบ Shadowban TikTok",

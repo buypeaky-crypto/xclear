@@ -6,8 +6,8 @@ export type Locale = (typeof locales)[number];
 
 export const localeSlugs: Record<Locale, string> = {
   en: "",
-  de: "de/shadowban-test",
-  id: "id/cek-shadowban",
+  de: "de",
+  id: "id",
   pt: "pt/teste-shadowban",
   es: "es/comprobar-shadowban",
   it: "it/test-shadowban",

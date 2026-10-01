@@ -17,10 +17,10 @@ export type LocaleDictionary = {
 
 export const dictionaries: Record<Exclude<Locale, "en">, LocaleDictionary> = {
   de: {
-    title: "Shadowban-Test für X/Twitter | ShadowbannChecker",
+    title: "Twitter-Shadowban-Test 2026 | Kostenlos & Sofort",
     description:
-      "Prüfe ein öffentliches X/Twitter-Profil kostenlos und ohne Anmeldung mit klaren Hinweisen zu den Grenzen des Tests.",
-    h1: "Ist dein X/Twitter-Konto shadowbanned?",
+      "Teste kostenlos, ob dein Twitter-Konto von Suchsperren, Ghost-Bans oder ausgeblendeten Antworten betroffen ist. Ohne Login.",
+    h1: "Twitter-Shadowban-Test",
     subtitle:
       "Prüfe ein öffentliches Profil kostenlos. Der aktuelle Check sucht Kontoinformationen und kann eine Shadowban-Entscheidung nicht bestätigen.",
     faqTitle: "Häufige Fragen",
@@ -54,10 +54,10 @@ export const dictionaries: Record<Exclude<Locale, "en">, LocaleDictionary> = {
     ],
   },
   id: {
-    title: "Cek Shadowban X/Twitter Gratis | ShadowbannChecker",
+    title: "Tes Shadowban Twitter 2026 | Gratis & Instan",
     description:
-      "Periksa profil publik X/Twitter secara gratis tanpa login dengan penjelasan yang jelas tentang batas pemeriksaan.",
-    h1: "Apakah akun X/Twitter Anda terkena shadowban?",
+      "Cek gratis apakah akun Twitter Anda terkena pembatasan pencarian, ghost ban, atau deboosting balasan. Tanpa login.",
+    h1: "Tes Shadowban Twitter",
     subtitle:
       "Periksa profil publik secara gratis. Pemeriksaan saat ini mencari informasi akun dan tidak dapat memastikan keputusan shadowban.",
     faqTitle: "Pertanyaan umum",
@@ -91,7 +91,7 @@ export const dictionaries: Record<Exclude<Locale, "en">, LocaleDictionary> = {
     ],
   },
   pt: {
-    title: "Teste de Shadowban no X/Twitter | ShadowbannChecker",
+    title: "Teste de Shadowban no X/Twitter | ShadowbanChecker",
     description:
       "Consulte gratuitamente um perfil público do X/Twitter sem login e veja com clareza os limites da verificação.",
     h1: "Sua conta do X/Twitter está com shadowban?",
@@ -128,7 +128,7 @@ export const dictionaries: Record<Exclude<Locale, "en">, LocaleDictionary> = {
     ],
   },
   es: {
-    title: "Comprobar Shadowban en X/Twitter | ShadowbannChecker",
+    title: "Comprobar Shadowban en X/Twitter | ShadowbanChecker",
     description:
       "Consulta gratis un perfil público de X/Twitter sin iniciar sesión y conoce claramente los límites de la comprobación.",
     h1: "¿Tu cuenta de X/Twitter tiene shadowban?",
@@ -165,7 +165,7 @@ export const dictionaries: Record<Exclude<Locale, "en">, LocaleDictionary> = {
     ],
   },
   it: {
-    title: "Test Shadowban su X/Twitter | ShadowbannChecker",
+    title: "Test Shadowban su X/Twitter | ShadowbanChecker",
     description:
       "Controlla gratuitamente un profilo pubblico X/Twitter senza accedere e scopri con chiarezza i limiti della verifica.",
     h1: "Il tuo account X/Twitter è in shadowban?",
@@ -202,7 +202,7 @@ export const dictionaries: Record<Exclude<Locale, "en">, LocaleDictionary> = {
     ],
   },
   th: {
-    title: "ตรวจสอบ Shadowban บน X/Twitter | ShadowbannChecker",
+    title: "ตรวจสอบ Shadowban บน X/Twitter | ShadowbanChecker",
     description:
       "ตรวจสอบโปรไฟล์สาธารณะบน X/Twitter ด้วย ShadowbannChecker ฟรี ไม่ต้องเข้าสู่ระบบ พร้อมอธิบายข้อจำกัดของการตรวจสอบอย่างชัดเจน",
     h1: "บัญชี X/Twitter ของคุณติด Shadowban หรือไม่?",
