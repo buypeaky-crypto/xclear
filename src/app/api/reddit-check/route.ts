@@ -4,9 +4,12 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const maxDuration = 8;
 
-const USER_AGENT = "Mozilla/5.0 (shadowbannchecker.com; free checker)";
-const FETCH_TIMEOUT_MS = 2_500;
+const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36 shadowbannchecker.com";
+const FETCH_TIMEOUT_MS = 1_800;
 const CACHE_TIMEOUT_MS = 350;
+const REDDIT_ENDPOINTS = ["old.reddit.com", "api.reddit.com", "www.reddit.com"] as const;
+
+type RedditStatus = "visible" | "shadowbanned" | "suspended" | "not_found" | "unavailable";
 
 type RedditUser = {
   created_utc?: unknown;
@@ -17,12 +20,15 @@ type RedditUser = {
 };
 
 type RedditResult = {
+  status: RedditStatus;
   exists: boolean;
   isShadowbanned: boolean;
   isSuspended: boolean;
   isVisible: boolean;
   karma?: number;
   created?: number;
+  linkKarma?: number;
+  commentKarma?: number;
   data?: {
     karma?: number;
     created_utc?: number;
@@ -32,6 +38,8 @@ type RedditResult = {
   scraped: boolean;
   riskSignals: string[];
   message?: string;
+  reason?: string;
+  manualCheckUrl?: string;
 };
 
 type RedditPayload = {
@@ -83,6 +91,7 @@ function isRedditResult(value: unknown): value is RedditResult {
   if (!value || typeof value !== "object") return false;
   const result = value as Partial<RedditResult>;
   return (
+    ["visible", "shadowbanned", "suspended", "not_found", "unavailable"].includes(String(result.status)) &&
     typeof result.exists === "boolean" &&
     typeof result.isShadowbanned === "boolean" &&
     typeof result.isSuspended === "boolean" &&
@@ -92,12 +101,12 @@ function isRedditResult(value: unknown): value is RedditResult {
   );
 }
 
-function responseErrorText(payload: RedditPayload | null): string {
-  if (!payload) return "";
-  return [payload.error, payload.message, payload.reason]
-    .filter((part) => typeof part === "string" || typeof part === "number")
-    .join(" ")
-    .toLowerCase();
+function responseErrorText(payload: unknown): string {
+  try {
+    return JSON.stringify(payload ?? "").toLowerCase();
+  } catch {
+    return "";
+  }
 }
 
 function asNumber(value: unknown): number | undefined {
@@ -105,7 +114,8 @@ function asNumber(value: unknown): number | undefined {
 }
 
 async function fetchAbout(host: string, username: string): Promise<Response> {
-  return fetch(`https://${host}/user/${encodeURIComponent(username)}/about.json`, {
+  const path = host === "api.reddit.com" ? "about" : "about.json";
+  return fetch(`https://${host}/user/${encodeURIComponent(username)}/${path}`, {
     headers: {
       "User-Agent": USER_AGENT,
       Accept: "application/json",
@@ -148,28 +158,40 @@ export async function POST(request: Request) {
     if (isRedditResult(cached)) return Response.json(cached);
   }
 
-  let response: Response;
-  try {
-    response = await fetchAbout("www.reddit.com", username);
-    if (response.status === 429) {
-      try {
-        response = await fetchAbout("old.reddit.com", username);
-      } catch {
-        return errorResponse("Reddit rate limit, retry in 30s", 429, username);
-      }
+  let response: Response | undefined;
+  let redditPayload: unknown;
+  for (const host of REDDIT_ENDPOINTS) {
+    try {
+      const candidate = await fetchAbout(host, username);
+      if (candidate.status === 403 || candidate.status === 429) continue;
+      if (candidate.status !== 200 && candidate.status !== 404) continue;
+      response = candidate;
+      redditPayload = await candidate.json().catch(() => null);
+      break;
+    } catch {
+      continue;
     }
-  } catch {
-    return errorResponse("Reddit could not be reached. Please try again shortly.", 502, username);
   }
 
-  if (response.status === 429) {
-    return errorResponse("Reddit rate limit, retry in 30s", 429, username);
+  const manualCheckUrl = `https://old.reddit.com/user/${encodeURIComponent(username)}/`;
+  if (!response) {
+    const result: RedditResult = {
+      status: "unavailable",
+      exists: false,
+      isShadowbanned: false,
+      isSuspended: false,
+      isVisible: false,
+      scraped: false,
+      riskSignals: [],
+      message: "Reddit blocks datacenter IPs, manual check needed",
+      reason: "Reddit blocks datacenter IPs, manual check needed",
+      manualCheckUrl,
+    };
+    return Response.json(result);
   }
-
-  const redditPayload = (await response.json().catch(() => null)) as RedditPayload | null;
 
   if (response.status === 200) {
-    const user = redditPayload?.data;
+    const user = (redditPayload as RedditPayload | null)?.data;
     if (!user || typeof user !== "object") {
       return errorResponse("Reddit returned an unreadable profile response.", 502, username);
     }
@@ -184,12 +206,15 @@ export async function POST(request: Request) {
     const created = asNumber(user.created_utc);
     const isSuspended = user.is_suspended === true;
     const result: RedditResult = {
+      status: isSuspended ? "suspended" : "visible",
       exists: true,
       isShadowbanned: false,
       isSuspended,
       isVisible: !isSuspended,
       karma,
       created,
+      linkKarma,
+      commentKarma,
       data: {
         karma,
         created_utc: created,
@@ -207,45 +232,44 @@ export async function POST(request: Request) {
     return Response.json(result);
   }
 
-  if (response.status === 404) {
-    const errorText = responseErrorText(redditPayload);
-    const isSuspended = errorText.includes("suspended");
-    const explicitlyMissing = /user_doesnt_exist|user does not exist|no such user|username not found/.test(
-      errorText,
-    );
+  const errorText = responseErrorText(redditPayload);
+  const isSuspended = errorText.includes("suspended");
+  const explicitlyMissing = /user_doesnt_exist|user does not exist|no such user|username not found|doesn't exist/.test(
+    errorText,
+  );
 
-    const result: RedditResult = isSuspended
+  const result: RedditResult = isSuspended
+    ? {
+        status: "suspended",
+        exists: true,
+        isShadowbanned: false,
+        isSuspended: true,
+        isVisible: false,
+        scraped: true,
+        riskSignals: ["Reddit's response identifies this account as suspended."],
+      }
+    : explicitlyMissing
       ? {
-          exists: true,
+          status: "not_found",
+          exists: false,
           isShadowbanned: false,
-          isSuspended: true,
+          isSuspended: false,
           isVisible: false,
           scraped: true,
-          riskSignals: ["Reddit's response identifies this account as suspended."],
+          riskSignals: [],
         }
-      : explicitlyMissing
-        ? {
-            exists: false,
-            isShadowbanned: false,
-            isSuspended: false,
-            isVisible: false,
-            scraped: true,
-            riskSignals: [],
-          }
-        : {
-            exists: false,
-            isShadowbanned: true,
-            isSuspended: false,
-            isVisible: false,
-            scraped: true,
-            riskSignals: [
-              "A logged-out 404 means this profile is not publicly reachable; Reddit may also return 404 for deleted or otherwise unavailable accounts.",
-            ],
-          };
+      : {
+          status: "shadowbanned",
+          exists: true,
+          isShadowbanned: true,
+          isSuspended: false,
+          isVisible: false,
+          scraped: true,
+          riskSignals: [
+            "A logged-out 404 means this profile is not publicly reachable; deleted or otherwise unavailable accounts can look the same.",
+          ],
+        };
 
-    await cacheResult(redis, cacheKey, result);
-    return Response.json(result);
-  }
-
-  return errorResponse("Reddit could not complete the logged-out profile check.", 502, username);
+  await cacheResult(redis, cacheKey, result);
+  return Response.json(result);
 }

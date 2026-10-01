@@ -168,7 +168,8 @@ export default function TikTokChecker() {
               />
             )}
             <div className="min-w-0">
-              <h2 className="text-xl font-bold text-stone-900">@{result.username} appears to exist</h2>
+              <h2 className="text-xl font-bold text-stone-900">TikTok visibility checklist</h2>
+              <p className="mt-1 text-sm text-stone-600">@{result.username}</p>
               {result.scraped && result.followerCount && (
                 <p className="mt-1 text-sm text-stone-600">{result.followerCount} followers shown publicly</p>
               )}
@@ -179,35 +180,69 @@ export default function TikTokChecker() {
 
           {!result.scraped && (
             <p className="mt-5 rounded-md border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-              The public profile appears to exist, but TikTok did not expose its details to this server. This does not indicate a shadowban.
+              TikTok confirmed that the profile exists, but did not expose its details to this server. This does not indicate a shadowban.
             </p>
           )}
 
-          <section className="mt-5">
-            <h3 className="font-bold text-stone-900">Visibility risk signals</h3>
-            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-stone-700">
-              {result.riskSignals.map((signal) => <li key={signal}>{signal}</li>)}
-              {hashtagSignals.map((signal) => <li key={signal}>{signal}</li>)}
-            </ul>
-          </section>
-
-          <section className="mt-6 border-t border-stone-200 pt-5">
-            <h3 className="font-bold text-stone-900">If your videos get 0 views</h3>
-            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-stone-700">
-              <li>Review TikTok account status and notices for Community Guidelines or recommendation-eligibility issues.</li>
-              <li>Post original videos; reused clips, visible watermarks, or duplicate uploads may affect distribution.</li>
-              <li>Avoid repetitive, unrelated, or engagement-bait hashtags. Hashtags alone cannot establish a restriction.</li>
-            </ul>
-          </section>
-
-          <section className="mt-6 border-t border-stone-200 pt-5">
-            <h3 className="font-bold text-stone-900">Recovery steps</h3>
-            <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-stone-700">
-              <li>Check TikTok&apos;s in-app account status and any content or recommendation notices.</li>
-              <li>Remove or appeal content TikTok identifies, and use original videos with relevant hashtags.</li>
-              <li>Give distribution time to settle and compare several posts; a single view count is not proof of a shadowban.</li>
-            </ol>
-          </section>
+          <ul className="mt-4 divide-y divide-stone-200">
+            <li className="py-3">
+              <div className="flex items-center gap-3">
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-100 font-bold text-emerald-700">✅</span>
+                <span className="flex-1 text-sm font-semibold">@{result.username} appears to exist (public oEmbed)</span>
+                <details className="group">
+                  <summary aria-label="About public oEmbed" className="grid h-7 w-7 cursor-pointer list-none place-items-center rounded-full border border-stone-400 text-xs font-bold text-stone-600">i</summary>
+                  <p className="mt-2 rounded-md bg-white p-3 text-sm leading-6 text-stone-700">TikTok&apos;s public oEmbed endpoint returned this profile. {result.followerCount ? `The profile page reports ${result.followerCount} followers.` : "Follower data was not available in this response."}</p>
+                </details>
+              </div>
+            </li>
+            <li className="py-3">
+              <div className="flex items-center gap-3">
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-amber-100 font-bold text-amber-800">⚠️</span>
+                <span className="flex-1 text-sm font-semibold">Search ban / For You reach cannot be confirmed</span>
+                <details>
+                  <summary aria-label="About search and For You reach" className="grid h-7 w-7 cursor-pointer list-none place-items-center rounded-full border border-stone-400 text-xs font-bold text-stone-600">i</summary>
+                  <p className="mt-2 rounded-md bg-white p-3 text-sm leading-6 text-stone-700">A public profile lookup cannot confirm a shadowban or measure For You Page distribution. TikTok has no official account-wide shadowban status. {result.riskSignals.join(" ")}</p>
+                </details>
+              </div>
+            </li>
+            <li className="py-3">
+              <div className="flex items-center gap-3">
+                <span className={`grid h-7 w-7 place-items-center rounded-full font-bold ${result.scraped ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-800"}`}>{result.scraped ? "✅" : "⚠️"}</span>
+                <span className="flex-1 text-sm font-semibold">{result.scraped ? "Profile page reachable logged-out" : "Profile details unavailable to this server"}</span>
+                <details>
+                  <summary aria-label="About public profile visibility" className="grid h-7 w-7 cursor-pointer list-none place-items-center rounded-full border border-stone-400 text-xs font-bold text-stone-600">i</summary>
+                  <p className="mt-2 rounded-md bg-white p-3 text-sm leading-6 text-stone-700">When returned, avatar, bio, and follower data come from the public profile page. This cannot establish that every video is recommended or visible in search.</p>
+                </details>
+              </div>
+            </li>
+            <li className="py-3">
+              <div className="flex items-center gap-3">
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-amber-100 font-bold text-amber-800">⚠️</span>
+                <span className="flex-1 text-sm font-semibold">If videos receive 0 views, review common reach risks</span>
+                <details>
+                  <summary aria-label="About zero-view risks" className="grid h-7 w-7 cursor-pointer list-none place-items-center rounded-full border border-stone-400 text-xs font-bold text-stone-600">i</summary>
+                  <div className="mt-2 rounded-md bg-white p-3 text-sm leading-6 text-stone-700">
+                    <p>Review in-app Account Status and Community Guidelines notices, post original videos, avoid reused clips or visible watermarks, and avoid repetitive or unrelated hashtags. These are review steps, not a diagnosis.</p>
+                    {hashtagSignals.map((signal) => <p key={signal} className="mt-2">{signal}</p>)}
+                  </div>
+                </details>
+              </div>
+            </li>
+            <li className="py-3">
+              <div className="flex items-center gap-3">
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-stone-100 font-bold text-stone-600">·</span>
+                <span className="flex-1 text-sm font-semibold">Recovery steps</span>
+                <details>
+                  <summary aria-label="Show recovery steps" className="grid h-7 w-7 cursor-pointer list-none place-items-center rounded-full border border-stone-400 text-xs font-bold text-stone-600">i</summary>
+                  <ol className="mt-2 list-decimal rounded-md bg-white p-4 pl-8 text-sm leading-6 text-stone-700">
+                    <li>Check TikTok&apos;s in-app Account Status and recommendation notices.</li>
+                    <li>Remove or appeal content TikTok flags, and post original videos with relevant hashtags.</li>
+                    <li>Give distribution time to settle and compare several posts; one view count is not proof of a shadowban.</li>
+                  </ol>
+                </details>
+              </div>
+            </li>
+          </ul>
         </div>
       )}
 
