@@ -30,7 +30,7 @@ export const tiktokCopies: Record<TikTokLocale, TikTokCopy> = {
       "Check if your TikTok account is shadowbanned for free. Test username, video visibility, hashtag suppression and For You Page (FYP) reach risk without login.",
     h1: "TikTok Shadowban Checker",
     intro:
-      "The TikTok checker is coming soon. Learn about video visibility, hashtag suppression, and For You Page (FYP) reach signals. TikTok does not provide an official shadowban status.",
+      "Check whether a public TikTok username appears to exist, then review common video visibility risks. This tool cannot confirm For You Page reach or an official shadowban status.",
     keywords: [
       "TikTok shadowban checker",
       "TikTok shadowban test",
@@ -52,7 +52,7 @@ export const tiktokCopies: Record<TikTokLocale, TikTokCopy> = {
       {
         question: "Do I need to share my TikTok password?",
         answer:
-          "No. Never share your password with a checker. The TikTok checker is in development and does not currently analyze accounts.",
+          "No. Never share your password with a checker. This tool uses public TikTok endpoints and does not ask you to log in.",
       },
     ],
   },
