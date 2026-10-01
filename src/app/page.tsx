@@ -7,6 +7,7 @@ import { baseUrl } from "../lib/i18n/config"
 import type { InstagramCopy } from "../lib/i18n/instagram"
 import { checkInstagram, type IGCheckResult } from "../lib/instagram/checker"
 import DonationButtons from "../components/DonationButtons"
+import SupportUsButton from "../components/SupportUsButton"
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -154,9 +155,7 @@ export default function Home({
               </Link>
             ))}
           </nav>
-          <div className="flex justify-center mt-8">
-            <a href="https://paypal.me/BDXII" target="_blank" rel="noopener noreferrer" className="bg-stone-900 border border-stone-900 text-white rounded-full px-8 py-2.5 text-[13px] font-semibold tracking-wide transition-colors hover:bg-black">SUPPORT US</a>
-          </div>
+          <SupportUsButton />
         </div>
 
         {platform === "instagram" && content ? (
