@@ -144,6 +144,7 @@ export default function Home({
               { label: "X / Twitter", href: "/", selected: platform === "x" },
               { label: "Instagram", href: "/instagram", selected: platform === "instagram" },
               { label: "TikTok", href: "/tiktok", selected: false },
+              { label: "Reddit", href: "/reddit", selected: false },
             ].map((item) => (
               <Link
                 key={item.label}
