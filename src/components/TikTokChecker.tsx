@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
+import SupportPopup from "./SupportPopup";
 
 type TikTokResult = {
   username: string;
@@ -41,12 +42,14 @@ export default function TikTokChecker() {
   const [videoUrl, setVideoUrl] = useState("");
   const [hashtagInput, setHashtagInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [result, setResult] = useState<TikTokResult | null>(null);
   const [error, setError] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
+    setShowSupportPopup(true);
     setError("");
     setResult(null);
 
@@ -214,6 +217,11 @@ export default function TikTokChecker() {
           Examples associated with engagement bait or spam include {hashtagsToReview.map((tag) => `#${tag}`).join(", ")}. TikTok does not publish a universal list of banned hashtags; policies and availability can change.
         </p>
       </section>
+      <SupportPopup
+        isOpen={showSupportPopup}
+        onClose={() => setShowSupportPopup(false)}
+        isChecking={loading}
+      />
     </section>
   );
 }

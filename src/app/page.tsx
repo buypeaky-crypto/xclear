@@ -9,6 +9,7 @@ import { checkInstagram, type IGCheckResult } from "../lib/instagram/checker"
 import DonationButtons from "../components/DonationButtons"
 import SupportUsButton from "../components/SupportUsButton"
 import BrandHomeLink from "../components/BrandHomeLink"
+import SupportPopup from "../components/SupportPopup"
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -81,6 +82,7 @@ export default function Home({
   })
   const [instagramResult, setInstagramResult] = useState<IGCheckResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showSupportPopup, setShowSupportPopup] = useState(false)
   const [openInfo, setOpenInfo] = useState<string | null>(null)
 
   const handleCheck = async () => {
@@ -88,6 +90,7 @@ export default function Home({
     if (!clean) return
     setUsername(clean)
     setLoading(true)
+    setShowSupportPopup(true)
     if (platform === "instagram") {
       setInstagramResult(checkInstagram(clean, hashtagInput.split(/[\s,]+/).filter(Boolean)))
       setLoading(false)
@@ -330,6 +333,11 @@ export default function Home({
           />
         </>
       )}
+      <SupportPopup
+        isOpen={showSupportPopup}
+        onClose={() => setShowSupportPopup(false)}
+        isChecking={loading}
+      />
     </main>
   )
 }

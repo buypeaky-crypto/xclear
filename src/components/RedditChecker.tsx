@@ -5,6 +5,7 @@ import { Fraunces } from "next/font/google";
 import DonationButtons from "./DonationButtons";
 import SupportUsButton from "./SupportUsButton";
 import BrandHomeLink from "./BrandHomeLink";
+import SupportPopup from "./SupportPopup";
 import { redditFaqs } from "../lib/i18n/reddit";
 
 const fraunces = Fraunces({
@@ -38,12 +39,14 @@ function accountAge(created: number): string {
 export default function RedditChecker() {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [result, setResult] = useState<RedditResult | null>(null);
   const [error, setError] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
+    setShowSupportPopup(true);
     setError("");
     setResult(null);
 
@@ -191,6 +194,11 @@ export default function RedditChecker() {
             ))}
           </div>
         </section>
+        <SupportPopup
+          isOpen={showSupportPopup}
+          onClose={() => setShowSupportPopup(false)}
+          isChecking={loading}
+        />
       </div>
     </main>
   );
