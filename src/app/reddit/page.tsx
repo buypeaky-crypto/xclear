@@ -17,12 +17,12 @@ export default function RedditPage() {
   };
 
   return (
-    <>
+    <div className="bg-platform-reddit">
       <RedditChecker />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPage) }}
       />
-    </>
+    </div>
   );
 }

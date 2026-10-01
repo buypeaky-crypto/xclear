@@ -8,7 +8,7 @@ export default function TikTokLanding({ locale }: { locale: TikTokLocale }) {
   const content = tiktokCopies[locale];
 
   return (
-    <main lang={locale} className="min-h-screen bg-[#FFFBEB] px-4 py-16 text-stone-900">
+    <main lang={locale} className="min-h-screen bg-platform-tiktok px-4 py-16 text-stone-900">
       <section className="mx-auto max-w-3xl text-center">
         <BrandHomeLink />
         <h1 className="mt-4 text-4xl font-black tracking-tight">{content.h1}</h1>

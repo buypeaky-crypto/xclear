@@ -62,10 +62,12 @@ export default function Home({
   content,
   locale,
   platform = "x",
+  backgroundClassName = platform === "instagram" ? "bg-platform-instagram" : "bg-platform-home",
 }: {
   content?: CheckerContent
   locale?: string
   platform?: CheckerPlatform
+  backgroundClassName?: string
 } = {}) {
   const faqItems = content?.faqs ?? defaultFaqs
   const initialUsername = platform === "instagram" ? "quran" : "GutNews247"
@@ -127,7 +129,7 @@ export default function Home({
   )
 
   return (
-    <main lang={locale} className={`${sora.className} min-h-screen bg-[#FFFBEB] pb-24 text-stone-900`}>
+    <main lang={locale} className={`${sora.className} min-h-screen ${backgroundClassName} pb-24 text-stone-900`}>
       <div className="max-w-[900px] mx-auto px-4 pt-8">
         <div className="text-center">
           {content && <BrandHomeLink />}

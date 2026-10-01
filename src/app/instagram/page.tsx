@@ -6,5 +6,9 @@ export const dynamic = "force-static";
 export const metadata: Metadata = getInstagramMetadata("en");
 
 export default function InstagramPage() {
-  return <InstagramLanding locale="en" />;
+  return (
+    <div className="bg-platform-instagram">
+      <InstagramLanding locale="en" />
+    </div>
+  );
 }

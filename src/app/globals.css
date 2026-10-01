@@ -24,3 +24,9 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.bg-platform-twitter { background: #E8F5FD; }
+.bg-platform-instagram { background: #FDF0F5; }
+.bg-platform-tiktok { background: #F2F2F2; }
+.bg-platform-reddit { background: #FFF1E6; }
+.bg-platform-home { background: #fdf6e3; }

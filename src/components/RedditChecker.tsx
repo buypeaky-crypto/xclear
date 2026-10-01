@@ -114,7 +114,7 @@ export default function RedditChecker({
   const accountDataAvailable = result?.created !== undefined || result?.karma !== undefined;
 
   return (
-    <main className="min-h-screen bg-[#FFFBEB] px-4 py-10 text-stone-900 sm:py-14">
+    <main className="min-h-screen bg-platform-reddit px-4 py-10 text-stone-900 sm:py-14">
       <div className="mx-auto max-w-4xl">
         <header className="text-center">
           <BrandHomeLink />

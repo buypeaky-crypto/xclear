@@ -6,5 +6,9 @@ export const dynamic = "force-static";
 export const metadata: Metadata = getTikTokMetadata("en");
 
 export default function TikTokPage() {
-  return <TikTokLanding locale="en" />;
+  return (
+    <div className="bg-platform-tiktok">
+      <TikTokLanding locale="en" />
+    </div>
+  );
 }
