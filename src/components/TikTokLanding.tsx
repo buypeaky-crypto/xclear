@@ -2,6 +2,7 @@ import { tiktokCopies, type TikTokLocale } from "../lib/i18n/tiktok";
 import TikTokChecker from "./TikTokChecker";
 import DonationButtons from "./DonationButtons";
 import SupportUsButton from "./SupportUsButton";
+import BrandHomeLink from "./BrandHomeLink";
 
 export default function TikTokLanding({ locale }: { locale: TikTokLocale }) {
   const content = tiktokCopies[locale];
@@ -9,7 +10,7 @@ export default function TikTokLanding({ locale }: { locale: TikTokLocale }) {
   return (
     <main lang={locale} className="min-h-screen bg-[#FFFBEB] px-4 py-16 text-stone-900">
       <section className="mx-auto max-w-3xl text-center">
-        <p className="text-sm font-semibold uppercase text-violet-700">ShadowbannChecker</p>
+        <BrandHomeLink />
         <h1 className="mt-4 text-4xl font-black tracking-tight">{content.h1}</h1>
         <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-stone-600">{content.intro}</p>
         <SupportUsButton />

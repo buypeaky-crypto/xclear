@@ -8,6 +8,7 @@ import type { InstagramCopy } from "../lib/i18n/instagram"
 import { checkInstagram, type IGCheckResult } from "../lib/instagram/checker"
 import DonationButtons from "../components/DonationButtons"
 import SupportUsButton from "../components/SupportUsButton"
+import BrandHomeLink from "../components/BrandHomeLink"
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -126,6 +127,7 @@ export default function Home({
     <main lang={locale} className={`${sora.className} min-h-screen bg-[#FFFBEB] pb-24 text-stone-900`}>
       <div className="max-w-[900px] mx-auto px-4 pt-8">
         <div className="text-center">
+          {content && <BrandHomeLink />}
           <h1 className={`${fraunces.className} text-[46px] tracking-tight leading-[0.95] font-black italic`}>
             {content ? (
               <span className="text-stone-800">{content.h1}</span>

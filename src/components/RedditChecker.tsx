@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { Fraunces } from "next/font/google";
 import DonationButtons from "./DonationButtons";
 import SupportUsButton from "./SupportUsButton";
+import BrandHomeLink from "./BrandHomeLink";
 import { redditFaqs } from "../lib/i18n/reddit";
 
 const fraunces = Fraunces({
@@ -71,7 +72,7 @@ export default function RedditChecker() {
     <main className="min-h-screen bg-[#FFFBEB] px-4 py-10 text-stone-900 sm:py-14">
       <div className="mx-auto max-w-4xl">
         <header className="text-center">
-          <p className="text-sm font-semibold uppercase text-violet-700">ShadowbannChecker</p>
+          <BrandHomeLink />
           <h1 className={`${fraunces.className} mt-4 text-4xl font-black italic leading-tight text-stone-900 sm:text-5xl`}>
             Reddit Shadowban Checker
           </h1>
