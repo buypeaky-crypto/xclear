@@ -3,6 +3,7 @@ import TikTokChecker from "./TikTokChecker";
 import DonationButtons from "./DonationButtons";
 import SupportUsButton from "./SupportUsButton";
 import BrandHomeLink from "./BrandHomeLink";
+import PlatformSwitcher from "./PlatformSwitcher";
 
 export default function TikTokLanding({ locale }: { locale: TikTokLocale }) {
   const content = tiktokCopies[locale];
@@ -13,6 +14,7 @@ export default function TikTokLanding({ locale }: { locale: TikTokLocale }) {
         <BrandHomeLink />
         <h1 className="mt-4 text-4xl font-black tracking-tight">{content.h1}</h1>
         <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-stone-600">{content.intro}</p>
+        <PlatformSwitcher activePlatform="tiktok" />
         <SupportUsButton />
       </section>
       {locale === "en" && <TikTokChecker />}

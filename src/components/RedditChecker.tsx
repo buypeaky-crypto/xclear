@@ -8,6 +8,7 @@ import BrandHomeLink from "./BrandHomeLink";
 import SupportPopup from "./SupportPopup";
 import ChecklistRow, { type ChecklistState } from "./ChecklistRow";
 import { redditFaqs } from "../lib/i18n/reddit";
+import PlatformSwitcher from "./PlatformSwitcher";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -124,6 +125,7 @@ export default function RedditChecker({
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-stone-600">
             Check whether a Reddit profile is publicly reachable while logged out. No login, API key, or password required.
           </p>
+          <PlatformSwitcher activePlatform="reddit" />
           <SupportUsButton />
         </header>
 
