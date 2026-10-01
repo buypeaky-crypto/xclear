@@ -19,11 +19,14 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: "Twitter Shadowban Checker | Free Shadowban Test",
+  title: "Shadowban Checker - Twitter, Instagram, TikTok, Reddit | ShadowbannChecker",
   description:
-    "Check public X/Twitter profile signals with this free shadowban checker, which explains what its results can and cannot confirm.",
+    "Free Shadowban Checker for Twitter (X), Instagram, TikTok, Reddit & more. Test if your account is shadowbanned — check search ban, ghost ban, reply visibility and hashtag suppression. No login required.",
   keywords: [
     "twitter shadowban checker",
+    "Instagram shadowban checker",
+    "TikTok shadowban checker",
+    "Reddit shadowban checker",
     "shadowban checker",
     "twitter shadowban test",
     "X shadowban checker",
@@ -37,24 +40,24 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://shadowbannchecker.vercel.app/",
-    siteName: "Twitter Shadowban Checker",
-    title: "Twitter Shadowban Checker | Free Shadowban Test",
+    siteName: "ShadowbannChecker",
+    title: "Shadowban Checker - Twitter, Instagram, TikTok, Reddit | ShadowbannChecker",
     description:
-      "Check whether your Twitter (X) account is shadowbanned with this free tool.",
+      "Free Shadowban Checker for Twitter (X), Instagram, TikTok, Reddit & more. Test if your account is shadowbanned — check search ban, ghost ban, reply visibility and hashtag suppression. No login required.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Twitter Shadowban Checker - Free Tool",
+        alt: "Shadowban Checker for Twitter, Instagram, TikTok, and Reddit",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Twitter Shadowban Checker | Free Shadowban Test",
+    title: "Shadowban Checker - Twitter, Instagram, TikTok, Reddit | ShadowbannChecker",
     description:
-      "Check whether your Twitter (X) account is shadowbanned with this free tool.",
+      "Free Shadowban Checker for Twitter (X), Instagram, TikTok, Reddit & more. Test if your account is shadowbanned — check search ban, ghost ban, reply visibility and hashtag suppression. No login required.",
     images: ["/og-image.png"],
   },
   robots: {
