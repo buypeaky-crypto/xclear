@@ -1,13 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Redis } from '@upstash/redis'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+
+type XUser = {
+  id: string | number
+  username: string
+  name: string
+}
+
+type CachedCheck = {
+  username?: string
+  error?: string
+  notFound?: boolean
+  [key: string]: unknown
+}
+
+type FxTwitterResponse = {
+  code?: number
+  user?: {
+    id: string | number
+    screen_name: string
+    name: string
+  }
+}
 
 function getRedis() {
   try {
     const url = process.env.UPSTASH_REDIS_REST_URL
     const token = process.env.UPSTASH_REDIS_REST_TOKEN
     if (!url || !token) return null
-    const { Redis } = require('@upstash/redis')
     return new Redis({ url, token })
   } catch {
     return null
@@ -23,7 +45,7 @@ export async function GET(req: NextRequest) {
 
   if (redis) {
     try {
-      const cached: any = await redis.get(cacheKey)
+      const cached = await redis.get<CachedCheck>(cacheKey)
       if (cached && cached.username && !cached.error && !cached.notFound) {
         return NextResponse.json(cached)
       }
@@ -31,20 +53,20 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    let user: any = null
+    let user: XUser | null = null
     const bearer = process.env.X_BEARER
     if (bearer) {
       const r = await fetch(`https://api.twitter.com/2/users/by/username/${username}`, {
         headers: { Authorization: `Bearer ${bearer}` },
         cache: 'no-store'
       })
-      const j = await r.json().catch(()=>null)
+      const j = (await r.json().catch(() => null)) as { data?: XUser } | null
       if (r.ok && j?.data) user = j.data
     }
 
     if (!user) {
       const fx = await fetch(`https://api.fxtwitter.com/${username}`, { cache: 'no-store' })
-      const fj: any = await fx.json()
+      const fj = (await fx.json()) as FxTwitterResponse
       if (fj?.code === 200 && fj?.user) {
         user = { id: fj.user.id, username: fj.user.screen_name, name: fj.user.name }
       } else if (fj?.code === 404) {
@@ -70,7 +92,8 @@ export async function GET(req: NextRequest) {
       try { await redis.set(cacheKey, result, { ex: 60*60*6 }) } catch {}
     }
     return NextResponse.json(result)
-  } catch (e:any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unexpected error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

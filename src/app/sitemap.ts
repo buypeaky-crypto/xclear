@@ -54,5 +54,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.9,
     },
+    ...[
+      "instagram-shadowban-checker",
+      "tiktok-shadowban-checker",
+      "reddit-shadowban-checker",
+      "facebook",
+    ].map((alias) => ({
+      url: `${baseUrl}/${alias}`,
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.9,
+    })),
   ];
 }
