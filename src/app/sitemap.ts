@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { baseUrl, getLocaleUrl, locales } from "../lib/i18n/config";
 import { getInstagramUrl, instagramLocales } from "../lib/i18n/instagram";
+import { facebookLocales, getFacebookUrl } from "../lib/i18n/facebook";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
@@ -31,6 +32,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
     ...instagramLocales.map((locale) => ({
       url: getInstagramUrl(locale),
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.9,
+    })),
+    ...facebookLocales.map((locale) => ({
+      url: getFacebookUrl(locale),
       lastModified: new Date(),
       changeFrequency: "daily" as const,
       priority: 0.9,

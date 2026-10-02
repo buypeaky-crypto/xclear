@@ -5,6 +5,7 @@ import { getInstagramUrl, instagramLocales } from "../lib/i18n/instagram";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
+import FacebookPixel from "./components/FacebookPixel";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -104,6 +105,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </Script>
       </head>
       <body className="min-h-full flex flex-col">
+        <FacebookPixel />
         {children}
         <footer className="border-t border-stone-200 bg-[#FFFBEB] text-stone-600">
           <nav

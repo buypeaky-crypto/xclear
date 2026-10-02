@@ -3,8 +3,9 @@ import { useState } from "react"
 import { Fraunces, Sora } from "next/font/google"
 import type { LocaleDictionary } from "../lib/i18n/dictionaries"
 import type { InstagramCopy } from "../lib/i18n/instagram"
+import type { FacebookCopy } from "../lib/i18n/facebook"
 import { checkInstagram, type IGCheckResult } from "../lib/instagram/checker"
-import DonationButtons from "../components/DonationButtons"
+import CryptoDonationButtons from "../components/CryptoDonationButtons"
 import SupportUsButton from "../components/SupportUsButton"
 import BrandHomeLink from "../components/BrandHomeLink"
 import SupportPopup from "../components/SupportPopup"
@@ -40,10 +41,24 @@ const defaultFaqs = [
 
 type CheckerContent = Pick<LocaleDictionary, "h1" | "subtitle" | "faqTitle" | "faqs"> &
   Partial<Pick<InstagramCopy, "inputLabel" | "buttonLabel" | "loadingLabel" | "resultTitle" | "hashtagInputLabel" | "hashtagPlaceholder" | "visibilityLabel" | "engagementLabel" | "scoreLabel" | "reasonsLabel" | "fixTitle" | "fixDescription" | "visibilityStates" | "engagementStates" | "reasonLabels" | "resultNote">> & {
+    facebookSearchLink?: FacebookCopy["facebookSearchLink"]
+    whyTitle?: FacebookCopy["whyTitle"]
+    whyReasons?: FacebookCopy["whyReasons"]
+    howTitle?: FacebookCopy["howTitle"]
+    howSteps?: FacebookCopy["howSteps"]
     checkItems?: { label: string; description: string }[]
   }
 
-type CheckerPlatform = "x" | "instagram"
+type CheckerPlatform = "x" | "instagram" | "facebook"
+
+type CheckerResult = {
+  username: string
+  exists?: boolean
+  searchSuggestionBan?: boolean
+  searchBan?: boolean
+  ghostBan?: boolean
+  replyDeboosting?: boolean
+}
 
 function localizeReason(reason: string, labels: InstagramCopy["reasonLabels"]): string {
   if (reason.startsWith("Uses banned/broken hashtags: ")) {
@@ -57,11 +72,40 @@ function localizeReason(reason: string, labels: InstagramCopy["reasonLabels"]): 
   return labels.clean
 }
 
+function InfoRow({
+  id,
+  label,
+  desc,
+  isBan,
+  openInfo,
+  setOpenInfo,
+}: {
+  id: string
+  label: string
+  desc: string
+  isBan: boolean
+  openInfo: string | null
+  setOpenInfo: (id: string | null) => void
+}) {
+  return (
+    <div className="border-b last:border-0 border-stone-200">
+      <div className="flex items-center justify-between p-4 px-6 cursor-pointer transition-colors hover:bg-amber-50/60" onClick={() => setOpenInfo(openInfo === id ? null : id)}>
+        <div className="flex items-center gap-3">
+          <span className={`text-xl ${isBan ? "text-red-500" : "text-emerald-600"}`}>{isBan ? "✕" : "✓"}</span>
+          <span className={`text-[15px] ${isBan ? "text-red-600" : "text-emerald-700"}`}>{label}</span>
+        </div>
+        <span className={`text-[11px] transition-transform ${openInfo === id ? "rotate-180" : ""}`}>ℹ️ ▾</span>
+      </div>
+      {openInfo === id && <div className="px-6 pb-4 text-[13px] text-stone-600 bg-amber-50/60 leading-relaxed">{desc}</div>}
+    </div>
+  )
+}
+
 export default function Home({
   content,
   locale,
   platform = "x",
-  backgroundClassName = platform === "instagram" ? "bg-platform-instagram" : "bg-platform-home",
+  backgroundClassName = platform === "instagram" || platform === "facebook" ? "bg-platform-instagram" : "bg-platform-home",
 }: {
   content?: CheckerContent
   locale?: string
@@ -69,11 +113,11 @@ export default function Home({
   backgroundClassName?: string
 } = {}) {
   const faqItems = content?.faqs ?? defaultFaqs
-  const initialUsername = platform === "instagram" ? "quran" : "GutNews247"
+  const initialUsername = platform === "instagram" ? "quran" : platform === "facebook" ? "" : "GutNews247"
   const [username, setUsername] = useState(initialUsername)
   const [inputVal, setInputVal] = useState(initialUsername)
   const [hashtagInput, setHashtagInput] = useState("#quran #islam #faith #community #dailyreminder")
-  const [result, setResult] = useState<any>(platform === "instagram" ? null : {
+  const [result, setResult] = useState<CheckerResult | null>(() => platform === "instagram" || platform === "facebook" ? null : {
     username: initialUsername,
     exists: true,
     searchSuggestionBan: false,
@@ -97,6 +141,12 @@ export default function Home({
       setLoading(false)
       return
     }
+    if (platform === "facebook") {
+      await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
+      setResult({ username: clean })
+      setLoading(false)
+      return
+    }
     try {
       const res = await fetch(`/api/check?username=${encodeURIComponent(clean)}`)
       const data = await res.json()
@@ -113,19 +163,6 @@ export default function Home({
     }
     setLoading(false)
   }
-
-  const InfoRow = ({ id, label, desc, isBan }: { id: string; label: string; desc: string; isBan: boolean }) => (
-    <div className="border-b last:border-0 border-stone-200">
-      <div className="flex items-center justify-between p-4 px-6 cursor-pointer transition-colors hover:bg-amber-50/60" onClick={() => setOpenInfo(openInfo === id ? null : id)}>
-        <div className="flex items-center gap-3">
-          <span className={`text-xl ${isBan ? "text-red-500" : "text-emerald-600"}`}>{isBan ? "✕" : "✓"}</span>
-          <span className={`text-[15px] ${isBan ? "text-red-600" : "text-emerald-700"}`}>{label}</span>
-        </div>
-        <span className={`text-[11px] transition-transform ${openInfo === id ? "rotate-180" : ""}`}>ℹ️ ▾</span>
-      </div>
-      {openInfo === id && <div className="px-6 pb-4 text-[13px] text-stone-600 bg-amber-50/60 leading-relaxed">{desc}</div>}
-    </div>
-  )
 
   return (
     <main lang={locale} className={`${sora.className} min-h-screen ${backgroundClassName} pb-24 text-stone-900`}>
@@ -147,6 +184,7 @@ export default function Home({
           {content && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">{content.subtitle}</p>}
           <PlatformSwitcher activePlatform={platform} />
           <SupportUsButton />
+          {platform === "facebook" && <CryptoDonationButtons />}
         </div>
 
         {platform === "instagram" && content ? (
@@ -244,17 +282,46 @@ export default function Home({
           </section>
         )}
 
-        {result && platform !== "instagram" && (
+        {platform === "facebook" && result && content?.whyTitle && content.whyReasons && content.howTitle && content.howSteps && (
+          <section aria-live="polite" className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+            <h2 className="text-xl font-bold text-stone-900">{content.resultTitle?.replace("{username}", username) ?? `Visibility review for @${username}`}</h2>
+            <p className="mt-3 text-sm leading-6 text-stone-600">{content.resultNote}</p>
+            <a
+              className="mt-4 inline-flex rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-800 transition-colors hover:bg-stone-50"
+              href={`https://www.facebook.com/search/top?q=${encodeURIComponent(username)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {content.facebookSearchLink}
+            </a>
+            <div className="mt-6 grid gap-6 border-t border-stone-200 pt-6 sm:grid-cols-2">
+              <div>
+                <h3 className="font-bold text-stone-900">{content.whyTitle}</h3>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-stone-700">
+                  {content.whyReasons.map((reason) => <li key={reason}>{reason}</li>)}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold text-stone-900">{content.howTitle}</h3>
+                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-stone-700">
+                  {content.howSteps.map((step) => <li key={step}>{step}</li>)}
+                </ol>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {result && platform !== "instagram" && platform !== "facebook" && (
           <div className="bg-white border border-stone-200 shadow-sm mt-6 overflow-hidden rounded-2xl">
             <div className="flex items-center gap-3 p-4 px-6 border-b border-stone-200"><span className="text-emerald-600 text-xl">✓</span><span className="text-[15px]"><span className="text-violet-600">@{result.username}</span> <span className="text-emerald-700">exists.</span></span></div>
-            <InfoRow id="sugg" label={result.searchSuggestionBan ? "Search suggestion ban." : "No search suggestion ban."} isBan={result.searchSuggestionBan} desc="Typeahead test: When you type @username in Twitter search, does it auto-suggest? If not, you have a search suggestion ban. Profile hidden from typeahead." />
-            <InfoRow id="search" label={result.searchBan ? "Search ban." : "No search ban."} isBan={result.searchBan} desc="Search ban: Your tweets don't appear in search results for logged-out users. Searching from:@username shows nothing." />
-            <InfoRow id="ghost" label={result.ghostBan ? "Ghost ban." : "No ghost ban."} isBan={result.ghostBan} desc="Ghost ban: Your tweets are visible only to you, invisible to everyone else. The classic shadowban." />
-            <InfoRow id="reply" label={result.replyDeboosting ? "Reply deboosting detected." : "No reply deboosting detected."} isBan={result.replyDeboosting} desc="Reply deboosting: Your replies are collapsed under 'Show more replies' so almost nobody sees them." />
+            <InfoRow id="sugg" label={result.searchSuggestionBan ? "Search suggestion ban." : "No search suggestion ban."} isBan={Boolean(result.searchSuggestionBan)} desc="Typeahead test: When you type @username in Twitter search, does it auto-suggest? If not, you have a search suggestion ban. Profile hidden from typeahead." openInfo={openInfo} setOpenInfo={setOpenInfo} />
+            <InfoRow id="search" label={result.searchBan ? "Search ban." : "No search ban."} isBan={Boolean(result.searchBan)} desc="Search ban: Your tweets don't appear in search results for logged-out users. Searching from:@username shows nothing." openInfo={openInfo} setOpenInfo={setOpenInfo} />
+            <InfoRow id="ghost" label={result.ghostBan ? "Ghost ban." : "No ghost ban."} isBan={Boolean(result.ghostBan)} desc="Ghost ban: Your tweets are visible only to you, invisible to everyone else. The classic shadowban." openInfo={openInfo} setOpenInfo={setOpenInfo} />
+            <InfoRow id="reply" label={result.replyDeboosting ? "Reply deboosting detected." : "No reply deboosting detected."} isBan={Boolean(result.replyDeboosting)} desc="Reply deboosting: Your replies are collapsed under 'Show more replies' so almost nobody sees them." openInfo={openInfo} setOpenInfo={setOpenInfo} />
           </div>
         )}
 
-        <DonationButtons />
+        {platform !== "facebook" && <CryptoDonationButtons />}
 
         <section id="how-it-works" className="mt-8 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
           <h2 className="border-b border-stone-200 px-6 py-4 text-lg font-bold text-stone-900">
