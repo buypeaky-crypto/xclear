@@ -60,6 +60,166 @@ type CheckerResult = {
   replyDeboosting?: boolean
 }
 
+type FacebookEvidence = {
+  profile: "unknown" | "public" | "unavailable"
+  spam: "unknown" | "clear" | "flagged"
+  groupPosting: "unknown" | "yes" | "no"
+  recommendation: "unknown" | "recommendable" | "not-recommendable"
+  distribution: "unknown" | "normal" | "reduced"
+  comments: "unknown" | "visible" | "filtered"
+  externalLink: string
+}
+
+type FacebookCheck = {
+  id: string
+  label: string
+  status: "pass" | "warning" | "fail"
+  message: string
+  why: string
+  how: string
+}
+
+type FacebookReport = {
+  url: string
+  checks: FacebookCheck[]
+}
+
+const facebookGuidanceIndexes = [
+  { why: 0, how: 1 },
+  { why: 3, how: 3 },
+  { why: 2, how: 0 },
+  { why: 1, how: 4 },
+  { why: 4, how: 2 },
+]
+
+function isFacebookHost(hostname: string): boolean {
+  const host = hostname.toLowerCase()
+  return host === "facebook.com" || host.endsWith(".facebook.com") || host === "fb.watch"
+}
+
+function parseFacebookUrl(value: string): URL | null {
+  try {
+    const url = new URL(value)
+    return isFacebookHost(url.hostname) ? url : null
+  } catch {
+    return null
+  }
+}
+
+function facebookUrlContainsExternalLink(url: URL, suppliedLink: string): boolean {
+  const candidate = suppliedLink.trim() || url.searchParams.get("u") || ""
+  if (!candidate) return false
+
+  try {
+    return !isFacebookHost(new URL(candidate).hostname)
+  } catch {
+    return false
+  }
+}
+
+function createFacebookChecks(
+  evidence: FacebookEvidence,
+  hasExternalLink: boolean,
+  content: FacebookCopy,
+): FacebookCheck[] {
+  const definitions: Omit<FacebookCheck, "why" | "how">[] = [
+    {
+      id: "profile",
+      label: "Profile/Page exists and is public",
+      status: evidence.profile === "public" ? "pass" : evidence.profile === "unavailable" ? "fail" : "warning",
+      message: evidence.profile === "public"
+        ? "Public access confirmed by your logged-out check."
+        : evidence.profile === "unavailable"
+          ? "Profile/Page is unavailable or not public, based on your check."
+          : "A URL alone cannot confirm that this Profile/Page exists or is public.",
+    },
+    {
+      id: "spam",
+      label: "Spam filter check",
+      status: evidence.spam === "flagged" ? "fail" : evidence.spam === "clear" ? "pass" : hasExternalLink && evidence.groupPosting === "yes" ? "warning" : "warning",
+      message: evidence.spam === "flagged"
+        ? "Post reported in Facebook Spam."
+        : evidence.spam === "clear"
+          ? "No spam-folder warning reported."
+          : hasExternalLink && evidence.groupPosting === "yes"
+            ? "Spam risk pattern: an external link plus repeated posting to many groups."
+            : "Spam-folder status is not public; check Support Inbox or Spam in Facebook.",
+    },
+    {
+      id: "recommendation",
+      label: "Page recommendation",
+      status: evidence.recommendation === "not-recommendable" ? "fail" : evidence.recommendation === "recommendable" ? "pass" : "warning",
+      message: evidence.recommendation === "not-recommendable"
+        ? "Not recommendable (reported in Page Quality)."
+        : evidence.recommendation === "recommendable"
+          ? "Recommendable (reported in Page Quality)."
+          : "Page Quality is private; select the status shown in Facebook to report it here.",
+    },
+    {
+      id: "distribution",
+      label: "Reduced distribution",
+      status: evidence.distribution === "reduced" ? "fail" : evidence.distribution === "normal" ? "pass" : "warning",
+      message: evidence.distribution === "reduced"
+        ? "Reduced distribution reported for engagement bait or misinformation."
+        : evidence.distribution === "normal"
+          ? "No reduced-distribution notice reported."
+          : "A URL cannot reveal downranking or misinformation decisions; review Facebook's post/account notices.",
+    },
+    {
+      id: "comments",
+      label: "Comment visibility",
+      status: evidence.comments === "filtered" ? "warning" : evidence.comments === "visible" ? "pass" : "warning",
+      message: evidence.comments === "filtered"
+        ? "Comment reported hidden under Most Relevant but visible under All comments."
+        : evidence.comments === "visible"
+          ? "Comment reported visible in both comment views."
+          : "Comment ranking cannot be checked from a URL; compare Most Relevant with All comments.",
+    },
+  ]
+
+  return definitions.map((check, index) => ({
+    ...check,
+    why: content.whyReasons[facebookGuidanceIndexes[index].why],
+    how: content.howSteps[facebookGuidanceIndexes[index].how],
+  }))
+}
+
+function FacebookResultRow({ check, isOpen, onToggle }: { check: FacebookCheck; isOpen: boolean; onToggle: () => void }) {
+  const style = {
+    pass: { icon: "✓", color: "text-emerald-700", background: "bg-emerald-100" },
+    warning: { icon: "⚠", color: "text-amber-800", background: "bg-amber-100" },
+    fail: { icon: "✕", color: "text-red-700", background: "bg-red-100" },
+  }[check.status]
+
+  return (
+    <li className="border-b border-stone-200 py-4 last:border-0">
+      <div className="flex items-start gap-3">
+        <span aria-hidden="true" className={`grid h-7 w-7 shrink-0 place-items-center rounded-full font-bold ${style.background} ${style.color}`}>
+          {style.icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-semibold text-stone-900">{check.label}</h3>
+          <p className={`mt-1 text-sm leading-6 ${style.color}`}>{check.message}</p>
+          <button
+            type="button"
+            aria-expanded={isOpen}
+            onClick={onToggle}
+            className="mt-2 text-sm font-semibold text-stone-700 underline decoration-stone-400 underline-offset-2 hover:text-stone-900"
+          >
+            ℹ️ Why and how to fix
+          </button>
+          {isOpen && (
+            <div className="mt-2 grid gap-2 rounded-md bg-stone-50 p-3 text-sm leading-6 text-stone-700 sm:grid-cols-2">
+              <p><strong>Why:</strong> {check.why}</p>
+              <p><strong>How to fix:</strong> {check.how}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </li>
+  )
+}
+
 function localizeReason(reason: string, labels: InstagramCopy["reasonLabels"]): string {
   if (reason.startsWith("Uses banned/broken hashtags: ")) {
     return `${labels.banned}: ${reason.slice("Uses banned/broken hashtags: ".length)}`
@@ -125,25 +285,54 @@ export default function Home({
     ghostBan: false,
     replyDeboosting: false,
   })
+  const [facebookEvidence, setFacebookEvidence] = useState<FacebookEvidence>({
+    profile: "unknown",
+    spam: "unknown",
+    groupPosting: "unknown",
+    recommendation: "unknown",
+    distribution: "unknown",
+    comments: "unknown",
+    externalLink: "",
+  })
+  const [facebookReport, setFacebookReport] = useState<FacebookReport | null>(null)
+  const [facebookError, setFacebookError] = useState("")
   const [instagramResult, setInstagramResult] = useState<IGCheckResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [showSupportPopup, setShowSupportPopup] = useState(false)
   const [openInfo, setOpenInfo] = useState<string | null>(null)
 
   const handleCheck = async () => {
-    const clean = inputVal.replace(/^@/, "").trim()
-    if (!clean) return
+    const clean = platform === "facebook" ? inputVal.trim() : inputVal.replace(/^@/, "").trim()
+    if (!clean) {
+      if (platform === "facebook") setFacebookError("Enter a Facebook profile, Page, or post URL.")
+      return
+    }
+    const facebookUrl = platform === "facebook" ? parseFacebookUrl(clean) : null
+    if (platform === "facebook" && !facebookUrl) {
+      setFacebookError("Enter a full Facebook profile, Page, or post URL, such as https://www.facebook.com/yourpage")
+      setFacebookReport(null)
+      return
+    }
+    setFacebookError("")
     setUsername(clean)
     setLoading(true)
     setShowSupportPopup(true)
+    setFacebookReport(null)
     if (platform === "instagram") {
       setInstagramResult(checkInstagram(clean, hashtagInput.split(/[\s,]+/).filter(Boolean)))
       setLoading(false)
       return
     }
-    if (platform === "facebook") {
+    if (platform === "facebook" && facebookUrl) {
       await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
-      setResult({ username: clean })
+      setFacebookReport({
+        url: facebookUrl.href,
+        checks: createFacebookChecks(
+          facebookEvidence,
+          facebookUrlContainsExternalLink(facebookUrl, facebookEvidence.externalLink),
+          content as FacebookCopy,
+        ),
+      })
       setLoading(false)
       return
     }
@@ -187,7 +376,95 @@ export default function Home({
           {platform === "facebook" && <CryptoDonationButtons />}
         </div>
 
-        {platform === "instagram" && content ? (
+        {platform === "facebook" && content ? (
+          <div className="mt-10 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+            <label htmlFor="facebook-url" className="mb-2 block text-sm font-semibold text-stone-700">Facebook profile, Page, or post URL</label>
+            <input
+              id="facebook-url"
+              type="url"
+              required
+              value={inputVal}
+              onChange={(event) => {
+                setInputVal(event.target.value)
+                setFacebookError("")
+                setFacebookReport(null)
+              }}
+              onKeyDown={(event) => event.key === "Enter" && handleCheck()}
+              placeholder="https://www.facebook.com/yourpage"
+              className="w-full rounded-md border border-stone-300 px-3 py-3 text-sm text-stone-900 outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200"
+            />
+            <details className="mt-5 rounded-md border border-stone-200 p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-stone-800">Report signals visible in Facebook</summary>
+              <p className="mt-2 text-xs leading-5 text-stone-600">Page Quality, spam status, distribution notices, and comment filtering are not public URL data. Select only what you can confirm in Facebook; unverified signals stay marked as not checked.</p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <label className="text-sm font-medium text-stone-700">
+                  Profile/Page visibility
+                  <select value={facebookEvidence.profile} onChange={(event) => setFacebookEvidence((current) => ({ ...current, profile: event.target.value as FacebookEvidence["profile"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
+                    <option value="unknown">Not checked</option>
+                    <option value="public">Opens while logged out</option>
+                    <option value="unavailable">Private, unavailable, or removed</option>
+                  </select>
+                </label>
+                <label className="text-sm font-medium text-stone-700">
+                  Spam folder status
+                  <select value={facebookEvidence.spam} onChange={(event) => setFacebookEvidence((current) => ({ ...current, spam: event.target.value as FacebookEvidence["spam"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
+                    <option value="unknown">Not checked</option>
+                    <option value="clear">Not in Spam</option>
+                    <option value="flagged">In Spam</option>
+                  </select>
+                </label>
+                <label className="text-sm font-medium text-stone-700">
+                  Repeated posting to many groups
+                  <select value={facebookEvidence.groupPosting} onChange={(event) => setFacebookEvidence((current) => ({ ...current, groupPosting: event.target.value as FacebookEvidence["groupPosting"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
+                    <option value="unknown">Not sure</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                </label>
+                <label className="text-sm font-medium text-stone-700">
+                  Page Quality recommendation
+                  <select value={facebookEvidence.recommendation} onChange={(event) => setFacebookEvidence((current) => ({ ...current, recommendation: event.target.value as FacebookEvidence["recommendation"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
+                    <option value="unknown">Not checked</option>
+                    <option value="recommendable">Recommendable</option>
+                    <option value="not-recommendable">Not recommendable</option>
+                  </select>
+                </label>
+                <label className="text-sm font-medium text-stone-700">
+                  Distribution notice
+                  <select value={facebookEvidence.distribution} onChange={(event) => setFacebookEvidence((current) => ({ ...current, distribution: event.target.value as FacebookEvidence["distribution"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
+                    <option value="unknown">Not checked</option>
+                    <option value="normal">No reduced-distribution notice</option>
+                    <option value="reduced">Reduced distribution shown</option>
+                  </select>
+                </label>
+                <label className="text-sm font-medium text-stone-700">
+                  Comment visibility
+                  <select value={facebookEvidence.comments} onChange={(event) => setFacebookEvidence((current) => ({ ...current, comments: event.target.value as FacebookEvidence["comments"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
+                    <option value="unknown">Not checked</option>
+                    <option value="visible">Visible in both views</option>
+                    <option value="filtered">Hidden under Most Relevant, visible under All comments</option>
+                  </select>
+                </label>
+                <label className="text-sm font-medium text-stone-700 sm:col-span-2">
+                  External link included in the post (optional)
+                  <input
+                    type="url"
+                    value={facebookEvidence.externalLink}
+                    onChange={(event) => setFacebookEvidence((current) => ({ ...current, externalLink: event.target.value }))}
+                    placeholder="https://example.com/article"
+                    className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-sm outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200"
+                  />
+                </label>
+              </div>
+            </details>
+            {facebookError && <p role="alert" className="mt-3 text-sm text-red-700">{facebookError}</p>}
+            <div className="mt-6 flex justify-center">
+              <button type="button" onClick={handleCheck} disabled={loading} className="rounded-full border border-stone-300 px-7 py-2.5 text-[13px] font-semibold text-stone-900 transition-colors hover:bg-stone-50 disabled:opacity-50">
+                {loading ? content.loadingLabel : content.buttonLabel}
+              </button>
+            </div>
+          </div>
+        ) : platform === "instagram" && content ? (
           <div className="mt-10 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
@@ -282,32 +559,28 @@ export default function Home({
           </section>
         )}
 
-        {platform === "facebook" && result && content?.whyTitle && content.whyReasons && content.howTitle && content.howSteps && (
+        {platform === "facebook" && facebookReport && content && (
           <section aria-live="polite" className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <h2 className="text-xl font-bold text-stone-900">{content.resultTitle?.replace("{username}", username) ?? `Visibility review for @${username}`}</h2>
+            <h2 className="text-xl font-bold text-stone-900">Facebook visibility results</h2>
             <p className="mt-3 text-sm leading-6 text-stone-600">{content.resultNote}</p>
             <a
-              className="mt-4 inline-flex rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-800 transition-colors hover:bg-stone-50"
-              href={`https://www.facebook.com/search/top?q=${encodeURIComponent(username)}`}
+              className="mt-3 inline-block break-all text-sm font-semibold text-violet-700 underline underline-offset-2"
+              href={facebookReport.url}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {content.facebookSearchLink}
+              {facebookReport.url}
             </a>
-            <div className="mt-6 grid gap-6 border-t border-stone-200 pt-6 sm:grid-cols-2">
-              <div>
-                <h3 className="font-bold text-stone-900">{content.whyTitle}</h3>
-                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-stone-700">
-                  {content.whyReasons.map((reason) => <li key={reason}>{reason}</li>)}
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-bold text-stone-900">{content.howTitle}</h3>
-                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-stone-700">
-                  {content.howSteps.map((step) => <li key={step}>{step}</li>)}
-                </ol>
-              </div>
-            </div>
+            <ul className="mt-4 divide-y divide-stone-200">
+              {facebookReport.checks.map((check) => (
+                <FacebookResultRow
+                  key={check.id}
+                  check={check}
+                  isOpen={openInfo === `facebook-${check.id}`}
+                  onToggle={() => setOpenInfo(openInfo === `facebook-${check.id}` ? null : `facebook-${check.id}`)}
+                />
+              ))}
+            </ul>
           </section>
         )}
 
@@ -321,7 +594,7 @@ export default function Home({
           </div>
         )}
 
-        {platform !== "facebook" && <CryptoDonationButtons />}
+        <CryptoDonationButtons />
 
         <section id="how-it-works" className="mt-8 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
           <h2 className="border-b border-stone-200 px-6 py-4 text-lg font-bold text-stone-900">
