@@ -82,6 +82,14 @@ type FacebookCheck = {
 type FacebookReport = {
   url: string
   checks: FacebookCheck[]
+  lookupMessage: string
+  externalLinks: string[]
+}
+
+type FacebookLookup = {
+  status: "public" | "not-found" | "unavailable" | "unknown"
+  externalLinks: string[]
+  message: string
 }
 
 const facebookGuidanceIndexes = [
@@ -119,35 +127,51 @@ function facebookUrlContainsExternalLink(url: URL, suppliedLink: string): boolea
 
 function createFacebookChecks(
   evidence: FacebookEvidence,
+  lookup: FacebookLookup,
   hasExternalLink: boolean,
   content: FacebookCopy,
 ): FacebookCheck[] {
+  const profileUnavailable = lookup.status === "not-found" || (lookup.status === "unknown" && evidence.profile === "unavailable")
+  const profilePublic = lookup.status === "public" || (lookup.status === "unknown" && evidence.profile === "public")
+  const spamRisk = hasExternalLink && evidence.groupPosting === "yes"
   const definitions: Omit<FacebookCheck, "why" | "how">[] = [
     {
       id: "profile",
-      label: "Profile/Page exists and is public",
-      status: evidence.profile === "public" ? "pass" : evidence.profile === "unavailable" ? "fail" : "warning",
-      message: evidence.profile === "public"
-        ? "Public access confirmed by your logged-out check."
-        : evidence.profile === "unavailable"
-          ? "Profile/Page is unavailable or not public, based on your check."
-          : "A URL alone cannot confirm that this Profile/Page exists or is public.",
+      label: lookup.status === "not-found" ? "Profile not found" : "Profile/Page exists and is public",
+      status: lookup.status === "not-found" || (lookup.status === "unknown" && evidence.profile === "unavailable")
+        ? "fail"
+        : lookup.status === "public" || (lookup.status === "unknown" && evidence.profile === "public")
+          ? "pass"
+          : "warning",
+      message: lookup.status === "not-found"
+        ? "Facebook returned 404 for this URL."
+        : lookup.status === "unavailable"
+          ? lookup.message
+          : profilePublic
+            ? lookup.status === "public" ? lookup.message : "Marked public based on your logged-out check."
+            : profileUnavailable
+              ? "Marked unavailable or private based on your check."
+              : lookup.message,
     },
     {
       id: "spam",
-      label: "Spam filter check",
-      status: evidence.spam === "flagged" ? "fail" : evidence.spam === "clear" ? "pass" : hasExternalLink && evidence.groupPosting === "yes" ? "warning" : "warning",
-      message: evidence.spam === "flagged"
+      label: evidence.spam === "flagged" || lookup.status === "unavailable" ? "In Facebook Spam Filter" : "Spam filter check",
+      status: evidence.spam === "flagged" ? "fail" : evidence.spam === "clear" && !spamRisk && lookup.status !== "unavailable" ? "pass" : "warning",
+      message: lookup.status === "unavailable"
+        ? "Facebook returned “This content isn't available.” It may be in Spam, private, removed, or unavailable to logged-out visitors."
+        : evidence.spam === "flagged"
         ? "Post reported in Facebook Spam."
-        : evidence.spam === "clear"
+        : spamRisk
+          ? `Spam filter risk: an external link${lookup.externalLinks.length ? ` (${lookup.externalLinks.join(", ")})` : ""} plus repeated posting to many groups. This pattern can trigger spam controls; it does not prove a shadowban.`
+          : evidence.spam === "clear"
           ? "No spam-folder warning reported."
-          : hasExternalLink && evidence.groupPosting === "yes"
-            ? "Spam risk pattern: an external link plus repeated posting to many groups."
+          : hasExternalLink
+            ? "An external destination was found. Repeatedly posting the same link to many groups can trigger spam controls; check Support Inbox or Spam."
             : "Spam-folder status is not public; check Support Inbox or Spam in Facebook.",
     },
     {
       id: "recommendation",
-      label: "Page recommendation",
+      label: evidence.recommendation === "not-recommendable" ? "Page Not Recommendable" : "Is Page Recommendable?",
       status: evidence.recommendation === "not-recommendable" ? "fail" : evidence.recommendation === "recommendable" ? "pass" : "warning",
       message: evidence.recommendation === "not-recommendable"
         ? "Not recommendable (reported in Page Quality)."
@@ -157,7 +181,7 @@ function createFacebookChecks(
     },
     {
       id: "distribution",
-      label: "Reduced distribution",
+      label: evidence.distribution === "reduced" ? "Reduced Distribution" : "Reduced distribution",
       status: evidence.distribution === "reduced" ? "fail" : evidence.distribution === "normal" ? "pass" : "warning",
       message: evidence.distribution === "reduced"
         ? "Reduced distribution reported for engagement bait or misinformation."
@@ -167,7 +191,7 @@ function createFacebookChecks(
     },
     {
       id: "comments",
-      label: "Comment visibility",
+      label: evidence.comments === "filtered" ? "Comment Hidden" : "Comment visibility",
       status: evidence.comments === "filtered" ? "warning" : evidence.comments === "visible" ? "pass" : "warning",
       message: evidence.comments === "filtered"
         ? "Comment reported hidden under Most Relevant but visible under All comments."
@@ -324,14 +348,34 @@ export default function Home({
       return
     }
     if (platform === "facebook" && facebookUrl) {
-      await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
+      let lookup: FacebookLookup = {
+        status: "unknown",
+        externalLinks: [],
+        message: "The public Facebook page could not be checked; this is not evidence of a restriction.",
+      }
+      try {
+        const response = await fetch("/api/facebook-check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: facebookUrl.href }),
+        })
+        const data = await response.json() as Partial<FacebookLookup>
+        if (!response.ok) throw new Error("Facebook URL check failed")
+        if (["public", "not-found", "unavailable", "unknown"].includes(data.status ?? "")) {
+          lookup = {
+            status: data.status as FacebookLookup["status"],
+            externalLinks: Array.isArray(data.externalLinks) ? data.externalLinks.filter((item): item is string => typeof item === "string") : [],
+            message: typeof data.message === "string" ? data.message : lookup.message,
+          }
+        }
+      } catch {
+      }
+      const hasExternalLink = facebookUrlContainsExternalLink(facebookUrl, facebookEvidence.externalLink) || lookup.externalLinks.length > 0
       setFacebookReport({
         url: facebookUrl.href,
-        checks: createFacebookChecks(
-          facebookEvidence,
-          facebookUrlContainsExternalLink(facebookUrl, facebookEvidence.externalLink),
-          content as FacebookCopy,
-        ),
+        lookupMessage: lookup.message,
+        externalLinks: lookup.externalLinks,
+        checks: createFacebookChecks(facebookEvidence, lookup, hasExternalLink, content as FacebookCopy),
       })
       setLoading(false)
       return
@@ -563,6 +607,7 @@ export default function Home({
           <section aria-live="polite" className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
             <h2 className="text-xl font-bold text-stone-900">Facebook visibility results</h2>
             <p className="mt-3 text-sm leading-6 text-stone-600">{content.resultNote}</p>
+            <p className="mt-2 text-xs leading-5 text-stone-500">{facebookReport.lookupMessage}</p>
             <a
               className="mt-3 inline-block break-all text-sm font-semibold text-violet-700 underline underline-offset-2"
               href={facebookReport.url}
