@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       { source: "/tiktok-shadowban-checker", destination: "/tiktok" },
       { source: "/reddit-shadowban-checker", destination: "/reddit" },
       { source: "/facebook", destination: "/facebook-shadowban-checker" },
+      { source: "/youtube-shadowban-checker", destination: "/youtube" },
     ];
   },
 };

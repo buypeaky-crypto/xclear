@@ -3,6 +3,7 @@ import { baseUrl, getLocaleUrl, locales } from "../lib/i18n/config";
 import { getInstagramUrl, instagramLocales } from "../lib/i18n/instagram";
 import { facebookLocales, getFacebookUrl } from "../lib/i18n/facebook";
 import { getTikTokUrl, tiktokLocales } from "../lib/i18n/tiktok";
+import { getYouTubeUrl, youtubeLocales } from "../lib/i18n/youtube";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
@@ -49,6 +50,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
       priority: 0.9,
     })),
+    ...youtubeLocales.map((locale) => ({
+      url: getYouTubeUrl(locale),
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.9,
+    })),
     {
       url: `${baseUrl}/reddit`,
       lastModified: new Date(),
@@ -61,6 +68,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       "tiktok-shadowban-checker",
       "reddit-shadowban-checker",
       "facebook",
+      "youtube",
     ].map((alias) => ({
       url: `${baseUrl}/${alias}`,
       lastModified: new Date(),

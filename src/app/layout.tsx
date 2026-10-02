@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { baseUrl, getLanguageAlternates, getLocaleUrl, localeNames, locales } from "../lib/i18n/config";
 import { getInstagramUrl, instagramLocales } from "../lib/i18n/instagram";
+import { getYouTubeUrl, youtubeLocales } from "../lib/i18n/youtube";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
     "Instagram shadowban checker",
     "TikTok shadowban checker",
     "Reddit shadowban checker",
+    "YouTube shadowban checker",
     "shadowban checker",
     "twitter shadowban test",
     "X shadowban checker",
@@ -128,6 +130,21 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 hrefLang={locale}
               >
                 Instagram · {localeNames[locale]}
+              </Link>
+            ))}
+          </nav>
+          <nav
+            aria-label="YouTube checker by language"
+            className="mx-auto flex max-w-4xl flex-wrap justify-center gap-x-5 gap-y-3 px-4 pb-6 text-sm"
+          >
+            {youtubeLocales.map((locale) => (
+              <Link
+                key={locale}
+                className="transition-colors hover:text-violet-700"
+                href={getYouTubeUrl(locale)}
+                hrefLang={locale}
+              >
+                YouTube · {locale}
               </Link>
             ))}
           </nav>
