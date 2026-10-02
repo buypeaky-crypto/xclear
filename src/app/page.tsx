@@ -696,26 +696,37 @@ export default function Home({
           <h2 className="border-b border-stone-200 px-6 py-4 text-lg font-bold text-stone-900">
             {content?.faqTitle ?? "Frequently asked questions"}
           </h2>
-          <div className="divide-y divide-stone-200">
-            {faqItems.map((faq, index) => {
-              const id = `faq-${index}`
-              const isOpen = openInfo === id
-              return (
-                <div key={faq.question}>
-                  <button
-                    type="button"
-                    aria-expanded={isOpen}
-                    onClick={() => setOpenInfo(isOpen ? null : id)}
-                    className="flex w-full items-center justify-between p-4 px-6 text-left transition-colors hover:bg-amber-50/60"
-                  >
-                    <span className="text-[14px] text-stone-800">{faq.question}</span>
-                    <span className={`ml-4 shrink-0 text-xs text-stone-500 transition-transform ${isOpen ? "rotate-180" : ""}`}>▼</span>
-                  </button>
-                  {isOpen && <div className="px-6 pb-4 text-[13px] leading-relaxed text-stone-600">{faq.answer}</div>}
-                </div>
-              )
-            })}
-          </div>
+          {platform === "facebook" ? (
+            <div className="divide-y divide-stone-200 px-6">
+              {faqItems.map((faq) => (
+                <article key={faq.question} className="py-4">
+                  <h3 className="text-sm font-semibold text-stone-900">{faq.question}</h3>
+                  <p className="mt-2 text-[13px] leading-relaxed text-stone-600">{faq.answer}</p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="divide-y divide-stone-200">
+              {faqItems.map((faq, index) => {
+                const id = `faq-${index}`
+                const isOpen = openInfo === id
+                return (
+                  <div key={faq.question}>
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      onClick={() => setOpenInfo(isOpen ? null : id)}
+                      className="flex w-full items-center justify-between p-4 px-6 text-left transition-colors hover:bg-amber-50/60"
+                    >
+                      <span className="text-[14px] text-stone-800">{faq.question}</span>
+                      <span className={`ml-4 shrink-0 text-xs text-stone-500 transition-transform ${isOpen ? "rotate-180" : ""}`}>▼</span>
+                    </button>
+                    {isOpen && <div className="px-6 pb-4 text-[13px] leading-relaxed text-stone-600">{faq.answer}</div>}
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </section>
 
         {!content && (
