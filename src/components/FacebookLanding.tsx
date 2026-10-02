@@ -26,8 +26,6 @@ export default function FacebookLanding({ locale }: { locale: FacebookLocale }) 
         ]}
         inLanguage={locale}
         faqs={copy.faqs}
-        operatingSystem="Web, Android, iOS"
-        aggregateRating={{ ratingValue: "4.8", ratingCount: "124" }}
       />
     </>
   );

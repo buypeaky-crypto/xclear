@@ -284,10 +284,10 @@ export default function RedditChecker({
           <h2 id="reddit-faq-title" className="text-2xl font-bold">Reddit shadowban FAQs</h2>
           <div className="mt-5 divide-y divide-stone-200">
             {redditFaqs.map((faq) => (
-              <details key={faq.question} className="py-4">
-                <summary className="cursor-pointer font-semibold">{faq.question}</summary>
+              <article key={faq.question} className="py-4">
+                <h3 className="font-semibold">{faq.question}</h3>
                 <p className="mt-3 text-sm leading-6 text-stone-600">{faq.answer}</p>
-              </details>
+              </article>
             ))}
           </div>
         </section>

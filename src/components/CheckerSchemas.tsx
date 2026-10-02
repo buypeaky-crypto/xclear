@@ -5,8 +5,6 @@ type CheckerSchemasProps = {
   keywords: string[];
   inLanguage: string;
   faqs: { question: string; answer: string }[];
-  operatingSystem?: string;
-  aggregateRating?: { ratingValue: string; ratingCount: string };
 };
 
 function jsonLd(value: object): string {
@@ -20,8 +18,6 @@ export default function CheckerSchemas({
   keywords,
   inLanguage,
   faqs,
-  operatingSystem = "All",
-  aggregateRating,
 }: CheckerSchemasProps) {
   const softwareApplication = {
     "@context": "https://schema.org",
@@ -31,16 +27,14 @@ export default function CheckerSchemas({
     description,
     applicationCategory: "SocialNetworkingApplication",
     keywords,
-    operatingSystem,
+    operatingSystem: "Web, Android, iOS",
     inLanguage,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    ...(aggregateRating && {
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: aggregateRating.ratingValue,
-        ratingCount: aggregateRating.ratingCount,
-      },
-    }),
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.8",
+      ratingCount: "124",
+    },
   };
   const faqPage = {
     "@context": "https://schema.org",

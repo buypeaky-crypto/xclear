@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { baseUrl, getLocaleUrl, locales } from "../lib/i18n/config";
 import { getInstagramUrl, instagramLocales } from "../lib/i18n/instagram";
 import { facebookLocales, getFacebookUrl } from "../lib/i18n/facebook";
+import { getTikTokUrl, tiktokLocales } from "../lib/i18n/tiktok";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
@@ -42,12 +43,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
       priority: 0.9,
     })),
-    {
-      url: `${baseUrl}/tiktok`,
+    ...tiktokLocales.map((locale) => ({
+      url: getTikTokUrl(locale),
       lastModified: new Date(),
       changeFrequency: "daily" as const,
       priority: 0.9,
-    },
+    })),
     {
       url: `${baseUrl}/reddit`,
       lastModified: new Date(),
@@ -55,6 +56,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     ...[
+      "twitter-shadowban-checker",
       "instagram-shadowban-checker",
       "tiktok-shadowban-checker",
       "reddit-shadowban-checker",
