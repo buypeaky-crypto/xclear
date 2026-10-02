@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link"
 import { useState } from "react"
 import { Fraunces, Sora } from "next/font/google"
 import type { LocaleDictionary } from "../lib/i18n/dictionaries"
@@ -10,6 +11,10 @@ import SupportUsButton from "../components/SupportUsButton"
 import BrandHomeLink from "../components/BrandHomeLink"
 import SupportPopup from "../components/SupportPopup"
 import PlatformSwitcher from "../components/PlatformSwitcher"
+import { localeNames } from "../lib/i18n/config"
+import { facebookLocales, getFacebookUrl } from "../lib/i18n/facebook"
+import { getInstagramUrl, instagramLocales } from "../lib/i18n/instagram"
+import { getTikTokUrl, tiktokLocales } from "../lib/i18n/tiktok"
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -421,6 +426,28 @@ export default function Home({
         </div>
 
         {platform === "facebook" && content ? (
+          <>
+            {locale === "en" && (
+              <section className="mx-auto mt-9 max-w-3xl border-y border-stone-300 py-6 text-sm leading-7 text-stone-700">
+                <h2 className={`${fraunces.className} mb-4 text-2xl font-bold text-stone-900`}>
+                  How To Tell If You&apos;re &quot;Shadow Banned&quot; On Facebook 🙅 (And How To Fix It)
+                </h2>
+                <div className="space-y-4">
+                  <p>
+                    People often search for a facebook shadowban when a profile, Page, or post suddenly reaches fewer people. Facebook does not use “shadowban” as a public account status. Instead, its tools may show that content is “Not recommendable,” placed in a Spam filter, or subject to Reduced distribution. Those notices describe different systems, and a decline alone does not prove that a restriction exists.
+                  </p>
+                  <p>
+                    If you are wondering whether you have been facebook shadow banned, start with evidence you can compare: open the profile and recent posts in a logged-out browser, check whether another person can find the Page, and review Facebook Account Status, Page Quality, Support Inbox, and post notices while signed in. A page not recommendable notice concerns recommendations; it is not the same as a profile being unavailable in search. Facebook spam filter placement can affect a post without blocking every part of an account. Reduced distribution notices may apply to individual content and can have a policy explanation.
+                  </p>
+                  <p>
+                    This checker provides a public visibility review of the Facebook URL you submit, along with a place to record signals you verify in Facebook. It does not access private analytics, inspect internal ranking decisions, or log in on your behalf. That means a result cannot confirm an official shadowban, estimate your reach, or prove why your facebook reach dropping. Use it as a structured checklist, then rely on notices in Facebook for account-specific decisions. Never enter a password or private access token here.
+                  </p>
+                  <p>
+                    If visibility has changed, compare several posts over similar time periods before drawing conclusions. Review recent edits, repeated links, posting frequency, audience changes, and recommendation eligibility; avoid reposting identical links to many groups. Open each notice for the affected content and follow Facebook&apos;s steps to request a review if you believe it is mistaken. Remove or revise material that violates current standards, and give changes time to take effect. A careful check separates public reach patterns from private policy decisions, so you can choose a useful next step instead of treating every drop as proof of a facebook shadowban.
+                  </p>
+                </div>
+              </section>
+            )}
           <div className="mt-10 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
             <label htmlFor="facebook-url" className="mb-2 block text-sm font-semibold text-stone-700">Facebook profile, Page, or post URL</label>
             <input
@@ -508,7 +535,30 @@ export default function Home({
               </button>
             </div>
           </div>
+          </>
         ) : platform === "instagram" && content ? (
+          <>
+            {locale === "en" && (
+              <section className="mx-auto mt-9 max-w-3xl border-y border-stone-300 py-6 text-sm leading-7 text-stone-700">
+                <h2 className={`${fraunces.className} mb-4 text-2xl font-bold text-stone-900`}>
+                  Instagram Reach, Hashtags, and Recommendation Eligibility
+                </h2>
+                <div className="space-y-4">
+                  <p>
+                    An Instagram shadowban is an informal name for a possible reduction in how often posts appear in hashtag results, Explore, Reels recommendations, or other discovery surfaces. Instagram does not provide one universal shadowban switch or public status, so a sudden change in views is not enough to diagnose a restriction. Audience habits, content topics, posting cadence, competition, and ranking changes can all affect reach.
+                  </p>
+                  <p>
+                    This Instagram shadowban checker reviews the username and the recent hashtags you provide for limited public risk signals. It is a heuristic, not an account connection: it does not sign in, inspect private analytics, or query Instagram&apos;s internal recommendation systems. A clean result cannot guarantee that every post is eligible for recommendations, and a warning does not prove that Instagram has restricted your account. Treat the score as a prompt to investigate rather than a platform decision.
+                  </p>
+                  <p>
+                    For a fuller check, compare several posts with similar formats and audiences, then look at Account Status and recommendation eligibility in Instagram&apos;s own app. Search each recent hashtag while logged out and see whether your post appears; remember that ranking and personalization can change what different viewers see. Review notices for specific posts, remove tags that are irrelevant or restricted, and avoid repetitive engagement tactics. If Instagram identifies a policy issue, use its review process. These checks help separate ordinary performance variation from a discoverability concern without claiming access to information only Instagram can confirm.
+                  </p>
+                  <p>
+                    Keep a simple record of post dates, formats, hashtags, and reach so you can compare like with like instead of relying on one unusually strong or weak result. Check whether a notice names a particular post or recommendation surface, and make one measured change at a time. This gives you clearer context when discussing an Instagram reach drop and avoids treating a third-party score as proof of a hidden restriction.
+                  </p>
+                </div>
+              </section>
+            )}
           <div className="mt-10 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
@@ -543,6 +593,7 @@ export default function Home({
               </button>
             </div>
           </div>
+          </>
         ) : (
           <div className="bg-white border border-stone-200 shadow-sm mt-10 p-8 flex flex-col sm:flex-row items-center justify-center gap-6 rounded-2xl">
             <div className="flex flex-col">
@@ -667,11 +718,77 @@ export default function Home({
           </div>
         </section>
 
+        {!content && (
+          <footer className="mt-12 border-t border-stone-300 pt-8">
+            <h2 className="text-center text-lg font-bold text-stone-900">Other Checkers — Also available in:</h2>
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <h3 className="text-sm font-bold text-stone-800">Facebook</h3>
+                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                  {facebookLocales.map((language) => (
+                    <li key={language}>
+                      <Link className="text-violet-700 underline underline-offset-2" href={new URL(getFacebookUrl(language)).pathname}>
+                        {localeNames[language]}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-stone-800">Instagram</h3>
+                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                  {instagramLocales.map((language) => (
+                    <li key={language}>
+                      <Link className="text-violet-700 underline underline-offset-2" href={new URL(getInstagramUrl(language)).pathname}>
+                        {localeNames[language]}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-stone-800">TikTok</h3>
+                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                  {tiktokLocales.map((language) => (
+                    <li key={language}>
+                      <Link className="text-violet-700 underline underline-offset-2" href={new URL(getTikTokUrl(language)).pathname}>
+                        {localeNames[language]}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-stone-800">Reddit</h3>
+                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                  <li><Link className="text-violet-700 underline underline-offset-2" href="/reddit">English</Link></li>
+                </ul>
+              </div>
+            </div>
+          </footer>
+        )}
         <div className="text-center text-[12px] text-stone-500 mt-10">Made in Germany by <a href="https://x.com/shadowban_eu" target="_blank" className="text-violet-600">@shadowban_eu</a>, rebuilt by <a href="https://x.com/gutnews247" target="_blank" className="text-violet-600">@gutnews247</a></div>
       </div>
 
       {!content && (
         <>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "SoftwareApplication",
+                name: "Twitter Shadowban Test 2026",
+                applicationCategory: "Utility",
+                offers: { "@type": "Offer", price: "0" },
+                aggregateRating: {
+                  "@type": "AggregateRating",
+                  ratingValue: "4.8",
+                  ratingCount: "127",
+                },
+              }).replace(/</g, "\\u003c"),
+            }}
+          />
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{

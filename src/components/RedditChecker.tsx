@@ -129,6 +129,24 @@ export default function RedditChecker({
           <SupportUsButton />
         </header>
 
+        <section className="mx-auto mt-8 max-w-3xl border-y border-stone-300 py-6 text-sm leading-7 text-stone-700">
+          <h2 className="text-xl font-bold text-stone-900">Reddit Shadowban Checks: Profile Visibility, Comments, and Appeals</h2>
+          <div className="mt-4 space-y-4">
+            <p>
+              A Reddit shadowban usually means that an account or its contributions are not visible to other people, even though the account owner can still see them. Reddit does not provide a simple public shadowban label that a third-party tool can verify in every case. A profile that fails to load while logged out can be a useful signal, but deleted accounts, suspensions, network blocks, and temporary Reddit errors can produce similar results. Low karma or a removed post alone does not establish an account restriction.
+            </p>
+            <p>
+              This Reddit shadowban checker tests whether a public profile endpoint responds to a logged-out request and reviews any account details Reddit makes public. It cannot see private moderation notes, guarantee that every comment is indexed, or decide why content was removed. Treat an unavailable response as inconclusive, and compare the profile and recent comments in a private browser window before drawing conclusions. Do not share your Reddit password or authorization token with a checker.
+            </p>
+            <p>
+              If your Reddit visibility appears limited, check account notices and review Reddit&apos;s rules and spam guidance. Look for messages from moderators, distinguish a community ban from a site-wide account action, and use the official appeal process when an account restriction appears mistaken. A community may remove a post without limiting your whole profile, while automated spam controls can delay or filter content. This public check is a starting point for investigation, not an official diagnosis or a substitute for Reddit&apos;s own account and appeal tools.
+            </p>
+            <p>
+              For a useful comparison, check both the profile and a few recent comments while logged out, then repeat later if Reddit is returning errors. Keep links to account notices and moderation messages for an appeal, but do not repost removed material simply to test its visibility. Separate community-level moderation from site-wide access signals before choosing what to do next.
+            </p>
+          </div>
+        </section>
+
         <section aria-label="Reddit account visibility check" className="mx-auto mt-8 max-w-2xl">
           <form ref={formRef} onSubmit={handleSubmit} className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
             <label htmlFor="reddit-username" className="mb-2 block text-sm font-semibold text-stone-700">

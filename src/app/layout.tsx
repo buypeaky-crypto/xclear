@@ -78,23 +78,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "SoftwareApplication",
-              name: "Twitter Shadowban Test 2026",
-              applicationCategory: "Utility",
-              offers: { "@type": "Offer", price: "0" },
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: "4.8",
-                ratingCount: "127",
-              },
-            }),
-          }}
-        />
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-F1E42SVH2T"
