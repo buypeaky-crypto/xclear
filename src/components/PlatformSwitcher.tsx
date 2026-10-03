@@ -4,12 +4,12 @@ type Platform = "x" | "instagram" | "facebook" | "tiktok" | "reddit" | "youtube"
 
 export default function PlatformSwitcher({ activePlatform }: { activePlatform: Platform }) {
   const platforms = [
-    { label: "X / Twitter", href: "/", platform: "x" },
+    { label: "X (Twitter)", href: "/", platform: "x" },
     { label: "Instagram", href: "/instagram", platform: "instagram" },
-    { label: "Facebook", href: "/facebook-shadowban-checker", platform: "facebook" },
     { label: "TikTok", href: "/tiktok", platform: "tiktok" },
-    { label: "Reddit", href: "/reddit", platform: "reddit" },
+    { label: "Facebook", href: "/facebook-shadowban-checker", platform: "facebook" },
     { label: "YouTube", href: "/youtube", platform: "youtube" },
+    { label: "Reddit", href: "/reddit", platform: "reddit" },
   ];
 
   return (

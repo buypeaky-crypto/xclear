@@ -6,7 +6,7 @@ import { getTikTokUrl, tiktokLocales } from "../lib/i18n/tiktok";
 import { getYouTubeUrl, youtubeLocales } from "../lib/i18n/youtube";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
+  const entries: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/`,
       lastModified: new Date(),
@@ -14,13 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
       images: [`${baseUrl}/og-image.png`],
     },
-    ...["de", "id"].map((locale) => ({
-      url: `${baseUrl}/${locale}`,
-      lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 0.9,
-    })),
-    ...["privacy", "terms", "about", "cookies", "contact"].map((page) => ({
+    ...["privacy", "terms", "about", "cookies", "contact", "imprint"].map((page) => ({
       url: `${baseUrl}/${page}`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
@@ -64,11 +58,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...[
       "twitter-shadowban-checker",
+      "x-shadowban-checker",
+      "twitter",
       "instagram-shadowban-checker",
       "tiktok-shadowban-checker",
       "reddit-shadowban-checker",
       "facebook",
       "youtube",
+      "youtube-shadowban-checker",
     ].map((alias) => ({
       url: `${baseUrl}/${alias}`,
       lastModified: new Date(),
@@ -76,4 +73,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     })),
   ];
+
+  return Array.from(new Map(entries.map((entry) => [entry.url, entry])).values());
 }

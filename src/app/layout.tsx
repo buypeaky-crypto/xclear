@@ -21,9 +21,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: "Twitter Shadowban Test 2026 | 100% Free & Instant Check",
+  title: "Twitter Shadowban Test - Free X Search, Ghost & Reply Check (No Login)",
   description:
-    "Free Twitter shadowban checker. Instantly test your account for search bans, ghost bans, and reply deboosting without logging in.",
+    "Free shadowban checker for X/Twitter. Tests search suggestion ban, search ban, ghost ban, and reply visibility with logged-out signals. No login required; results are cached for up to one hour.",
   keywords: [
     "twitter shadowban checker",
     "Instagram shadowban checker",
@@ -44,8 +44,8 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://shadowbannchecker.vercel.app/",
     siteName: "ShadowbanChecker",
-    title: "Twitter Shadowban Test 2026 | 100% Free & Instant Check",
-    description: "Free Twitter shadowban checker. Instantly test your account for search bans, ghost bans, and reply deboosting without logging in.",
+    title: "Twitter Shadowban Test - Free X Search, Ghost & Reply Check (No Login)",
+    description: "Free shadowban checker for X/Twitter using limited logged-out visibility signals. No login required.",
     images: [
       {
         url: "/og-image.png",
@@ -57,8 +57,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Twitter Shadowban Test 2026 | 100% Free & Instant Check",
-    description: "Free Twitter shadowban checker. Instantly test your account for search bans, ghost bans, and reply deboosting without logging in.",
+    title: "Twitter Shadowban Test - Free X Search, Ghost & Reply Check (No Login)",
+    description: "Free shadowban checker for X/Twitter using limited logged-out visibility signals. No login required.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -97,11 +97,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             aria-label="Legal and site information"
             className="mx-auto flex max-w-4xl flex-wrap justify-center gap-x-6 gap-y-3 px-4 py-6 text-sm"
           >
+            <Link className="transition-colors hover:text-blue-700" href="/imprint">Imprint</Link>
             <Link className="transition-colors hover:text-violet-700" href="/privacy">Privacy</Link>
             <Link className="transition-colors hover:text-violet-700" href="/terms">Terms</Link>
             <Link className="transition-colors hover:text-violet-700" href="/about">About</Link>
             <Link className="transition-colors hover:text-violet-700" href="/cookies">Cookies</Link>
             <Link className="transition-colors hover:text-violet-700" href="/contact">Contact</Link>
+          </nav>
+          <nav aria-label="Project details" className="mx-auto flex max-w-4xl flex-wrap justify-center gap-x-6 gap-y-3 px-4 pb-6 text-sm">
+            <a className="transition-colors hover:text-blue-700" href="https://github.com/buypeaky-crypto/xclear" target="_blank" rel="noreferrer">GitHub</a>
+            <span>Last updated October 3, 2026</span>
           </nav>
           <nav
             aria-label="Choose language"

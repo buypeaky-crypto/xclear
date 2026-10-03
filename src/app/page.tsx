@@ -31,18 +31,55 @@ const sora = Sora({
 
 const defaultFaqs = [
   {
-    question: "Twitter reserves the right to limit distribution or visibility of content",
-    answer: "X says they don't shadowban, but they do limit visibility for policy violations. This tool detects technical bans, not algorithmic downranking.",
+    question: "Does X have an official shadowban status?",
+    answer: "X does not provide a single public status that confirms every kind of reduced visibility. Review account notices and X's own visibility controls for authoritative information.",
   },
   {
-    question: "Why is the QFD test gone?",
-    answer: "QFD (Quality Filter Discrimination) was removed by X in 2023. The endpoint no longer exists, so we removed it from the checker.",
+    question: "What does this X shadowban check test?",
+    answer: "It checks whether logged-out X endpoints return typeahead, search, and public-profile signals. Reply ranking cannot be confirmed from a username alone, and an unavailable endpoint is marked unknown.",
   },
   {
-    question: "How does this tester work?",
-    answer: "We use logged-out Twitter endpoints to check: profile existence, typeahead suggestions, tweet search visibility, tweet visibility to others, and reply deboosting.",
+    question: "Can a clean result prove my posts are not downranked?",
+    answer: "No. Public endpoints cannot reveal all personalized search, recommendation, moderation, or reply-ranking decisions. Treat each result as a limited signal, not a guarantee.",
+  },
+  {
+    question: "Do I need to connect my X account?",
+    answer: "No. Enter a public username only. Never provide a password, verification code, or access token to a third-party checker.",
   },
 ]
+
+const xVisibilityCards = [
+  {
+    title: "Search suggestion visibility",
+    description: "The typeahead signal checks whether a logged-out X search suggestion response includes the username. A missing suggestion can happen because of personalization, query matching, endpoint changes, or temporary service limits. It is not, by itself, proof that X has restricted an account. Try the exact handle in a private browser window and compare more than once before treating an absence as meaningful. Make sure the spelling and punctuation match the public handle, and remember that suggestions can be affected by the query and the viewer's location or recent activity. A successful response confirms only that this endpoint returned a suggestion at that moment. It does not measure impressions, recommendations, or what every user sees. If the endpoint is unavailable or rate-limited, the result stays unknown instead of treating a failed request as a ban.",
+  },
+  {
+    title: "Search visibility",
+    description: "A search request for public posts associated with an account can offer a limited view of search indexing. Results depend on whether the account has public posts, the query, language, location, and X's current search behavior. This checker cannot see personalized results or private account notices. An empty or incomplete response is marked inconclusive unless the endpoint provides evidence that can be interpreted reliably. A new or quiet account may have no matching posts; protected, deleted, or age-restricted material also will not behave like ordinary public posts. Search may take time to index new content and may rank identical queries differently. Compare a specific public post from a signed-out session rather than relying on a single broad query. Even repeated absence is a reason to inspect X's own account notices, not a definitive diagnosis from a third party.",
+  },
+  {
+    title: "Logged-out profile visibility",
+    description: "The public profile signal checks whether X returns the requested account without a signed-in session. A reachable profile only confirms that the profile endpoint responded; it does not prove that every post is visible in search or recommendations. A profile may be unavailable for reasons unrelated to a visibility restriction, including a changed handle, suspension, deletion, age or region controls, and temporary errors. Check that the entered username is current and does not include a URL or extra punctuation. If the profile loads in one browser but not another, sign-in state, region, age settings, or an intermittent platform response may explain the difference. This test does not inspect private analytics, follower-only posts, or account status messages. Treat a positive profile response as one narrow observation and use the platform's own notices to understand any account-specific action.",
+  },
+  {
+    title: "Reply visibility",
+    description: "Reply ranking is conversation-specific. Replies may be collapsed, hidden behind a control, or ordered differently for different viewers. A username alone does not identify a conversation or let a third-party tool inspect the views of multiple logged-out readers. This signal therefore remains unknown here. Ask a trusted person to compare the same public conversation while logged out, and check any account notices in X before drawing a conclusion. Compare the same reply URL and conversation rather than searching only for the author's handle. Replies can be deleted, filtered by the author, hidden by a viewer's settings, or ranked below a platform control for ordinary quality and safety reasons. A difference between accounts is not enough to establish a penalty. X alone can explain whether it applied a specific visibility action, and a supported appeal should refer to the notice or content involved.",
+  },
+]
+
+const xFixSteps = [
+  "Pause repetitive behavior while you investigate. Avoid repeatedly posting identical replies, hashtags, links, or unsolicited direct messages; normal posting frequency varies by account and there is no universal safe quota. Check recent activity for automation, duplicate posts, or behavior that may have triggered a platform warning. Do not try to evade a restriction with alternate accounts or rapid retries. A short pause is a practical troubleshooting step, not a guaranteed fix or an admission that a rule was broken.",
+  "Review the posts and replies that changed visibility. Remove or edit content only when it violates X's current rules or you no longer want it public. Keep a copy of relevant account notices and avoid mass-deleting content based only on an inconclusive third-party result. Check the date, affected post, and wording of any notice; distinguish content removal from reduced search or recommendation eligibility. If an item is accurate and allowed, use the review path attached to that specific decision rather than repeatedly reposting it.",
+  "Give temporary limits time to clear, then compare the same public searches from a signed-out browser. Recheck after a reasonable interval rather than submitting many rapid checks; this service rate-limits requests and caches results for up to one hour. Compare several posts with similar topics and ages, and record the query, time, and whether the viewer was logged in. Audience changes, seasonality, competition, and ranking experiments can change reach without any account restriction. One post's views are not a reliable account-wide measurement.",
+  "Use X's in-product account status, safety, and content visibility controls, and follow the appeal or review link shown on the specific notice. Menu names and available controls can change. Only X can confirm an account-level decision or restore distribution. Review the current rules and any explanation tied to a particular post before appealing, and include relevant URLs if the official form requests them. Do not give a third-party checker your password, verification code, or access token. If there is no account notice, continue to treat public endpoint results as clues rather than a confirmed penalty.",
+]
+
+const xTestKeys = [
+  ["searchSuggestion", "Search Suggestion"],
+  ["searchBan", "Search Ban"],
+  ["ghostBan", "Ghost Ban"],
+  ["replyDeboost", "Reply Deboost"],
+] as const
 
 type CheckerContent = Pick<LocaleDictionary, "h1" | "subtitle" | "faqTitle" | "faqs"> &
   Partial<Pick<InstagramCopy, "inputLabel" | "buttonLabel" | "loadingLabel" | "resultTitle" | "hashtagInputLabel" | "hashtagPlaceholder" | "visibilityLabel" | "engagementLabel" | "scoreLabel" | "reasonsLabel" | "fixTitle" | "fixDescription" | "visibilityStates" | "engagementStates" | "reasonLabels" | "resultNote">> & {
@@ -59,10 +96,7 @@ type CheckerPlatform = "x" | "instagram" | "facebook"
 type CheckerResult = {
   username: string
   exists?: boolean
-  searchSuggestionBan?: boolean
-  searchBan?: boolean
-  ghostBan?: boolean
-  replyDeboosting?: boolean
+  tests: Record<string, { label: string; status: "clear" | "flagged" | "unknown"; detail: string }>
 }
 
 type FacebookEvidence = {
@@ -261,35 +295,6 @@ function localizeReason(reason: string, labels: InstagramCopy["reasonLabels"]): 
   return labels.clean
 }
 
-function InfoRow({
-  id,
-  label,
-  desc,
-  isBan,
-  openInfo,
-  setOpenInfo,
-}: {
-  id: string
-  label: string
-  desc: string
-  isBan: boolean
-  openInfo: string | null
-  setOpenInfo: (id: string | null) => void
-}) {
-  return (
-    <div className="border-b last:border-0 border-stone-200">
-      <div className="flex items-center justify-between p-4 px-6 cursor-pointer transition-colors hover:bg-amber-50/60" onClick={() => setOpenInfo(openInfo === id ? null : id)}>
-        <div className="flex items-center gap-3">
-          <span className={`text-xl ${isBan ? "text-red-500" : "text-emerald-600"}`}>{isBan ? "✕" : "✓"}</span>
-          <span className={`text-[15px] ${isBan ? "text-red-600" : "text-emerald-700"}`}>{label}</span>
-        </div>
-        <span className={`text-[11px] transition-transform ${openInfo === id ? "rotate-180" : ""}`}>ℹ️ ▾</span>
-      </div>
-      {openInfo === id && <div className="px-6 pb-4 text-[13px] text-stone-600 bg-amber-50/60 leading-relaxed">{desc}</div>}
-    </div>
-  )
-}
-
 export default function Home({
   content,
   locale,
@@ -302,18 +307,11 @@ export default function Home({
   backgroundClassName?: string
 } = {}) {
   const faqItems = content?.faqs ?? defaultFaqs
-  const initialUsername = platform === "instagram" ? "quran" : platform === "facebook" ? "" : "GutNews247"
+  const initialUsername = platform === "instagram" ? "quran" : ""
   const [username, setUsername] = useState(initialUsername)
   const [inputVal, setInputVal] = useState(initialUsername)
   const [hashtagInput, setHashtagInput] = useState("#quran #islam #faith #community #dailyreminder")
-  const [result, setResult] = useState<CheckerResult | null>(() => platform === "instagram" || platform === "facebook" ? null : {
-    username: initialUsername,
-    exists: true,
-    searchSuggestionBan: false,
-    searchBan: false,
-    ghostBan: false,
-    replyDeboosting: false,
-  })
+  const [result, setResult] = useState<CheckerResult | null>(null)
   const [facebookEvidence, setFacebookEvidence] = useState<FacebookEvidence>({
     profile: "unknown",
     spam: "unknown",
@@ -327,6 +325,8 @@ export default function Home({
   const [facebookError, setFacebookError] = useState("")
   const [instagramResult, setInstagramResult] = useState<IGCheckResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [checkerError, setCheckerError] = useState("")
+  const [shareMessage, setShareMessage] = useState("")
   const [showSupportPopup, setShowSupportPopup] = useState(false)
   const [openInfo, setOpenInfo] = useState<string | null>(null)
 
@@ -343,6 +343,7 @@ export default function Home({
       return
     }
     setFacebookError("")
+    setCheckerError("")
     setUsername(clean)
     setLoading(true)
     setShowSupportPopup(true)
@@ -386,20 +387,25 @@ export default function Home({
       return
     }
     try {
-      const res = await fetch(`/api/check?username=${encodeURIComponent(clean)}`)
-      const data = await res.json()
-      setResult({
-        username: data.username || clean,
-        exists: true,
-        searchSuggestionBan: data.searchSuggestionBan || false,
-        searchBan: data.searchBan || false,
-        ghostBan: data.ghostBan || false,
-        replyDeboosting: data.replyDeboosting || false,
-      })
-    } catch {
-      setResult({ username: clean, exists: true, searchSuggestionBan: false, searchBan: false, ghostBan: false, replyDeboosting: false })
+      const response = await fetch(`/api/check/twitter?username=${encodeURIComponent(clean)}`)
+      const data = await response.json() as Partial<CheckerResult> & { error?: string }
+      if (!response.ok || !data.tests) throw new Error(data.error || "The check could not be completed.")
+      setResult({ username: data.username || clean, tests: data.tests })
+    } catch (error) {
+      setCheckerError(error instanceof Error ? error.message : "The check could not be completed. Please try again shortly.")
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
+  }
+
+  const handleShare = async () => {
+    const shareText = `I checked @${username} with ShadowbannChecker. The public visibility checks are limited and cannot prove a shadowban: https://shadowbannchecker.vercel.app/`;
+    if (navigator.share) {
+      await navigator.share({ title: "X visibility check", text: shareText }).catch(() => undefined)
+      return
+    }
+    await navigator.clipboard?.writeText(shareText)
+    setShareMessage("Share text copied.")
   }
 
   return (
@@ -411,12 +417,12 @@ export default function Home({
             {content ? (
               <span className="text-stone-800">{content.h1}</span>
             ) : (
-              <span className="text-stone-800">Twitter Shadowban Test 2026</span>
+              <span className="text-stone-800">Check if you&apos;re shadowbanned on X (Twitter)</span>
             )}
           </h1>
           {!content && (
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">
-              Use this free Twitter shadowban test and Twitter shadowban checker to check whether your account may have search bans, ghost bans, or reply deboosting. Wondering &quot;is my Twitter shadowbanned?&quot; Check a public username instantly, without logging in.
+              Wondering, &quot;Is my Twitter shadowbanned?&quot; X does not describe its visibility limits as shadowbans, but reach can still be restricted. This free checker tests public, logged-out signals for search suggestions, search, and profile visibility. Reply ranking needs a specific conversation, so that signal may remain unknown. No login is required. X&apos;s own account notices and visibility controls are the authoritative place to review account-specific decisions.
             </p>
           )}
           {content && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">{content.subtitle}</p>}
@@ -595,15 +601,20 @@ export default function Home({
           </div>
           </>
         ) : (
-          <div className="bg-white border border-stone-200 shadow-sm mt-10 p-8 flex flex-col sm:flex-row items-center justify-center gap-6 rounded-2xl">
+          <div className="bg-white border border-stone-200 shadow-sm mt-10 p-6 sm:p-8 rounded-lg">
+            <h2 className="mb-5 text-left text-xl font-bold text-stone-900">Check a public X username</h2>
+            <div className="flex flex-col sm:flex-row items-end justify-center gap-6">
             <div className="flex flex-col">
-              <label className="text-[11px] text-stone-500 mb-1">{content?.inputLabel ?? "username"}</label>
+              <label htmlFor="handle" className="text-sm font-semibold text-stone-700 mb-2">{content?.inputLabel ?? "X username"}</label>
               <div className="flex items-end border-b border-stone-300 pb-1 w-[280px]">
                 <span className="text-violet-600 text-[26px] font-bold mr-2">@</span>
-                <input value={inputVal} onChange={(e) => setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e) => e.key === "Enter" && handleCheck()} className="flex-1 outline-none text-[17px] text-violet-600 bg-transparent" />
+                <input id="handle" aria-label={platform === "x" ? "X username including @, e.g. @elonmusk" : undefined} autoComplete="off" spellCheck={false} value={inputVal} onChange={(e) => setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e) => e.key === "Enter" && handleCheck()} className="min-w-0 flex-1 bg-transparent text-[17px] text-violet-600 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2" />
               </div>
             </div>
-            <button onClick={handleCheck} disabled={loading} className="border border-stone-300 text-stone-900 rounded-full px-7 py-2 text-[13px] transition-colors hover:bg-stone-50 disabled:opacity-50">{loading ? content?.loadingLabel ?? "CHECKING..." : content?.buttonLabel ?? "CHECK"}</button>
+            <button type="button" onClick={handleCheck} disabled={loading} className="rounded-md bg-blue-700 px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-800 disabled:opacity-50">{loading ? content?.loadingLabel ?? "CHECKING..." : content?.buttonLabel ?? "Check X visibility"}</button>
+            </div>
+            {loading && <p role="status" aria-live="polite" className="mt-4 text-sm text-stone-600">Checking Search Suggestion → Search Ban → Ghost → Reply Deboost...</p>}
+            {checkerError && <p role="alert" className="mt-4 text-sm text-red-700">{checkerError}</p>}
           </div>
         )}
 
@@ -681,13 +692,54 @@ export default function Home({
         )}
 
         {result && platform !== "instagram" && platform !== "facebook" && (
-          <div className="bg-white border border-stone-200 shadow-sm mt-6 overflow-hidden rounded-2xl">
-            <div className="flex items-center gap-3 p-4 px-6 border-b border-stone-200"><span className="text-emerald-600 text-xl">✓</span><span className="text-[15px]"><span className="text-violet-600">@{result.username}</span> <span className="text-emerald-700">exists.</span></span></div>
-            <InfoRow id="sugg" label={result.searchSuggestionBan ? "Search suggestion ban." : "No search suggestion ban."} isBan={Boolean(result.searchSuggestionBan)} desc="Typeahead test: When you type @username in Twitter search, does it auto-suggest? If not, you have a search suggestion ban. Profile hidden from typeahead." openInfo={openInfo} setOpenInfo={setOpenInfo} />
-            <InfoRow id="search" label={result.searchBan ? "Search ban." : "No search ban."} isBan={Boolean(result.searchBan)} desc="Search ban: Your tweets don't appear in search results for logged-out users. Searching from:@username shows nothing." openInfo={openInfo} setOpenInfo={setOpenInfo} />
-            <InfoRow id="ghost" label={result.ghostBan ? "Ghost ban." : "No ghost ban."} isBan={Boolean(result.ghostBan)} desc="Ghost ban: Your tweets are visible only to you, invisible to everyone else. The classic shadowban." openInfo={openInfo} setOpenInfo={setOpenInfo} />
-            <InfoRow id="reply" label={result.replyDeboosting ? "Reply deboosting detected." : "No reply deboosting detected."} isBan={Boolean(result.replyDeboosting)} desc="Reply deboosting: Your replies are collapsed under 'Show more replies' so almost nobody sees them." openInfo={openInfo} setOpenInfo={setOpenInfo} />
-          </div>
+          <section aria-live="polite" className="mt-6 rounded-lg border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+            <h2 className="text-xl font-bold text-stone-900">Visibility signals for @{result.username}</h2>
+            <p className="mt-1 text-sm text-stone-600">These logged-out checks are limited signals, not a platform verdict.</p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {xTestKeys.map(([key, fallbackLabel]) => {
+                const test = result.tests[key]
+                const status = test?.status ?? "unknown"
+                const color = status === "clear" ? "border-emerald-300 bg-emerald-50 text-emerald-900" : status === "flagged" ? "border-red-300 bg-red-50 text-red-900" : "border-amber-300 bg-amber-50 text-amber-950"
+                const statusLabel = status === "clear" ? "No signal" : status === "flagged" ? "Possible signal" : "Unknown"
+                return (
+                  <article key={key} title={test?.detail} className={`rounded-md border p-4 ${color}`}>
+                    <h3 className="font-semibold">{test?.label ?? fallbackLabel}</h3>
+                    <p className="mt-1 text-sm font-bold">{statusLabel}</p>
+                    <p className="mt-2 text-sm leading-6">{test?.detail ?? "No reliable public result was returned."}</p>
+                  </article>
+                )
+              })}
+            </div>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <button type="button" onClick={handleShare} className="rounded-md border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-50">Share results</button>
+              <button type="button" onClick={() => { setResult(null); setInputVal(""); document.getElementById("handle")?.focus() }} className="rounded-md border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-50">Check another</button>
+              <a href="mailto:contact@shadowbannchecker.vercel.app?subject=Visibility%20check%20alert" className="text-sm font-semibold text-blue-700 underline underline-offset-2">Get alerted if banned again</a>
+              {shareMessage && <span role="status" aria-live="polite" className="text-sm text-stone-600">{shareMessage}</span>}
+            </div>
+          </section>
+        )}
+
+        {!content && platform === "x" && (
+          <>
+            <section className="mt-10 border-y border-stone-300 py-8">
+              <h2 className="text-2xl font-bold text-stone-900">Four visibility signals, with clear limits</h2>
+              <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                {xVisibilityCards.map((card) => (
+                  <article key={card.title} className="rounded-md border border-stone-200 bg-white p-5">
+                    <h3 className="text-lg font-semibold text-stone-900">{card.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-stone-700">{card.description}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+            <section className="mt-8">
+              <h2 className="text-2xl font-bold text-stone-900">What to do if visibility changed</h2>
+              <ol className="mt-4 list-decimal space-y-3 pl-6 text-sm leading-7 text-stone-700">
+                {xFixSteps.map((step) => <li key={step}>{step}</li>)}
+              </ol>
+            </section>
+            <p className="mt-8 text-sm leading-6 text-stone-600">No account login or watchlist. Results may be cached for up to one hour; infrastructure providers may retain technical request logs under their own settings. Last updated October 3, 2026. Built by <a className="font-semibold text-blue-700 underline" href="https://x.com/gutnews247" target="_blank" rel="noreferrer">@gutnews247</a>.</p>
+          </>
         )}
 
         <CryptoDonationButtons />
@@ -755,7 +807,7 @@ export default function Home({
             </div>
           </footer>
         )}
-        <div className="text-center text-[12px] text-stone-500 mt-10">Made in Germany by <a href="https://x.com/shadowban_eu" target="_blank" className="text-violet-600">@shadowban_eu</a>, rebuilt by <a href="https://x.com/gutnews247" target="_blank" className="text-violet-600">@gutnews247</a></div>
+        <div className="text-center text-[12px] text-stone-500 mt-10">By <a href="https://x.com/gutnews247" target="_blank" rel="noreferrer" className="text-blue-700">@gutnews247</a></div>
       </div>
 
       {!content && (
@@ -766,7 +818,7 @@ export default function Home({
               __html: JSON.stringify({
                 "@context": "https://schema.org",
                 "@type": "SoftwareApplication",
-                name: "Twitter Shadowban Test 2026",
+                name: "Twitter Shadowban Checker",
                 applicationCategory: "Utility",
                 operatingSystem: "Web, Android, iOS",
                 offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },

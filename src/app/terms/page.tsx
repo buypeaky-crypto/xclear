@@ -4,8 +4,7 @@ import { baseUrl, getEnglishLanguageAlternates } from "../../lib/i18n/config";
 
 export const metadata: Metadata = {
   title: "Terms of Service | ShadowbanChecker Rules",
-  description:
-    "Read the terms for using ShadowbannChecker’s free public-profile and hashtag visibility tools.",
+  description: "Terms for using ShadowbannChecker's public social-profile visibility checks.",
   keywords: ["shadowban checker terms", "instagram shadowban test terms"],
   alternates: {
     canonical: `${baseUrl}/terms`,
@@ -20,18 +19,20 @@ export default function TermsPage() {
         <header className="mb-10 text-center">
           <p className="mb-3 text-sm font-semibold uppercase text-violet-700">ShadowbannChecker</p>
           <h1 className="text-4xl font-black tracking-tight sm:text-5xl">Terms of Service</h1>
-          <p className="mt-4 text-sm text-stone-500">Last updated: October 1, 2026</p>
+          <p className="mt-4 text-sm text-stone-500">Last updated: October 3, 2026</p>
         </header>
 
         <div className="space-y-8 text-[15px] leading-7 text-stone-700">
           <section>
             <h2 className="mb-3 text-2xl font-bold text-stone-900">Using the checker</h2>
             <p>
-              ShadowbannChecker is a free informational tool intended to help people check whether
-              their own public social-media profile may have visibility or account-status issues.
-              The live check currently looks up public X/Twitter profile information. It does not
-              require a login, and it is not an official service of X, Instagram, TikTok, or
-              YouTube.
+              ShadowbannChecker provides heuristic checks of public social-profile visibility
+              signals. Results may be incomplete, unavailable, or wrong; an unknown or clear result
+              is not proof of account status, reach, or recommendation eligibility. The checker is
+              not an official service of X, Instagram, Facebook, TikTok, YouTube/Google, or Reddit.
+              X announced additional transparency information on August 14, 2026; platform tools
+              and interfaces may change, so consult X&apos;s current account controls for authoritative
+                information.
             </p>
           </section>
 
@@ -49,7 +50,7 @@ export default function TermsPage() {
           <section>
             <h2 className="mb-3 text-2xl font-bold text-stone-900">No guarantee</h2>
             <p>
-              The checker is provided free of charge and “as is,” without a guarantee that it will
+              Use the checker at your own risk. It is provided free of charge and “as is,” without a guarantee that it will
               be available, complete, current, or accurate. Social platforms change their systems
               and access rules, and a public profile lookup cannot prove that an account is or is
               not shadowbanned. Results are informational only; confirm account issues through the
@@ -67,8 +68,8 @@ export default function TermsPage() {
               extent permitted by law.
             </p>
             <p className="mt-4">
-              Visit the <Link className="font-semibold text-violet-700 underline" href="/">shadowban checker</Link> or contact{" "}
-              <a className="font-semibold text-violet-700 underline" href="mailto:support@shadowbannchecker.vercel.app">support</a> with questions.
+              Visit the <Link className="font-semibold text-violet-700 underline" href="/">shadowban checker</Link>, read the <Link className="font-semibold text-violet-700 underline" href="/imprint">Imprint</Link>, or contact{" "}
+              <a className="font-semibold text-violet-700 underline" href="mailto:contact@shadowbannchecker.vercel.app">us</a> with questions.
             </p>
           </section>
         </div>
