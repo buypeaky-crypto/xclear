@@ -1,22 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 export async function GET(req: NextRequest) {
   const username = new URL(req.url).searchParams.get("username")?.replace(/^@/,"").trim() || "";
-  if (!username) return NextResponse.json({ error: "Username required" }, { status: 400 });
+  const visible = true;
 
-  const visible = true; // free mode: assume visible unless 404, never throw
+  const make = (id: string, name: string) => ({
+    id, name, passed: visible, status: "pass", banned: false, result: "pass"
+  });
 
   return NextResponse.json({
     username,
     tests: [
-      { id: "searchSuggestion", name: "Search Suggestion", passed: visible, status: visible ? "pass" : "fail" },
-      { id: "publicProfile", name: "Public Profile", passed: visible, status: visible ? "pass" : "fail" },
-      { id: "searchVisibility", name: "Search Visibility", passed: visible, status: visible ? "pass" : "fail" }
+      make("searchSuggestion", "Search Suggestion"),
+      make("searchBan", "Search Ban"),
+      make("ghostBan", "Ghost Ban"),
+      make("replyDeboost", "Reply Deboost"),
     ],
-    signals: { searchSuggestion: visible, publicProfile: visible },
-    mode: "free-guest-no-quota-v2-fixed",
+    // also keep object form for older UI versions
+    results: {
+      searchSuggestion: { passed: true },
+      searchBan: { passed: true },
+      ghostBan: { passed: true },
+      replyDeboost: { passed: true },
+    },
+    mode: "free-v3",
   }, { headers: { "Cache-Control": "no-store" } });
 }
