@@ -15,6 +15,7 @@ import { localeNames } from "../lib/i18n/config"
 import { facebookLocales, getFacebookUrl } from "../lib/i18n/facebook"
 import { getInstagramUrl, instagramLocales } from "../lib/i18n/instagram"
 import { getTikTokUrl, tiktokLocales } from "../lib/i18n/tiktok"
+import AlertButton from './components/AlertButton'
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -846,6 +847,7 @@ export default function Home({
           />
         </>
       )}
+ <AlertButton handle={inputVal} platform={platform} />
       <SupportPopup
         isOpen={showSupportPopup}
         onClose={() => setShowSupportPopup(false)}
