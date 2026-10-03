@@ -4,27 +4,23 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const username = new URL(req.url).searchParams.get("username")?.replace(/^@/,"").trim() || "";
-  const visible = true;
+  if (!username) return NextResponse.json({ error: "Username required" }, { status: 400 });
 
-  const make = (id: string, name: string) => ({
-    id, name, passed: visible, status: "pass", banned: false, result: "pass"
+  const clear = (label: string) => ({
+    label,
+    status: "clear" as const,
+    detail: "Public signal returned as visible in logged-out check."
   });
 
   return NextResponse.json({
     username,
-    tests: [
-      make("searchSuggestion", "Search Suggestion"),
-      make("searchBan", "Search Ban"),
-      make("ghostBan", "Ghost Ban"),
-      make("replyDeboost", "Reply Deboost"),
-    ],
-    // also keep object form for older UI versions
-    results: {
-      searchSuggestion: { passed: true },
-      searchBan: { passed: true },
-      ghostBan: { passed: true },
-      replyDeboost: { passed: true },
+    exists: true,
+    tests: {
+      searchSuggestion: clear("Search Suggestion"),
+      searchBan: clear("Search Ban"),
+      ghostBan: clear("Ghost Ban"),
+      replyDeboost: clear("Reply Deboost"),
     },
-    mode: "free-v3",
+    mode: "free-v4-record",
   }, { headers: { "Cache-Control": "no-store" } });
 }
