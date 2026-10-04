@@ -853,6 +853,17 @@ export default function Home({
         onClose={() => setShowSupportPopup(false)}
         isChecking={loading}
       />
+      {/* OFFICIAL ACCOUNTS - YOUR BOXES */}
+<div className="bg-white shadow-sm border border-stone-200 mt-8 p-6 rounded-2xl max-w- mx-auto">
+  <h3 className="text-center text- font-semibold tracking-wide mb-4">OUR OFFICIAL ACCOUNTS - TEST THEM</h3>
+  <div className="flex flex-wrap justify-center gap-2">
+    <a href="https://x.com/gutnews247" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text- hover:bg-violet-50"><b>Twitter:</b> @gutnews247</a>
+    <a href="https://instagram.com/aljannah.tv" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text- hover:bg-violet-50"><b>Instagram:</b> @aljannah.tv</a>
+    <a href="https://tiktok.com/@hownwhen" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text- hover:bg-violet-50"><b>TikTok:</b> @hownwhen</a>
+    <a href="https://web.facebook.com/functionSmarterAI" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text- hover:bg-violet-50"><b>Facebook:</b> functionSmarterAI</a>
+    <a href="https://youtube.com/@villainaudit" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text- hover:bg-violet-50"><b>YouTube:</b> @villainaudit</a>
+  </div>
+</div>
     </main>
   )
 }
