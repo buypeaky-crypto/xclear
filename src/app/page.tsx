@@ -16,7 +16,14 @@ import { facebookLocales, getFacebookUrl } from "../lib/i18n/facebook"
 import { getInstagramUrl, instagramLocales } from "../lib/i18n/instagram"
 import { getTikTokUrl, tiktokLocales } from "../lib/i18n/tiktok"
 import AlertButton from './components/AlertButton'
-
+const DEFAULT_HANDLES: Record<string, string> = {
+  "X (Twitter)": "gutnews247",
+  "Instagram": "aljannah.tv",
+  "TikTok": "hownwhen",
+  "Facebook": "functionSmarterAI",
+  "YouTube": "villainaudit",
+  "Reddit": "gutnews247",
+}
 const fraunces = Fraunces({
   subsets: ["latin"],
   weight: ["700", "800", "900"],
@@ -308,8 +315,20 @@ export default function Home({
   backgroundClassName?: string
 } = {}) {
   const faqItems = content?.faqs ?? defaultFaqs
-  const initialUsername = platform === "instagram" ? "quran" : ""
-  const [username, setUsername] = useState(initialUsername)
+  const platformToHandle: Record<string, string> = {
+    x: "gutnews247",
+    twitter: "gutnews247",
+    instagram: "aljannah.tv",
+    tiktok: "hownwhen",
+    facebook: "functionSmarterAI",
+    youtube: "villainaudit",
+    reddit: "gutnews247",
+    threads: "gutnews247",
+    th: "gutnews247",
+    pt: "gutnews247",
+  }
+  const initialUsername = platformToHandle[platform] || ""
+    const [username, setUsername] = useState(initialUsername)
   const [inputVal, setInputVal] = useState(initialUsername)
   const [hashtagInput, setHashtagInput] = useState("#quran #islam #faith #community #dailyreminder")
   const [result, setResult] = useState<CheckerResult | null>(null)
