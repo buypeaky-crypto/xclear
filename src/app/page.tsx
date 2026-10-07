@@ -720,7 +720,8 @@ export default function Home({
                 const test = result.tests[key]
                 const status = test?.status ?? "unknown"
                 const color = status === "clear" ? "border-emerald-300 bg-emerald-50 text-emerald-900" : status === "flagged" ? "border-red-300 bg-red-50 text-red-900" : "border-amber-300 bg-amber-50 text-amber-950"
-const statusLabel = status === "clear"? "OK" : status === "flagged"? "Possible signal" : "Unknown"                return (
+const statusLabel = status === "clear"? "OK" : status === "flagged"? "Possible signal" : "Unknown"                
+return (
                   <article key={key} title={test?.detail} className={`rounded-md border p-4 ${color}`}>
                     <h3 className="font-semibold">{test?.label ?? fallbackLabel}</h3>
                     <p className="mt-1 text-sm font-bold">{statusLabel}</p>
