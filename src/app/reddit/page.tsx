@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default function RedditPage() {
-  const baseUrl = "https://xclear.pro";
+  const baseUrl = "https://shadowbannchecker.vercel.app";
   return (
     <div className="bg-platform-reddit">
       <RedditChecker />
