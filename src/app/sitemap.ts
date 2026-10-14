@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://shadowbannchecker.vercel.app'
+  const baseUrl = 'https://shadowban.online'
 
   const checkerPages = [
     '',
