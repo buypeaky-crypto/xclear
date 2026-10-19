@@ -433,13 +433,13 @@ export default function Home({
       <div className="max-w-[900px] mx-auto px-4 pt-8">
         <div className="text-center">
           {content && <BrandHomeLink />}
-          <h1 className={`${fraunces.className} text-[46px] tracking-tight leading-[0.95] font-black italic`}>
-            {content ? (
-              <span className="text-stone-800">{content.h1}</span>
-            ) : (
-              <span className="text-stone-800">Check if you&apos;re shadowbanned on X (Twitter)</span>
-            )}
-          </h1>
+                 <h1 className={`${fraunces.className} text- tracking-tight leading-[0.95] font-black italic`}>
+          {content ? (
+            <span className="text-stone-800">{content.h1}</span>
+          ) : (
+            <span className="text-stone-800">Free Social Media Shadowban Checker & Reach Recovery Tool</span>
+          )}
+        </h1>
           {!content && (
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">
               Wondering, &quot;Is my Twitter shadowbanned?&quot; X does not describe its visibility limits as shadowbans, but reach can still be restricted. This free checker tests public, logged-out signals for search suggestions, search, and profile visibility. Reply ranking needs a specific conversation, so that signal may remain unknown. No login is required. X&apos;s own account notices and visibility controls are the authoritative place to review account-specific decisions.
