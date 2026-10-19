@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://shadowbannchecker.vercel.app/",
+    url: "https://shadowban.online/",
     siteName: "ShadowbanChecker",
     title: "Twitter Shadowban Test - Free X Search, Ghost & Reply Check (No Login)",
     description: "Free shadowban checker for X/Twitter using limited logged-out visibility signals. No login required.",
