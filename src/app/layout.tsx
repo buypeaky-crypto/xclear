@@ -8,7 +8,12 @@ import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import FacebookPixel from "./components/FacebookPixel";
 import "./globals.css";
-
+export const metadata: Metadata = {
+  metadataBase: new URL('https://shadowban.online'),
+  alternates: {
+    canonical: '/',
+  },
+};
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
