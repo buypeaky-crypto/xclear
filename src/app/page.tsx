@@ -448,6 +448,40 @@ export default function Home({
           {content && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">{content.subtitle}</p>}
           <PlatformSwitcher activePlatform={platform} />
           <SupportUsButton />
+          <div className="mx-auto mt-16 max-w-3xl space-y-10 text-left">
+  <div>
+    <h2 className="text-2xl font-bold tracking-tight">What we actually check: visibility filtering, not a myth</h2>
+    <p className="mt-3 text-stone-600">
+      Platforms deny "shadowban". We measure public signals Google associates with it: 
+      <strong> search ban, ghostban, hashtag suppression, non-follower reach split, downranking, and API rate limits.</strong> 
+      No login, public data only — we don't use official APIs because they don't exist for this.
+    </p>
+  </div>
+  <div>
+    <h2 className="text-2xl font-bold tracking-tight">Why your reach dropped in 2026</h2>
+    <p className="mt-3 text-stone-600">
+      Instagram 2026 average: 2.2% engagement, Reels suppressed below 1.1% non-follower reach. 
+      TikTok 2026: 6%+ For You reach for accounts under 10k. 
+      X/Twitter: reply deboost & ghostban. YouTube: comment suppression & Shorts shelf removal.
+      If you're below those benchmarks, you're filtered.
+    </p>
+  </div>
+  <div>
+    <h2 className="text-2xl font-bold tracking-tight">3 fixes before you re-check</h2>
+    <ol className="mt-3 list-decimal space-y-2 pl-5 text-stone-600">
+      <li>Remove 3rd-party auto-DM / mass-unfollow apps and check Account Status</li>
+      <li>Delete last 2 hashtags or sounds that triggered spam filter, wait 48h</li>
+      <li>Post 1 original post without hashtags/links to reset non-follower split, then test again</li>
+    </ol>
+  </div>
+  <div>
+    <h2 className="text-2xl font-bold tracking-tight">FAQ</h2>
+    <h3 className="mt-4 font-semibold">Do shadowban checkers use official APIs?</h3>
+    <p className="mt-1 text-stone-600">No. Instagram, TikTok, X, YouTube don't offer a shadowban API. Checkers like ours use public signals only.</p>
+    <h3 className="mt-4 font-semibold">How long does a shadowban last?</h3>
+    <p className="mt-1 text-stone-600">3-14 days after you remove the violation on Instagram/TikTok, 48-72h on X. Repeated extends to 30 days.</p>
+  </div>
+</div>
           {platform === "facebook" && <CryptoDonationButtons />}
         </div>
 
