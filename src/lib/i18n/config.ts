@@ -1,4 +1,4 @@
-export const baseUrl = "https://shadowban.online";
+export const baseUrl = "https://shadowban.online/";
 
 export const locales = ["en", "de", "id", "pt", "es", "it", "th"] as const;
 
