@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     "check Twitter account status",
   ],
   alternates: {
-    canonical: `${baseUrl}/`,
+canonical: baseUrl1,
     languages: getLanguageAlternates(),
   },
   openGraph: {
