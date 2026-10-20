@@ -448,6 +448,21 @@ export default function Home({
           {content && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">{content.subtitle}</p>}
           <PlatformSwitcher activePlatform={platform} />
           <SupportUsButton />
+          <div className="bg-white border border-stone-200 shadow-sm mt-6 p-6 sm:p-8 rounded-lg">
+  <h2 className="mb-5 text-left text-xl font-bold text-stone-900">Check a public X username</h2>
+  <div className="flex flex-col sm:flex-row items-end justify-center gap-6">
+    <div className="flex flex-col">
+      <label htmlFor="handle" ...>X username</label>
+      <div className="flex items-end border-b border-stone-300 pb-1 w-">
+        <span>@</span>
+        <input id="handle" ... />
+      </div>
+    </div>
+    <button type="button" onClick={handleCheck} ...>Check X visibility</button>
+  </div>
+  {loading && <p>Checking...</p>}
+  {checkerError && <p>{checkerError}</p>}
+</div>
           <div className="mx-auto mt-16 max-w-3xl space-y-10 text-left">
   <div>
     <h2 className="text-2xl font-bold tracking-tight">What we actually check: visibility filtering, not a myth</h2>
@@ -655,21 +670,7 @@ export default function Home({
           </div>
           </>
         ) : (
-          <div className="bg-white border border-stone-200 shadow-sm mt-10 p-6 sm:p-8 rounded-lg">
-            <h2 className="mb-5 text-left text-xl font-bold text-stone-900">Check a public X username</h2>
-            <div className="flex flex-col sm:flex-row items-end justify-center gap-6">
-            <div className="flex flex-col">
-              <label htmlFor="handle" className="text-sm font-semibold text-stone-700 mb-2">{content?.inputLabel ?? "X username"}</label>
-              <div className="flex items-end border-b border-stone-300 pb-1 w-[280px]">
-                <span className="text-violet-600 text-[26px] font-bold mr-2">@</span>
-                <input id="handle" aria-label={platform === "x" ? "X username including @, e.g. @elonmusk" : undefined} autoComplete="off" spellCheck={false} value={inputVal} onChange={(e) => setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e) => e.key === "Enter" && handleCheck()} className="min-w-0 flex-1 bg-transparent text-[17px] text-violet-600 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2" />
-              </div>
-            </div>
-            <button type="button" onClick={handleCheck} disabled={loading} className="rounded-md bg-blue-700 px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-800 disabled:opacity-50">{loading ? content?.loadingLabel ?? "CHECKING..." : content?.buttonLabel ?? "Check X visibility"}</button>
-            </div>
-            {loading && <p role="status" aria-live="polite" className="mt-4 text-sm text-stone-600">Checking Search Suggestion → Search Ban → Ghost → Reply Deboost...</p>}
-            {checkerError && <p role="alert" className="mt-4 text-sm text-red-700">{checkerError}</p>}
-          </div>
+         null
         )}
 
         {platform === "instagram" && content && instagramResult && (
