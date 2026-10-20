@@ -30,9 +30,15 @@ export function getLocaleUrl(locale: Locale): string {
   return slug ? `${baseUrl}${slug}` : baseUrl;
 }
 
+export const getLocaleUrl1 = getLocaleUrl;
+
 export function getLanguageAlternates(): Record<string, string> {
   return {
     ...Object.fromEntries(locales.map((locale) => [locale, getLocaleUrl(locale)])),
     "x-default": getLocaleUrl("en"),
   };
+}
+
+export function getEnglishLanguageAlternates(): Record<string, string> {
+  return getLanguageAlternates();
 }
