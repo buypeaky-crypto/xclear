@@ -26,9 +26,7 @@ export const localeNames: Record<Locale, string> = {
 
 export function getLocaleUrl(locale: Locale): string {
   const slug = localeSlugs[locale];
-  return slug ? `${baseUrl}/${slug}` : `${baseUrl}/`;
-}
-
+return slug ? `${baseUrl}${slug}` : baseUrl;
 export function getLanguageAlternates(): Record<string, string> {
   return {
     ...Object.fromEntries(locales.map((locale) => [locale, getLocaleUrl(locale)])),
@@ -37,6 +35,7 @@ export function getLanguageAlternates(): Record<string, string> {
 }
 
 export function getEnglishLanguageAlternates(path: string): Record<string, string> {
-  const url = `${baseUrl}${path}`;
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  const url = `${baseUrl}${cleanPath}`;
   return { en: url, "x-default": url };
 }
