@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { baseUrl, getLanguageAlternates, getLocaleUrl, localeNames, locales } from "../lib/i18n/config";
+import { baseUrl1, getLanguageAlternates } from "@/lib/i18n/config"
 import { getInstagramUrl, instagramLocales } from "../lib/i18n/instagram";
 import { getYouTubeUrl, youtubeLocales } from "../lib/i18n/youtube";
 import { Geist, Geist_Mono } from "next/font/google";
