@@ -112,16 +112,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             aria-label="Choose language"
             className="mx-auto flex max-w-4xl flex-wrap justify-center gap-x-5 gap-y-3 px-4 pb-6 text-sm"
           >
-           locales.map((locale: Locale) =>
-            <Link
-                key={locale}
-                className="transition-colors hover:text-violet-700"
-                href={getLocaleUrl(locale)}
-                hrefLang={locale}
-              >
-                {localeNames[locale]}
-              </Link>
-            ))}
+           {locales.map((locale: Locale) => (
+  <Link
+    key={locale}
+    className="transition-colors hover:text-violet-700"
+    href={getLocaleUrl1(locale)}
+    hrefLang={locale}
+  >
+    {localeNames[locale]}
+  </Link>
+))}
           </nav>
           <nav
             aria-label="Instagram checker by language"
