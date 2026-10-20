@@ -2,7 +2,6 @@ export const baseUrl = "https://shadowban.online/";
 export const baseUrl1 = baseUrl;
 
 export const locales = ["en", "de", "id", "pt", "es", "it", "th"] as const;
-
 export type Locale = (typeof locales)[number];
 
 export const localeSlugs: Record<Locale, string> = {
@@ -32,13 +31,13 @@ export function getLocaleUrl(locale: Locale): string {
 
 export const getLocaleUrl1 = getLocaleUrl;
 
-export function getLanguageAlternates(): Record<string, string> {
+export function getLanguageAlternates(_locale?: any): Record<string, string> {
   return {
     ...Object.fromEntries(locales.map((locale) => [locale, getLocaleUrl(locale)])),
     "x-default": getLocaleUrl("en"),
   };
 }
 
-export function getEnglishLanguageAlternates(): Record<string, string> {
+export function getEnglishLanguageAlternates(_locale?: any): Record<string, string> {
   return getLanguageAlternates();
 }
