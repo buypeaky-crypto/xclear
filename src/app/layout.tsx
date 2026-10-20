@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { baseUrl1, getLanguageAlternates } from "@/lib/i18n/config"
+import { baseUrl, baseUrl1, getLanguageAlternates, getLocaleUrl, getLocaleUrl1, localeNames, locales, type Locale } from "@/lib/i18n/config"
 import { getInstagramUrl, instagramLocales } from "../lib/i18n/instagram";
 import { getYouTubeUrl, youtubeLocales } from "../lib/i18n/youtube";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -112,8 +112,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             aria-label="Choose language"
             className="mx-auto flex max-w-4xl flex-wrap justify-center gap-x-5 gap-y-3 px-4 pb-6 text-sm"
           >
-            {locales.map((locale) => (
-              <Link
+           locales.map((locale: Locale) =>
+            <Link
                 key={locale}
                 className="transition-colors hover:text-violet-700"
                 href={getLocaleUrl(locale)}
