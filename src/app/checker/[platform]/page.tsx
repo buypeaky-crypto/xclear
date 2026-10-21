@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 
-export const dynamicParams = false;
-
+export const dynamicParams = true;
 const PLATFORMS = [
   "instagram","tiktok","x","youtube","facebook",
   "reddit","linkedin","pinterest","snapchat","threads",
