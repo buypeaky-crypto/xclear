@@ -44,7 +44,6 @@ export const metadata: Metadata = {
     locale: 'en_US',
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Shadowban Checker for Twitter, Instagram, TikTok, and Reddit" }],
   },
-};
   twitter: {
     card: "summary_large_image",
     title: "Twitter Shadowban Test - Free X Search, Ghost & Reply Check (No Login)",
