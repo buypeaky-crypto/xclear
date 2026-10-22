@@ -1,3 +1,8 @@
+import TikTokChecker from '@/app/components/TikTokChecker';
+import YouTubeChecker from '@/app/components/YouTubeChecker';
+import RedditChecker from '@/app/components/RedditChecker';
+import InstagramLanding from '@/app/components/InstagramLanding';
+import FacebookLanding from '@/app/components/FacebookLanding';
 import { Metadata } from "next";
 import { platforms, type Platform, platformTestLabels } from "@/lib/platforms";
 
@@ -166,12 +171,19 @@ export default async function Page({
       <h1 className="text-3xl font-bold">{cfg.h1}</h1>
       <p className="mt-4 text-stone-700">{cfg.benchmark}</p>
 
-      <div className="mt-6 bg-white border rounded-lg p-6 shadow-sm">
-        <h2 className="text-xl font-bold">Check a public {raw} username</h2>
-        <p className="text-sm text-stone-600 mt-2">
-          No login. Public signals: {labels?.join(" → ")}.
-        </p>
-      </div>
+     <div className="mt-6 bg-white border rounded-lg p-6 shadow-sm">
+  <h2 className="text-xl font-bold">Check a public {raw} username</h2>
+  <p className="text-sm text-stone-600 mt-2">
+    No login. Public signals: {labels?.join(" → ")}.
+  </p>
+  <div className="mt-4">
+    {normalized === 'tiktok' && <TikTokChecker />}
+    {normalized === 'youtube' && <YouTubeChecker />}
+    {normalized === 'reddit' && <RedditChecker />}
+    {normalized === 'instagram' && <InstagramLanding />}
+    {normalized === 'facebook' && <FacebookLanding />}
+  </div>
+</div>
 
       <section className="mt-10">
         <h2 className="text-2xl font-bold">
