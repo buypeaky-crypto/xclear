@@ -177,11 +177,11 @@ export default async function Page({
     No login. Public signals: {labels?.join(" → ")}.
   </p>
   <div className="mt-4">
-    {normalized === 'tiktok' && <TikTokChecker />}
-    {normalized === 'youtube' && <YouTubeChecker />}
-    {normalized === 'reddit' && <RedditChecker />}
-    {normalized === 'instagram' && <InstagramLanding />}
-    {normalized === 'facebook' && <FacebookLanding />}
+  {normalized === 'tiktok' && <TikTokChecker locale="en" />}
+  {normalized === 'youtube' && <YouTubeChecker locale="en" />}
+  {normalized === 'reddit' && <RedditChecker locale="en" />}
+  {normalized === 'instagram' && <InstagramLanding locale="en" />}
+  {normalized === 'facebook' && <FacebookLanding locale="en" />}
   </div>
 </div>
 
