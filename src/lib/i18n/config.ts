@@ -1,5 +1,5 @@
-export const baseUrl = "https://shadowban.online/";
-export const baseUrl1 = baseUrl;
+export const baseUrl = "https://shadowban.online"
+export const baseUrl1 = "https://shadowban.online"
 
 export const locales = ["en", "de", "id", "pt", "es", "it", "th"] as const;
 export type Locale = (typeof locales)[number];
