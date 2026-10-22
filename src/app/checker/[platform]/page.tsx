@@ -1,8 +1,8 @@
-import TikTokChecker from '../../components/TikTokChecker';
-import YouTubeChecker from '../../components/YouTubeChecker';
-import RedditChecker from '../../components/RedditChecker';
-import InstagramLanding from '../../components/InstagramLanding';
-import FacebookLanding from '../../components/FacebookLanding';
+import TikTokChecker from '@/components/TikTokChecker';
+import YouTubeChecker from '@/components/YouTubeChecker';
+import RedditChecker from '@/components/RedditChecker';
+import InstagramLanding from '@/components/InstagramLanding';
+import FacebookLanding from '@/components/FacebookLanding';
 import { Metadata } from "next";
 import { platforms, type Platform, platformTestLabels } from "@/lib/platforms";
 
