@@ -20,10 +20,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(baseUrl),
-  title: "Twitter Shadowban Test - Free X Search, Ghost & Reply Check (No Login)",
-  description:
-    "Free shadowban checker for X/Twitter. Tests search suggestion ban, search ban, ghost ban, and reply visibility with logged-out signals. No login required; results are cached for up to one hour.",
+  metadataBase: new URL('https://shadowban.online'),
+  title: { default: 'Free Social Media Shadowban Checker & Reach Recovery Tool', template: '%s | shadowban.online' },
+  description: "Free shadowban checker for X/Twitter, Instagram, TikTok, YouTube, Reddit, Facebook. Tests search ban, ghost ban, hashtag suppression with logged-out signals. No login required.",
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'Free Social Media Shadowban Checker & Reach Recovery Tool',
+    description: 'Test search ban, ghost ban, hashtag suppression with logged-out signals.',
+    url: 'https://shadowban.online',
+    siteName: 'shadowban.online',
+  },
   keywords: [
     "twitter shadowban checker",
     "Instagram shadowban checker",
@@ -35,6 +43,7 @@ export const metadata: Metadata = {
     "X shadowban checker",
     "check Twitter account status",
   ],
+};
   alternates: {
 canonical: baseUrl1,
     languages: getLanguageAlternates(),
