@@ -23,15 +23,6 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://shadowban.online'),
   title: { default: 'Free Social Media Shadowban Checker & Reach Recovery Tool', template: '%s | shadowban.online' },
   description: "Free shadowban checker for X/Twitter, Instagram, TikTok, YouTube, Reddit, Facebook. Tests search ban, ghost ban, hashtag suppression with logged-out signals. No login required.",
-  alternates: {
-    canonical: '/',
-  },
-  openGraph: {
-    title: 'Free Social Media Shadowban Checker & Reach Recovery Tool',
-    description: 'Test search ban, ghost ban, hashtag suppression with logged-out signals.',
-    url: 'https://shadowban.online',
-    siteName: 'shadowban.online',
-  },
   keywords: [
     "twitter shadowban checker",
     "Instagram shadowban checker",
@@ -43,27 +34,17 @@ export const metadata: Metadata = {
     "X shadowban checker",
     "check Twitter account status",
   ],
-};
-  alternates: {
-canonical: baseUrl1,
-    languages: getLanguageAlternates(),
-  },
+  alternates: { canonical: '/' },
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://shadowban.online/",
-    siteName: "ShadowbanChecker",
-    title: "Twitter Shadowban Test - Free X Search, Ghost & Reply Check (No Login)",
-    description: "Free shadowban checker for X/Twitter using limited logged-out visibility signals. No login required.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Shadowban Checker for Twitter, Instagram, TikTok, and Reddit",
-      },
-    ],
+    title: 'Free Social Media Shadowban Checker & Reach Recovery Tool',
+    description: 'Test search ban, ghost ban, hashtag suppression with logged-out signals.',
+    url: 'https://shadowban.online',
+    siteName: 'shadowban.online',
+    type: 'website',
+    locale: 'en_US',
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Shadowban Checker for Twitter, Instagram, TikTok, and Reddit" }],
   },
+};
   twitter: {
     card: "summary_large_image",
     title: "Twitter Shadowban Test - Free X Search, Ghost & Reply Check (No Login)",
