@@ -178,21 +178,16 @@ export default async function Page({
     <main className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="text-3xl font-bold">{cfg.h1}</h1>
       <p className="mt-4 text-stone-700">{cfg.benchmark}</p>
+      <p className="mt-2 text-sm text-stone-600">No login. Public signals: {labels?.join(" → ")}.</p>
 
-      <div className="mt-6 bg-white border rounded-lg p-6 shadow-sm">
-      <h2 className="text-xl font-bold">Check a public {raw} username</h2>
-      <p className="text-sm text-stone-600 mt-2">
-        No login. Public signals: {labels?.join(" → ")}.
-      </p>
-      <div className="mt-4">
-
-{normalized === 'tiktok' && <TikTokChecker />}
-{normalized === 'youtube' && <YouTubeChecker locale="en" />}
-{normalized === 'reddit' && <RedditChecker />}
-{normalized === 'instagram' && <InstagramLanding locale="en" />}
-{normalized === 'facebook' && <FacebookLanding locale="en" />}
-  </div>
-</div>
+      <div className="mt-8">
+        {normalized === 'tiktok' && <TikTokChecker />}
+        {normalized === 'youtube' && <YouTubeChecker locale="en" />}
+        {normalized === 'reddit' && <RedditChecker />}
+        {normalized === 'instagram' && <InstagramLanding locale="en" />}
+        {normalized === 'facebook' && <FacebookLanding locale="en" />}
+        {normalized === 'twitter' && <Home backgroundClassName="bg-white border rounded-lg p-6 shadow-sm" />}
+      </div>
 
       <section className="mt-10">
         <h2 className="text-2xl font-bold">
