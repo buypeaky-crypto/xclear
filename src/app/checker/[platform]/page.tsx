@@ -3,6 +3,7 @@ import YouTubeChecker from '@/components/YouTubeChecker';
 import RedditChecker from '@/components/RedditChecker';
 import InstagramLanding from '@/components/InstagramLanding';
 import FacebookLanding from '@/components/FacebookLanding';
+import Home from '../../page';
 import { Metadata } from "next";
 import { platforms, type Platform, platformTestLabels } from "@/lib/platforms";
 
@@ -177,7 +178,8 @@ export default async function Page({
     No login. Public signals: {labels?.join(" → ")}.
   </p>
   <div className="mt-4">
- {normalized === 'tiktok' && <TikTokChecker />}
+{normalized === 'twitter' && <Home backgroundClassName="bg-transparent" />}
+{normalized === 'tiktok' && <TikTokChecker />}
 {normalized === 'youtube' && <YouTubeChecker locale="en" />}
 {normalized === 'reddit' && <RedditChecker />}
 {normalized === 'instagram' && <InstagramLanding locale="en" />}
