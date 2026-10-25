@@ -47,9 +47,11 @@ function accountAge(created: number): string {
 export default function RedditChecker({
   initialUsername = "",
   autoCheck = false,
+  variant = "full",
 }: {
   initialUsername?: string;
   autoCheck?: boolean;
+  variant?: "full" | "checker";
 }) {
   const [username, setUsername] = useState(initialUsername);
   const [loading, setLoading] = useState(false);
@@ -67,7 +69,7 @@ export default function RedditChecker({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
-    setShowSupportPopup(true);
+    if (variant === "full") setShowSupportPopup(true);
     setError("");
     setResult(null);
 
@@ -113,6 +115,113 @@ export default function RedditChecker({
       ? "risk"
       : "pass";
   const accountDataAvailable = result?.created !== undefined || result?.karma !== undefined;
+
+  if (variant === "checker") {
+    return (
+      <>
+        <section aria-label="Reddit account visibility check" className="mx-auto mt-8 max-w-3xl">
+          <form ref={formRef} onSubmit={handleSubmit} className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+            <label htmlFor="reddit-username" className="mb-2 block text-sm font-semibold text-stone-700">
+              Reddit username
+            </label>
+            <div className="flex items-center border-b border-stone-300 pb-2">
+              <span aria-hidden="true" className="mr-2 text-lg font-bold text-violet-600">u/</span>
+              <input
+                id="reddit-username"
+                autoComplete="username"
+                required
+                maxLength={20}
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="Enter Reddit username"
+                className="min-w-0 flex-1 bg-transparent text-base text-stone-900 outline-none placeholder:text-stone-400"
+              />
+            </div>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="submit"
+                disabled={loading || !username.trim()}
+                className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-violet-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? "Checking Reddit..." : "Check Reddit Shadowban"}
+              </button>
+              <span className="text-xs text-stone-500">Logged-out public check only</span>
+            </div>
+          </form>
+
+          {error && (
+            <div role="alert" className="mt-5 rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+              {error}
+            </div>
+          )}
+
+          {result && (
+            <section aria-live="polite" className="mt-5 rounded-md border border-amber-200 bg-[#fdf6e3] p-5 shadow-sm sm:p-7">
+              <h2 className="text-xl font-bold text-stone-900">Reddit visibility checklist</h2>
+              {unavailable && (
+                <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                  <p className="font-semibold">⚠️ Reddit blocked automated check from Vercel</p>
+                  <p className="mt-1">{result.reason ?? result.message}</p>
+                </div>
+              )}
+              {notFound && <p className="mt-3 text-sm font-semibold text-red-700">Username doesn&apos;t exist</p>}
+              <ul className="mt-3 divide-y divide-stone-200">
+                <ChecklistRow
+                  id="reddit-exists"
+                  state={existenceState}
+                  label={result.exists ? `u/${username} exists` : notFound ? `u/${username} doesn’t exist` : `Could not confirm u/${username} exists`}
+                  explanation="This row reflects the response from a logged-out Reddit profile endpoint. A blocked request does not establish whether the account exists."
+                />
+                <ChecklistRow
+                  id="reddit-public"
+                  state={reachabilityState}
+                  label={unavailable ? "Reddit blocked automated check from Vercel" : result.isVisible ? "Publicly reachable logged-out (200); search suggestion ban not tested" : notFound ? "Username not found" : "Not publicly reachable logged-out (404)"}
+                  explanation="We fetch the profile as a logged-out visitor. A 200 means the profile endpoint is visible; this does not test search suggestions. A 404 means it is not reachable logged-out, but can also occur for deleted or unavailable accounts."
+                >
+                  {unavailable && result.manualCheckUrl && (
+                    <a href={result.manualCheckUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex rounded-full bg-stone-900 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-black">
+                      Open manual check
+                    </a>
+                  )}
+                </ChecklistRow>
+                <ChecklistRow
+                  id="reddit-shadowban"
+                  state={shadowbanState}
+                  label={result.isShadowbanned ? "Not publicly reachable — possible shadowban" : result.status === "unavailable" ? "Shadowban status unavailable" : "No shadowban signal from this check"}
+                  explanation="If old.reddit.com/user/name returns 404 while logged out but the profile is visible when signed in, it may indicate a visibility restriction. A 404 alone cannot prove a shadowban."
+                />
+                <ChecklistRow
+                  id="reddit-suspension"
+                  state={suspensionState}
+                  label={result.isSuspended ? "Suspension identified" : result.status === "unavailable" ? "Suspension status unavailable" : "No suspension identified"}
+                  explanation="A suspension is shown only when Reddit returns a response that specifically identifies the account as suspended."
+                />
+                <ChecklistRow
+                  id="reddit-account-data"
+                  state={accountDataAvailable ? "pass" : unavailable ? "risk" : "neutral"}
+                  label={accountDataAvailable ? "Account age and karma available" : "Account age and karma not available"}
+                  explanation="These values come from Reddit's public about endpoint when it returns profile data."
+                >
+                  <dl className="mt-3 grid gap-1 sm:grid-cols-2">
+                    {result.created !== undefined && <><dt>Created (UTC)</dt><dd>{new Date(result.created * 1000).toISOString()}</dd></>}
+                    {result.linkKarma !== undefined && <><dt>Link karma</dt><dd>{result.linkKarma.toLocaleString()}</dd></>}
+                    {result.commentKarma !== undefined && <><dt>Comment karma</dt><dd>{result.commentKarma.toLocaleString()}</dd></>}
+                    {result.karma !== undefined && <><dt>Total karma</dt><dd>{result.karma.toLocaleString()}</dd></>}
+                  </dl>
+                  {result.created !== undefined && <p className="mt-2">Account age: {accountAge(result.created)}</p>}
+                </ChecklistRow>
+              </ul>
+              {result.riskSignals.length > 0 && (
+                <ul className="mt-4 list-disc space-y-1 pl-5 text-sm leading-6 text-stone-600">
+                  {result.riskSignals.map((signal) => <li key={signal}>{signal}</li>)}
+                </ul>
+              )}
+            </section>
+          )}
+        </section>
+      </>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-platform-reddit px-4 py-10 text-stone-900 sm:py-14">
