@@ -103,7 +103,7 @@ type CheckerContent = Pick<LocaleDictionary, "h1" | "subtitle" | "faqTitle" | "f
     checkItems?: { label: string; description: string }[]
   }
 
-type CheckerPlatform = "x" | "instagram" | "facebook"
+type CheckerPlatform = "x" | "twitter" | "instagram" | "facebook" | "tiktok" | "youtube" | "reddit"
 
 type CheckerResult = {
   username: string
