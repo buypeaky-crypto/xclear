@@ -183,7 +183,7 @@ export default async function Page({
       <div className="mt-8">
         {normalized === 'tiktok' && <TikTokChecker />}
         {normalized === 'youtube' && <YouTubeChecker locale="en" />}
-        {normalized === 'reddit' && <RedditChecker />}
+        {normalized === 'reddit' && <RedditChecker variant="checker" />}
         {normalized === 'instagram' && <InstagramLanding locale="en" />}
         {normalized === 'facebook' && <FacebookLanding locale="en" />}
         {(normalized as string) === 'twitter' && <Home backgroundClassName="bg-white border rounded-lg p-6 shadow-sm" />}
