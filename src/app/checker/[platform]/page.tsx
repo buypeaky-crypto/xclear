@@ -184,9 +184,9 @@ export default async function Page({
         {normalized === 'tiktok' && <TikTokChecker />}
         {normalized === 'youtube' && <YouTubeChecker locale="en" />}
         {normalized === 'reddit' && <RedditChecker variant="checker" />}
-        {normalized === 'instagram' && <Home platform="instagram" backgroundClassName="bg-white border rounded-lg p-6 shadow-sm" />}
-        {normalized === 'facebook' && <Home platform="facebook" backgroundClassName="bg-white border rounded-lg p-6 shadow-sm" />}
-        {(normalized as string) === 'twitter' && <Home backgroundClassName="bg-white border rounded-lg p-6 shadow-sm" />}
+        {normalized === 'instagram' && <Home platform="instagram" variant="checker" backgroundClassName="bg-white border rounded-lg p-6 shadow-sm" />}
+        {normalized === 'facebook' && <Home platform="facebook" variant="checker" backgroundClassName="bg-white border rounded-lg p-6 shadow-sm" />}
+        {(normalized as string) === 'twitter' && <Home platform="x" variant="checker" backgroundClassName="bg-white border rounded-lg p-6 shadow-sm" />}
       </div>
 
       <section className="mt-10">
