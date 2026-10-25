@@ -16,6 +16,10 @@ import { facebookLocales, getFacebookUrl } from "../lib/i18n/facebook"
 import { getInstagramUrl, instagramLocales } from "../lib/i18n/instagram"
 import { getTikTokUrl, tiktokLocales } from "../lib/i18n/tiktok"
 import AlertButton from './components/AlertButton'
+import TikTokChecker from "../components/TikTokChecker"
+import RedditChecker from "../components/RedditChecker"
+import YouTubeChecker from "../components/YouTubeChecker"
+
 const DEFAULT_HANDLES: Record<string, string> = {
   "X (Twitter)": "gutnews247",
   "Instagram": "aljannah.tv",
@@ -477,13 +481,14 @@ export default function Home({
           <div className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
             <label className="mb-2 block text-sm font-semibold">Facebook URL <span className="text-red-600">*</span></label>
             <input type="url" value={inputVal} onChange={(e)=>{setInputVal(e.target.value); setFacebookError(""); setFacebookReport(null);}} placeholder="https://www.facebook.com/yourpage" className="w-full rounded-md border px-3 py-2.5 text-sm" />
-            {facebookError && <p className="mt-2 text-sm text-red-700">{facebookError}</p>}
             <div className="mt-6 flex justify-center">
               <button onClick={handleCheck} disabled={loading} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white">{loading?"Checking...":"Check Facebook Shadowban"}</button>
             </div>
-            {facebookReport && <div className="mt-4 text-sm">Checked {facebookReport.checks.length} signals</div>}
           </div>
         )}
+        {platform === "tiktok" && <TikTokChecker />}
+        {platform === "youtube" && <YouTubeChecker locale="en" />}
+        {platform === "reddit" && <RedditChecker variant="checker" />}
         <SupportPopup isOpen={showSupportPopup} onClose={()=>setShowSupportPopup(false)} isChecking={loading} />
       </main>
     )
@@ -522,7 +527,7 @@ export default function Home({
         </div>
         <button type="button" onClick={handleCheck} disabled={loading} className="rounded-md bg-blue-700 px-7 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">Check X visibility</button>
       </div>
-      {loading && <p className="mt-4 text-sm text-stone-600">Checking...</p>}
+      {loading && <p className="mt-4 text-sm">Checking...</p>}
       {checkerError && <p className="mt-4 text-sm text-red-700">{checkerError}</p>}
     </div>
     )}
@@ -533,7 +538,7 @@ export default function Home({
           <label className="mb-2 block text-sm font-semibold">Instagram username <span className="text-red-600">*</span></label>
           <div className="flex items-center border-b border-stone-300 pb-2">
             <span className="mr-2 text-xl font-bold text-violet-600">@</span>
-            <input value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e)=> e.key==="Enter" && handleCheck()} placeholder="aljannah.tv" className="flex-1 bg-transparent outline-none" />
+            <input value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} placeholder="aljannah.tv" className="flex-1 bg-transparent outline-none" />
           </div>
         </div>
         <div>
@@ -555,6 +560,9 @@ export default function Home({
       </div>
     </div>
     )}
+    {platform === "tiktok" && <div className="mt-6"><TikTokChecker /></div>}
+    {platform === "reddit" && <div className="mt-6"><RedditChecker variant="checker" /></div>}
+    {platform === "youtube" && <div className="mt-6"><YouTubeChecker locale="en" /></div>}
           <div className="mx-auto mt-16 max-w-3xl space-y-10 text-left">
   <div>
     <h2 className="text-2xl font-bold tracking-tight">What we actually check: visibility filtering, not a myth</h2>
