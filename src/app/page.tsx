@@ -308,11 +308,13 @@ export default function Home({
   locale,
   platform = "x",
   backgroundClassName = platform === "instagram" || platform === "facebook" ? "bg-platform-instagram" : "bg-platform-home",
+  variant = "full",
 }: {
   content?: CheckerContent
   locale?: string
   platform?: CheckerPlatform
   backgroundClassName?: string
+  variant?: "full" | "checker"
 } = {}) {
   const faqItems = content?.faqs ?? defaultFaqs
   const platformToHandle: Record<string, string> = {
@@ -426,6 +428,87 @@ export default function Home({
     }
     await navigator.clipboard?.writeText(shareText)
     setShareMessage("Share text copied.")
+  }
+
+
+  if (variant === "checker") {
+    return (
+      <main className={`${sora.className} ${backgroundClassName} p-6 text-stone-900`}>
+        {platform === "x" && (
+          <div className="bg-white border border-stone-200 shadow-sm p-6 sm:p-8 rounded-lg">
+            <h2 className="mb-5 text-left text-xl font-bold text-stone-900">Check a public X username</h2>
+            <div className="flex flex-col sm:flex-row items-end justify-center gap-6">
+              <div className="flex flex-col">
+                <label htmlFor="handle-checker" className="text-sm font-semibold text-stone-700 mb-2">X username</label>
+                <div className="flex items-end border-b border-stone-300 pb-1">
+                  <span className="text-violet-600 text- font-bold mr-2">@</span>
+                  <input id="handle-checker" value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e)=> e.key==="Enter" && handleCheck()} placeholder="gutnews247" className="w-full bg-transparent outline-none" />
+                </div>
+              </div>
+              <button type="button" onClick={handleCheck} disabled={loading} className="rounded-full bg-blue-700 px-7 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:opacity-50">{loading ? "Checking..." : "Check X visibility"}</button>
+            </div>
+            {loading && <p className="mt-4 text-sm text-stone-600">Checking Search Suggestion → Search Ban → Ghost → Reply Deboost...</p>}
+            {checkerError && <p className="mt-4 text-sm text-red-700">{checkerError}</p>}
+            {result && (
+              <div className="mt-6 rounded-lg border border-stone-200 p-4">
+                <h3 className="font-bold">Result for @{result.username}</h3>
+                <ul className="mt-2 space-y-1 text-sm">
+                  {Object.entries(result.tests).map(([k,v])=>(
+                    <li key={k} className="flex justify-between"><span>{(v as any).label}</span><span className={(v as any).status==="clear" ? "text-emerald-700" : (v as any).status==="flagged" ? "text-red-700" : "text-amber-700"}>{(v as any).status}</span></li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+        {platform === "instagram" && (
+          <div className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label htmlFor="instagram-username-checker" className="mb-2 block text-sm font-semibold text-stone-700">Instagram username <span className="text-red-600">*</span></label>
+                <div className="flex items-center border-b border-stone-300 pb-2">
+                  <span aria-hidden="true" className="mr-2 text-xl font-bold text-violet-600">@</span>
+                  <input id="instagram-username-checker" required maxLength={30} value={inputVal} onChange={(event) => setInputVal(event.target.value.replace(/^@/, ""))} onKeyDown={(event) => event.key === "Enter" && handleCheck()} placeholder="aljannah.tv" className="min-w-0 flex-1 bg-transparent text-base text-stone-900 outline-none placeholder:text-stone-400" />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="instagram-hashtags-checker" className="mb-2 block text-sm font-semibold text-stone-700">Recent hashtags <span className="font-normal text-stone-500">(optional)</span></label>
+                <textarea id="instagram-hashtags-checker" value={hashtagInput} onChange={(event) => setHashtagInput(event.target.value)} placeholder="#quran #islam #faith #community #dailyreminder" rows={2} className="w-full resize-y rounded-md border border-stone-300 px-3 py-2.5 text-sm outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200" />
+              </div>
+            </div>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <button onClick={handleCheck} disabled={loading || !inputVal.trim()} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-violet-800 disabled:opacity-60">{loading ? "Checking Instagram..." : "Check Instagram Shadowban"}</button>
+              <span className="text-xs text-stone-500">No password or login required</span>
+            </div>
+            {instagramResult && (
+              <div aria-live="polite" className="mt-5 rounded-md border border-stone-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center gap-4 border-b border-stone-200 pb-4"><div className={`grid h-16 w-16 place-items-center rounded-full border-4 ${instagramResult.score>=80?"border-emerald-500":instagramResult.score>=60?"border-amber-400":"border-red-500"}`}><span className="text-xl font-black">{instagramResult.score}</span></div><div><h3 className="text-xl font-bold">@{username}</h3><p className="text-sm text-stone-600">Score {instagramResult.score}/100 • {instagramResult.hashtagVisibility} • {instagramResult.engagement}</p></div></div>
+                {instagramResult.reasons && <ul className="mt-3 list-disc pl-5 text-sm text-stone-600">{instagramResult.reasons.map((r:string)=> <li key={r}>{r}</li>)}</ul>}
+              </div>
+            )}
+          </div>
+        )}
+        {platform === "facebook" && (
+          <div className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+            <label htmlFor="facebook-url-checker" className="mb-2 block text-sm font-semibold text-stone-700">Facebook profile, Page, or post URL <span className="text-red-600">*</span></label>
+            <input id="facebook-url-checker" type="url" required value={inputVal} onChange={(event) => { setInputVal(event.target.value); setFacebookError(""); setFacebookReport(null); }} onKeyDown={(event) => event.key === "Enter" && handleCheck()} placeholder="https://www.facebook.com/yourpage" className="w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200" />
+            {facebookError && <p className="mt-2 text-sm text-red-700">{facebookError}</p>}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <button onClick={handleCheck} disabled={loading || !inputVal.trim()} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-violet-800 disabled:opacity-60">{loading ? "Checking Facebook..." : "Check Facebook Shadowban"}</button>
+              <span className="text-xs text-stone-500">No password or login required</span>
+            </div>
+            {facebookReport && (
+              <ul className="mt-5 divide-y divide-stone-200 border-t border-stone-200 pt-2">
+                {facebookReport.checks.map((check)=>(
+                  <li key={check.id} className="py-3 flex items-center gap-3"><span className={`grid h-7 w-7 place-items-center rounded-full font-bold ${check.status==="pass"?"bg-emerald-100 text-emerald-700":check.status==="fail"?"bg-red-100 text-red-700":"bg-amber-100 text-amber-800"}`}>{check.status==="pass"?"✓":check.status==="fail"?"✕":"⚠"}</span><div className="flex-1"><div className="font-semibold text-sm">{check.label}</div><div className="text-sm text-stone-600">{check.message}</div></div></li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+        <SupportPopup isOpen={showSupportPopup} onClose={()=>setShowSupportPopup(false)} isChecking={loading} />
+      </main>
+    )
   }
 
   return (
