@@ -1,4 +1,5 @@
 "use client"
+import AdBelowChecker from "@/components/AdBelowChecker";
 import Link from "next/link"
 import { useState } from "react"
 import { Fraunces, Sora } from "next/font/google"
@@ -448,14 +449,15 @@ export default function Home({
                   <span className="text-violet-600 font-bold mr-2">@</span>
                   <input value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e)=> e.key==="Enter" && handleCheck()} placeholder="gutnews247" className="w-full bg-transparent outline-none" />
                 </div>
-              </div>
-              <button onClick={handleCheck} disabled={loading} className="rounded-full bg-blue-700 px-6 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-60">{loading?"Checking...":"Check X visibility"}</button>
-            </div>
-            {loading && <p className="mt-4 text-sm">Checking...</p>}
-            {checkerError && <p className="mt-4 text-sm text-red-700">{checkerError}</p>}
-            {result && <div className="mt-4 text-sm"><b>@{result.username}</b> checked</div>}
-          </div>
-        )}
+                    </div>
+      <button onClick={handleCheck} disabled={loading} className="rounded-full bg-blue-700 px-6 py-3 text-s...">
+    </div>
+    {loading && <p className="mt-4 text-sm">Checking...</p>}
+    {checkerError && <p className="mt-4 text-sm text-red-700">{checkerError}</p>}
+    {result && <div className="mt-4 text-sm"><b>@{result.username}</b> checked</div>}
+    {result && <AdBelowChecker />}
+  </div>
+)}
         {platform === "instagram" && (
           <div className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
             <div className="grid gap-5 sm:grid-cols-2">
