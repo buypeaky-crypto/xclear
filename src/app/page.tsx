@@ -433,77 +433,55 @@ export default function Home({
 
   if (variant === "checker") {
     return (
-      <main className={`${sora.className} ${backgroundClassName} p-6 text-stone-900`}>
+      <main className={`${sora.className} ${backgroundClassName} p-4 text-stone-900`}>
         {platform === "x" && (
-          <div className="bg-white border border-stone-200 shadow-sm p-6 sm:p-8 rounded-lg">
-            <h2 className="mb-5 text-left text-xl font-bold text-stone-900">Check a public X username</h2>
+          <div className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+            <h2 className="mb-5 text-left text-xl font-bold">Check a public X username</h2>
             <div className="flex flex-col sm:flex-row items-end justify-center gap-6">
               <div className="flex flex-col">
-                <label htmlFor="handle-checker" className="text-sm font-semibold text-stone-700 mb-2">X username</label>
+                <label className="text-sm font-semibold mb-2">X username</label>
                 <div className="flex items-end border-b border-stone-300 pb-1">
-                  <span className="text-violet-600 text- font-bold mr-2">@</span>
-                  <input id="handle-checker" value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e)=> e.key==="Enter" && handleCheck()} placeholder="gutnews247" className="w-full bg-transparent outline-none" />
+                  <span className="text-violet-600 font-bold mr-2">@</span>
+                  <input value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e)=> e.key==="Enter" && handleCheck()} placeholder="gutnews247" className="w-full bg-transparent outline-none" />
                 </div>
               </div>
-              <button type="button" onClick={handleCheck} disabled={loading} className="rounded-full bg-blue-700 px-7 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:opacity-50">{loading ? "Checking..." : "Check X visibility"}</button>
+              <button onClick={handleCheck} disabled={loading} className="rounded-full bg-blue-700 px-6 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-60">{loading?"Checking...":"Check X visibility"}</button>
             </div>
-            {loading && <p className="mt-4 text-sm text-stone-600">Checking Search Suggestion → Search Ban → Ghost → Reply Deboost...</p>}
+            {loading && <p className="mt-4 text-sm">Checking...</p>}
             {checkerError && <p className="mt-4 text-sm text-red-700">{checkerError}</p>}
-            {result && (
-              <div className="mt-6 rounded-lg border border-stone-200 p-4">
-                <h3 className="font-bold">Result for @{result.username}</h3>
-                <ul className="mt-2 space-y-1 text-sm">
-                  {Object.entries(result.tests).map(([k,v])=>(
-                    <li key={k} className="flex justify-between"><span>{(v as any).label}</span><span className={(v as any).status==="clear" ? "text-emerald-700" : (v as any).status==="flagged" ? "text-red-700" : "text-amber-700"}>{(v as any).status}</span></li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {result && <div className="mt-4 text-sm"><b>@{result.username}</b> checked</div>}
           </div>
         )}
         {platform === "instagram" && (
           <div className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label htmlFor="instagram-username-checker" className="mb-2 block text-sm font-semibold text-stone-700">Instagram username <span className="text-red-600">*</span></label>
+                <label className="mb-2 block text-sm font-semibold">Instagram username <span className="text-red-600">*</span></label>
                 <div className="flex items-center border-b border-stone-300 pb-2">
-                  <span aria-hidden="true" className="mr-2 text-xl font-bold text-violet-600">@</span>
-                  <input id="instagram-username-checker" required maxLength={30} value={inputVal} onChange={(event) => setInputVal(event.target.value.replace(/^@/, ""))} onKeyDown={(event) => event.key === "Enter" && handleCheck()} placeholder="aljannah.tv" className="min-w-0 flex-1 bg-transparent text-base text-stone-900 outline-none placeholder:text-stone-400" />
+                  <span className="mr-2 text-xl font-bold text-violet-600">@</span>
+                  <input value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} placeholder="aljannah.tv" className="flex-1 bg-transparent outline-none" />
                 </div>
               </div>
               <div>
-                <label htmlFor="instagram-hashtags-checker" className="mb-2 block text-sm font-semibold text-stone-700">Recent hashtags <span className="font-normal text-stone-500">(optional)</span></label>
-                <textarea id="instagram-hashtags-checker" value={hashtagInput} onChange={(event) => setHashtagInput(event.target.value)} placeholder="#quran #islam #faith #community #dailyreminder" rows={2} className="w-full resize-y rounded-md border border-stone-300 px-3 py-2.5 text-sm outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200" />
+                <label className="mb-2 block text-sm font-semibold">Recent hashtags (optional)</label>
+                <textarea value={hashtagInput} onChange={(e)=>setHashtagInput(e.target.value)} rows={2} placeholder="#quran #islam" className="w-full rounded-md border px-3 py-2 text-sm" />
               </div>
             </div>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <button onClick={handleCheck} disabled={loading || !inputVal.trim()} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-violet-800 disabled:opacity-60">{loading ? "Checking Instagram..." : "Check Instagram Shadowban"}</button>
-              <span className="text-xs text-stone-500">No password or login required</span>
+            <div className="mt-6 flex justify-center">
+              <button onClick={handleCheck} disabled={loading} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white">{loading?"Checking...":"Check Instagram Shadowban"}</button>
             </div>
-            {instagramResult && (
-              <div aria-live="polite" className="mt-5 rounded-md border border-stone-200 bg-white p-5 shadow-sm">
-                <div className="flex items-center gap-4 border-b border-stone-200 pb-4"><div className={`grid h-16 w-16 place-items-center rounded-full border-4 ${instagramResult.score>=80?"border-emerald-500":instagramResult.score>=60?"border-amber-400":"border-red-500"}`}><span className="text-xl font-black">{instagramResult.score}</span></div><div><h3 className="text-xl font-bold">@{username}</h3><p className="text-sm text-stone-600">Score {instagramResult.score}/100 • {instagramResult.hashtagVisibility} • {instagramResult.engagement}</p></div></div>
-                {instagramResult.reasons && <ul className="mt-3 list-disc pl-5 text-sm text-stone-600">{instagramResult.reasons.map((r:string)=> <li key={r}>{r}</li>)}</ul>}
-              </div>
-            )}
+            {instagramResult && <div className="mt-4 text-sm">Score {instagramResult.score}/100</div>}
           </div>
         )}
         {platform === "facebook" && (
           <div className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
-            <label htmlFor="facebook-url-checker" className="mb-2 block text-sm font-semibold text-stone-700">Facebook profile, Page, or post URL <span className="text-red-600">*</span></label>
-            <input id="facebook-url-checker" type="url" required value={inputVal} onChange={(event) => { setInputVal(event.target.value); setFacebookError(""); setFacebookReport(null); }} onKeyDown={(event) => event.key === "Enter" && handleCheck()} placeholder="https://www.facebook.com/yourpage" className="w-full rounded-md border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200" />
+            <label className="mb-2 block text-sm font-semibold">Facebook URL <span className="text-red-600">*</span></label>
+            <input type="url" value={inputVal} onChange={(e)=>{setInputVal(e.target.value); setFacebookError(""); setFacebookReport(null);}} placeholder="https://www.facebook.com/yourpage" className="w-full rounded-md border px-3 py-2.5 text-sm" />
             {facebookError && <p className="mt-2 text-sm text-red-700">{facebookError}</p>}
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <button onClick={handleCheck} disabled={loading || !inputVal.trim()} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-violet-800 disabled:opacity-60">{loading ? "Checking Facebook..." : "Check Facebook Shadowban"}</button>
-              <span className="text-xs text-stone-500">No password or login required</span>
+            <div className="mt-6 flex justify-center">
+              <button onClick={handleCheck} disabled={loading} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white">{loading?"Checking...":"Check Facebook Shadowban"}</button>
             </div>
-            {facebookReport && (
-              <ul className="mt-5 divide-y divide-stone-200 border-t border-stone-200 pt-2">
-                {facebookReport.checks.map((check)=>(
-                  <li key={check.id} className="py-3 flex items-center gap-3"><span className={`grid h-7 w-7 place-items-center rounded-full font-bold ${check.status==="pass"?"bg-emerald-100 text-emerald-700":check.status==="fail"?"bg-red-100 text-red-700":"bg-amber-100 text-amber-800"}`}>{check.status==="pass"?"✓":check.status==="fail"?"✕":"⚠"}</span><div className="flex-1"><div className="font-semibold text-sm">{check.label}</div><div className="text-sm text-stone-600">{check.message}</div></div></li>
-                ))}
-              </ul>
-            )}
+            {facebookReport && <div className="mt-4 text-sm">Checked {facebookReport.checks.length} signals</div>}
           </div>
         )}
         <SupportPopup isOpen={showSupportPopup} onClose={()=>setShowSupportPopup(false)} isChecking={loading} />
@@ -531,21 +509,52 @@ export default function Home({
           {content && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">{content.subtitle}</p>}
           <PlatformSwitcher activePlatform={platform} />
           <SupportUsButton />
+    {platform === "x" && (
     <div className="bg-white border border-stone-200 shadow-sm mt-6 p-6 sm:p-8 rounded-lg">
-  <h2 className="mb-5 text-left text-xl font-bold text-stone-900">Check a public X username</h2>
-  <div className="flex flex-col sm:flex-row items-end justify-center gap-6">
-    <div className="flex flex-col">
-      <label htmlFor="handle" className="text-sm font-semibold text-stone-700 mb-2">X username</label>
-      <div className="flex items-end border-b border-stone-300 pb-1 w-">
-        <span className="text-violet-600 text- font-bold mr-2">@</span>
-        <input id="handle" aria-label="X username including @, e.g. @elonmusk" autoComplete="off" spellCheck={false} className="w-full bg-transparent outline-none" />
+      <h2 className="mb-5 text-left text-xl font-bold text-stone-900">Check a public X username</h2>
+      <div className="flex flex-col sm:flex-row items-end justify-center gap-6">
+        <div className="flex flex-col">
+          <label htmlFor="handle" className="text-sm font-semibold text-stone-700 mb-2">X username</label>
+          <div className="flex items-end border-b border-stone-300 pb-1">
+            <span className="text-violet-600 font-bold mr-2">@</span>
+            <input id="handle" value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e)=> e.key==="Enter" && handleCheck()} placeholder="gutnews247" className="w-full bg-transparent outline-none" />
+          </div>
+        </div>
+        <button type="button" onClick={handleCheck} disabled={loading} className="rounded-md bg-blue-700 px-7 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">Check X visibility</button>
+      </div>
+      {loading && <p className="mt-4 text-sm text-stone-600">Checking...</p>}
+      {checkerError && <p className="mt-4 text-sm text-red-700">{checkerError}</p>}
+    </div>
+    )}
+    {platform === "instagram" && (
+    <div className="mt-6 rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label className="mb-2 block text-sm font-semibold">Instagram username <span className="text-red-600">*</span></label>
+          <div className="flex items-center border-b border-stone-300 pb-2">
+            <span className="mr-2 text-xl font-bold text-violet-600">@</span>
+            <input value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e)=> e.key==="Enter" && handleCheck()} placeholder="aljannah.tv" className="flex-1 bg-transparent outline-none" />
+          </div>
+        </div>
+        <div>
+          <label className="mb-2 block text-sm font-semibold">Recent hashtags (optional)</label>
+          <textarea value={hashtagInput} onChange={(e)=>setHashtagInput(e.target.value)} rows={2} placeholder="#quran #islam #faith" className="w-full rounded-md border px-3 py-2 text-sm" />
+        </div>
+      </div>
+      <div className="mt-6 flex justify-center">
+        <button onClick={handleCheck} disabled={loading} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white hover:bg-violet-800">{loading?"Checking...":"Check Instagram Shadowban"}</button>
       </div>
     </div>
-    <button type="button" onClick={handleCheck} disabled={loading} className="rounded-md bg-blue-700 px-7 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:opacity-50">Check X visibility</button>
-  </div>
-  {loading && <p role="status" aria-live="polite" className="mt-4 text-sm text-stone-600">Checking Search Suggestion → Search Ban → Ghost → Reply Deboost...</p>}
-  {checkerError && <p role="alert" className="mt-4 text-sm text-red-700">{checkerError}</p>}
-  </div>
+    )}
+    {platform === "facebook" && (
+    <div className="mt-6 rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+      <label className="mb-2 block text-sm font-semibold">Facebook URL <span className="text-red-600">*</span></label>
+      <input type="url" value={inputVal} onChange={(e)=>{setInputVal(e.target.value); setFacebookError(""); setFacebookReport(null);}} placeholder="https://www.facebook.com/yourpage" className="w-full rounded-md border px-3 py-2.5 text-sm" />
+      <div className="mt-6 flex justify-center">
+        <button onClick={handleCheck} disabled={loading} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white hover:bg-violet-800">{loading?"Checking...":"Check Facebook Shadowban"}</button>
+      </div>
+    </div>
+    )}
           <div className="mx-auto mt-16 max-w-3xl space-y-10 text-left">
   <div>
     <h2 className="text-2xl font-bold tracking-tight">What we actually check: visibility filtering, not a myth</h2>
