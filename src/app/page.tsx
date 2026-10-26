@@ -1,4 +1,6 @@
-import AdBelowChecker from "@/components/AdBelowChecker";
+'use client'
+import CheckerIsland from "@/components/CheckerIsland"
+import AdBelowChecker from "@/components/AdBelowChecker"
 import Link from "next/link"
 import { useState } from "react"
 import { Fraunces, Sora } from "next/font/google"
@@ -86,6 +88,8 @@ const xFixSteps = [
   "Use X's in-product account status, safety, and content visibility controls, and follow the appeal or review link shown on the specific notice. Menu names and available controls can change. Only X can confirm an account-level decision or restore distribution. Review the current rules and any explanation tied to a particular post before appealing, and include relevant URLs if the official form requests them. Do not give a third-party checker your password, verification code, or access token. If there is no account notice, continue to treat public endpoint results as clues rather than a confirmed penalty.",
 ]
 
+
+
 const xTestKeys = [
   ["searchSuggestion", "Search Suggestion"],
   ["searchBan", "Search Ban"],
@@ -168,7 +172,6 @@ function parseFacebookUrl(value: string): URL | null {
 function facebookUrlContainsExternalLink(url: URL, suppliedLink: string): boolean {
   const candidate = suppliedLink.trim() || url.searchParams.get("u") || ""
   if (!candidate) return false
-
   try {
     return !isFacebookHost(new URL(candidate).hostname)
   } catch {
@@ -213,11 +216,11 @@ function createFacebookChecks(
         : evidence.spam === "flagged"
         ? "Post reported in Facebook Spam."
         : spamRisk
-          ? `Spam filter risk: an external link${lookup.externalLinks.length ? ` (${lookup.externalLinks.join(", ")})` : ""} plus repeated posting to many groups. This pattern can trigger spam controls; it does not prove a shadowban.`
+          ? `Spam filter risk: an external link${lookup.externalLinks.length ? ` (${lookup.externalLinks.join(", ")})` : ""} plus repeated posting to many groups.`
           : evidence.spam === "clear"
           ? "No spam-folder warning reported."
           : hasExternalLink
-            ? "An external destination was found. Repeatedly posting the same link to many groups can trigger spam controls; check Support Inbox or Spam."
+            ? "An external destination was found. Repeatedly posting the same link to many groups can trigger spam controls."
             : "Spam-folder status is not public; check Support Inbox or Spam in Facebook.",
     },
     {
@@ -251,7 +254,6 @@ function createFacebookChecks(
           : "Comment ranking cannot be checked from a URL; compare Most Relevant with All comments.",
     },
   ]
-
   return definitions.map((check, index) => ({
     ...check,
     why: content.whyReasons[facebookGuidanceIndexes[index].why],
@@ -265,7 +267,6 @@ function FacebookResultRow({ check, isOpen, onToggle }: { check: FacebookCheck; 
     warning: { icon: "⚠", color: "text-amber-800", background: "bg-amber-100" },
     fail: { icon: "✕", color: "text-red-700", background: "bg-red-100" },
   }[check.status]
-
   return (
     <li className="border-b border-stone-200 py-4 last:border-0">
       <div className="flex items-start gap-3">
@@ -275,13 +276,8 @@ function FacebookResultRow({ check, isOpen, onToggle }: { check: FacebookCheck; 
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-stone-900">{check.label}</h3>
           <p className={`mt-1 text-sm leading-6 ${style.color}`}>{check.message}</p>
-          <button
-            type="button"
-            aria-expanded={isOpen}
-            onClick={onToggle}
-            className="mt-2 text-sm font-semibold text-stone-700 underline decoration-stone-400 underline-offset-2 hover:text-stone-900"
-          >
-            ℹ️ Why and how to fix
+          <button type="button" aria-expanded={isOpen} onClick={onToggle} className="mt-2 text-sm font-semibold text-stone-700 underline decoration-stone-400 underline-offset-2 hover:text-stone-900">
+            ℹ Why and how to fix
           </button>
           {isOpen && (
             <div className="mt-2 grid gap-2 rounded-md bg-stone-50 p-3 text-sm leading-6 text-stone-700 sm:grid-cols-2">
@@ -334,7 +330,7 @@ export default function Home({
     pt: "gutnews247",
   }
   const initialUsername = platformToHandle[platform] || ""
-    const [username, setUsername] = useState(initialUsername)
+  const [username, setUsername] = useState(initialUsername)
   const [inputVal, setInputVal] = useState(initialUsername)
   const [hashtagInput, setHashtagInput] = useState("#quran #islam #faith #community #dailyreminder")
   const [result, setResult] = useState<CheckerResult | null>(null)
@@ -400,8 +396,7 @@ export default function Home({
             message: typeof data.message === "string" ? data.message : lookup.message,
           }
         }
-      } catch {
-      }
+      } catch {}
       const hasExternalLink = facebookUrlContainsExternalLink(facebookUrl, facebookEvidence.externalLink) || lookup.externalLinks.length > 0
       setFacebookReport({
         url: facebookUrl.href,
@@ -434,33 +429,13 @@ export default function Home({
     setShareMessage("Share text copied.")
   }
 
-
   if (variant === "checker") {
     return (
       <main className={`${sora.className} ${backgroundClassName} p-4 text-stone-900`}>
-        {platform === "x" && (
-          <div className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
-            <h2 className="mb-5 text-left text-xl font-bold">Check a public X username</h2>
-            <div className="flex flex-col sm:flex-row items-end justify-center gap-6">
-              <div className="flex flex-col">
-                <label className="text-sm font-semibold mb-2">X username</label>
-                <div className="flex items-end border-b border-stone-300 pb-1">
-                  <span className="text-violet-600 font-bold mr-2">@</span>
-                  <input value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e)=> e.key==="Enter" && handleCheck()} placeholder="gutnews247" className="w-full bg-transparent outline-none" />
-                </div>
-                    </div>
-        <button onClick={handleCheck} disabled={loading} className="rounded-full bg-blue-700 px-6 py-3 text-sm font-bold text-white">
-           Check
-          </button>
-                 </div>
-        {loading && <p className="mt-4 text-sm">Checking...</p>}
-        {checkerError && <p className="mt-4 text-sm text-red-700">{checkerError}</p>}
-        {result && <div className="mt-4 text-sm"><b>@{result.username}</b> checked</div>}
-        {result && <AdBelowChecker />}
-                    </div>
-)}
+        <CheckerIsland />
+        <AdBelowChecker />
         {platform === "instagram" && (
-          <div className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mt-6 rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <label className="mb-2 block text-sm font-semibold">Instagram username <span className="text-red-600">*</span></label>
@@ -481,7 +456,7 @@ export default function Home({
           </div>
         )}
         {platform === "facebook" && (
-          <div className="rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mt-6 rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
             <label className="mb-2 block text-sm font-semibold">Facebook URL <span className="text-red-600">*</span></label>
             <input type="url" value={inputVal} onChange={(e)=>{setInputVal(e.target.value); setFacebookError(""); setFacebookReport(null);}} placeholder="https://www.facebook.com/yourpage" className="w-full rounded-md border px-3 py-2.5 text-sm" />
             <div className="mt-6 flex justify-center">
@@ -502,105 +477,88 @@ export default function Home({
       <div className="max-w-[900px] mx-auto px-4 pt-8">
         <div className="text-center">
           {content && <BrandHomeLink />}
-                 <h1 className={`${fraunces.className} text- tracking-tight leading-[0.95] font-black italic`}>
-          {content ? (
-            <span className="text-stone-800">{content.h1}</span>
-          ) : (
-            <span className="text-stone-800">Free Social Media Shadowban Checker & Reach Recovery Tool</span>
-          )}
-        </h1>
+          <h1 className={`${fraunces.className} text- tracking-tight leading-[0.95] font-black italic`}>
+            {content ? (
+              <span className="text-stone-800">{content.h1}</span>
+            ) : (
+              <span className="text-stone-800">Free Social Media Shadowban Checker & Reach Recovery Tool</span>
+            )}
+          </h1>
           {!content && (
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">
-              Wondering, &quot;Is my Twitter shadowbanned?&quot; X does not describe its visibility limits as shadowbans, but reach can still be restricted. This free checker tests public, logged-out signals for search suggestions, search, and profile visibility. Reply ranking needs a specific conversation, so that signal may remain unknown. No login is required. X&apos;s own account notices and visibility controls are the authoritative place to review account-specific decisions.
+              Wondering, &quot;Is my Twitter shadowbanned?&quot; X does not describe its visibility limits as shadowbans, but reach can still be restricted. This free checker tests public, logged-out signals for search suggestions, search, and profile visibility. No login is required.
             </p>
           )}
           {content && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">{content.subtitle}</p>}
-          <CheckerIsland />
-          <AdBelowChecker />
+          
+          {/* NEW $0 CHECKER - REPLACES OLD X CHECKER */}
+          <div className="mt-8">
+            <CheckerIsland />
+            <AdBelowChecker />
+          </div>
+          
           <SupportUsButton />
-    {platform === "x" && (
-    <div className="bg-white border border-stone-200 shadow-sm mt-6 p-6 sm:p-8 rounded-lg">
-      <h2 className="mb-5 text-left text-xl font-bold text-stone-900">Check a public X username</h2>
-      <div className="flex flex-col sm:flex-row items-end justify-center gap-6">
-        <div className="flex flex-col">
-          <label htmlFor="handle" className="text-sm font-semibold text-stone-700 mb-2">X username</label>
-          <div className="flex items-end border-b border-stone-300 pb-1">
-            <span className="text-violet-600 font-bold mr-2">@</span>
-            <input id="handle" value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} onKeyDown={(e)=> e.key==="Enter" && handleCheck()} placeholder="gutnews247" className="w-full bg-transparent outline-none" />
-          </div>
-        </div>
-        <button type="button" onClick={handleCheck} disabled={loading} className="rounded-md bg-blue-700 px-7 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">Check X visibility</button>
-      </div>
-      {loading && <p className="mt-4 text-sm">Checking...</p>}
-      {checkerError && <p className="mt-4 text-sm text-red-700">{checkerError}</p>}
-    </div>
-    )}
-    {platform === "instagram" && (
-    <div className="mt-6 rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-sm font-semibold">Instagram username <span className="text-red-600">*</span></label>
-          <div className="flex items-center border-b border-stone-300 pb-2">
-            <span className="mr-2 text-xl font-bold text-violet-600">@</span>
-            <input value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} placeholder="aljannah.tv" className="flex-1 bg-transparent outline-none" />
-          </div>
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-semibold">Recent hashtags (optional)</label>
-          <textarea value={hashtagInput} onChange={(e)=>setHashtagInput(e.target.value)} rows={2} placeholder="#quran #islam #faith" className="w-full rounded-md border px-3 py-2 text-sm" />
-        </div>
-      </div>
-      <div className="mt-6 flex justify-center">
-        <button onClick={handleCheck} disabled={loading} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white hover:bg-violet-800">{loading?"Checking...":"Check Instagram Shadowban"}</button>
-      </div>
-    </div>
-    )}
-    {platform === "facebook" && (
-    <div className="mt-6 rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
-      <label className="mb-2 block text-sm font-semibold">Facebook URL <span className="text-red-600">*</span></label>
-      <input type="url" value={inputVal} onChange={(e)=>{setInputVal(e.target.value); setFacebookError(""); setFacebookReport(null);}} placeholder="https://www.facebook.com/yourpage" className="w-full rounded-md border px-3 py-2.5 text-sm" />
-      <div className="mt-6 flex justify-center">
-        <button onClick={handleCheck} disabled={loading} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white hover:bg-violet-800">{loading?"Checking...":"Check Facebook Shadowban"}</button>
-      </div>
-    </div>
-    )}
-    {platform === "tiktok" && <div className="mt-6"><TikTokChecker /></div>}
-    {platform === "reddit" && <div className="mt-6"><RedditChecker variant="checker" /></div>}
-    {platform === "youtube" && <div className="mt-6"><YouTubeChecker locale="en" /></div>}
+
+          {/* OTHER PLATFORMS KEEP THEIR CHECKERS */}
+          {platform === "instagram" && (
+            <div className="mt-6 rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold">Instagram username <span className="text-red-600">*</span></label>
+                  <div className="flex items-center border-b border-stone-300 pb-2">
+                    <span className="mr-2 text-xl font-bold text-violet-600">@</span>
+                    <input value={inputVal} onChange={(e)=>setInputVal(e.target.value.replace(/^@/, ""))} placeholder="aljannah.tv" className="flex-1 bg-transparent outline-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold">Recent hashtags (optional)</label>
+                  <textarea value={hashtagInput} onChange={(e)=>setHashtagInput(e.target.value)} rows={2} placeholder="#quran #islam #faith" className="w-full rounded-md border px-3 py-2 text-sm" />
+                </div>
+              </div>
+              <div className="mt-6 flex justify-center">
+                <button onClick={handleCheck} disabled={loading} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white hover:bg-violet-800">{loading?"Checking...":"Check Instagram Shadowban"}</button>
+              </div>
+            </div>
+          )}
+          {platform === "facebook" && (
+            <div className="mt-6 rounded-md border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+              <label className="mb-2 block text-sm font-semibold">Facebook URL <span className="text-red-600">*</span></label>
+              <input type="url" value={inputVal} onChange={(e)=>{setInputVal(e.target.value); setFacebookError(""); setFacebookReport(null);}} placeholder="https://www.facebook.com/yourpage" className="w-full rounded-md border px-3 py-2.5 text-sm" />
+              <div className="mt-6 flex justify-center">
+                <button onClick={handleCheck} disabled={loading} className="rounded-full bg-violet-700 px-6 py-3 text-sm font-bold text-white hover:bg-violet-800">{loading?"Checking...":"Check Facebook Shadowban"}</button>
+              </div>
+            </div>
+          )}
+          {platform === "tiktok" && <div className="mt-6"><TikTokChecker /></div>}
+          {platform === "reddit" && <div className="mt-6"><RedditChecker variant="checker" /></div>}
+          {platform === "youtube" && <div className="mt-6"><YouTubeChecker locale="en" /></div>}
+
           <div className="mx-auto mt-16 max-w-3xl space-y-10 text-left">
-  <div>
-    <h2 className="text-2xl font-bold tracking-tight">What we actually check: visibility filtering, not a myth</h2>
-    <p className="mt-3 text-stone-600">
-      Platforms deny "shadowban". We measure public signals Google associates with it: 
-      <strong> search ban, ghostban, hashtag suppression, non-follower reach split, downranking, and API rate limits.</strong> 
-      No login, public data only — we don't use official APIs because they don't exist for this.
-    </p>
-  </div>
-  <div>
-    <h2 className="text-2xl font-bold tracking-tight">Why your reach dropped in 2026</h2>
-    <p className="mt-3 text-stone-600">
-      Instagram 2026 average: 2.2% engagement, Reels suppressed below 1.1% non-follower reach. 
-      TikTok 2026: 6%+ For You reach for accounts under 10k. 
-      X/Twitter: reply deboost & ghostban. YouTube: comment suppression & Shorts shelf removal.
-      If you're below those benchmarks, you're filtered.
-    </p>
-  </div>
-  <div>
-    <h2 className="text-2xl font-bold tracking-tight">3 fixes before you re-check</h2>
-    <ol className="mt-3 list-decimal space-y-2 pl-5 text-stone-600">
-      <li>Remove 3rd-party auto-DM / mass-unfollow apps and check Account Status</li>
-      <li>Delete last 2 hashtags or sounds that triggered spam filter, wait 48h</li>
-      <li>Post 1 original post without hashtags/links to reset non-follower split, then test again</li>
-    </ol>
-  </div>
-  <div>
-    <h2 className="text-2xl font-bold tracking-tight">FAQ</h2>
-    <h3 className="mt-4 font-semibold">Do shadowban checkers use official APIs?</h3>
-    <p className="mt-1 text-stone-600">No. Instagram, TikTok, X, YouTube don't offer a shadowban API. Checkers like ours use public signals only.</p>
-    <h3 className="mt-4 font-semibold">How long does a shadowban last?</h3>
-    <p className="mt-1 text-stone-600">3-14 days after you remove the violation on Instagram/TikTok, 48-72h on X. Repeated extends to 30 days.</p>
-  </div>
-</div>
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">What we actually check: visibility filtering, not a myth</h2>
+              <p className="mt-3 text-stone-600">
+                Platforms deny "shadowban". We measure public signals Google associates with it: 
+                <strong> search ban, ghostban, hashtag suppression, non-follower reach split, downranking, and API rate limits.</strong> 
+                No login, public data only.
+              </p>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Why your reach dropped in 2026</h2>
+              <p className="mt-3 text-stone-600">
+                Instagram 2026 average: 2.2% engagement, Reels suppressed below 1.1% non-follower reach. 
+                TikTok 2026: 6%+ For You reach for accounts under 10k. 
+                X/Twitter: reply deboost & ghostban. YouTube: comment suppression & Shorts shelf removal.
+              </p>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">3 fixes before you re-check</h2>
+              <ol className="mt-3 list-decimal space-y-2 pl-5 text-stone-600">
+                <li>Remove 3rd-party auto-DM / mass-unfollow apps and check Account Status</li>
+                <li>Delete last 2 hashtags or sounds that triggered spam filter, wait 48h</li>
+                <li>Post 1 original post without hashtags/links to reset non-follower split, then test again</li>
+              </ol>
+            </div>
+          </div>
           {platform === "facebook" && <CryptoDonationButtons />}
         </div>
 
@@ -609,107 +567,17 @@ export default function Home({
             {locale === "en" && (
               <section className="mx-auto mt-9 max-w-3xl border-y border-stone-300 py-6 text-sm leading-7 text-stone-700">
                 <h2 className={`${fraunces.className} mb-4 text-2xl font-bold text-stone-900`}>
-                  How To Tell If You&apos;re &quot;Shadow Banned&quot; On Facebook 🙅 (And How To Fix It)
+                  How To Tell If You&apos;re &quot;Shadow Banned&quot; On Facebook
                 </h2>
-                <div className="space-y-4">
-                  <p>
-                    People often search for a facebook shadowban when a profile, Page, or post suddenly reaches fewer people. Facebook does not use “shadowban” as a public account status. Instead, its tools may show that content is “Not recommendable,” placed in a Spam filter, or subject to Reduced distribution. Those notices describe different systems, and a decline alone does not prove that a restriction exists.
-                  </p>
-                  <p>
-                    If you are wondering whether you have been facebook shadow banned, start with evidence you can compare: open the profile and recent posts in a logged-out browser, check whether another person can find the Page, and review Facebook Account Status, Page Quality, Support Inbox, and post notices while signed in. A page not recommendable notice concerns recommendations; it is not the same as a profile being unavailable in search. Facebook spam filter placement can affect a post without blocking every part of an account. Reduced distribution notices may apply to individual content and can have a policy explanation.
-                  </p>
-                  <p>
-                    This checker provides a public visibility review of the Facebook URL you submit, along with a place to record signals you verify in Facebook. It does not access private analytics, inspect internal ranking decisions, or log in on your behalf. That means a result cannot confirm an official shadowban, estimate your reach, or prove why your facebook reach dropping. Use it as a structured checklist, then rely on notices in Facebook for account-specific decisions. Never enter a password or private access token here.
-                  </p>
-                  <p>
-                    If visibility has changed, compare several posts over similar time periods before drawing conclusions. Review recent edits, repeated links, posting frequency, audience changes, and recommendation eligibility; avoid reposting identical links to many groups. Open each notice for the affected content and follow Facebook&apos;s steps to request a review if you believe it is mistaken. Remove or revise material that violates current standards, and give changes time to take effect. A careful check separates public reach patterns from private policy decisions, so you can choose a useful next step instead of treating every drop as proof of a facebook shadowban.
-                  </p>
-                </div>
+                <p>People often search for a facebook shadowban when a profile, Page, or post suddenly reaches fewer people. Facebook does not use "shadowban" as a public account status.</p>
               </section>
             )}
           <div className="mt-10 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
             <label htmlFor="facebook-url" className="mb-2 block text-sm font-semibold text-stone-700">Facebook profile, Page, or post URL</label>
-            <input
-              id="facebook-url"
-              type="url"
-              required
-              value={inputVal}
-              onChange={(event) => {
-                setInputVal(event.target.value)
-                setFacebookError("")
-                setFacebookReport(null)
-              }}
-              onKeyDown={(event) => event.key === "Enter" && handleCheck()}
-              placeholder="https://www.facebook.com/yourpage"
-              className="w-full rounded-md border border-stone-300 px-3 py-3 text-sm text-stone-900 outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200"
-            />
-            <details className="mt-5 rounded-md border border-stone-200 p-4">
-              <summary className="cursor-pointer text-sm font-semibold text-stone-800">Report signals visible in Facebook</summary>
-              <p className="mt-2 text-xs leading-5 text-stone-600">Page Quality, spam status, distribution notices, and comment filtering are not public URL data. Select only what you can confirm in Facebook; unverified signals stay marked as not checked.</p>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <label className="text-sm font-medium text-stone-700">
-                  Profile/Page visibility
-                  <select value={facebookEvidence.profile} onChange={(event) => setFacebookEvidence((current) => ({ ...current, profile: event.target.value as FacebookEvidence["profile"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
-                    <option value="unknown">Not checked</option>
-                    <option value="public">Opens while logged out</option>
-                    <option value="unavailable">Private, unavailable, or removed</option>
-                  </select>
-                </label>
-                <label className="text-sm font-medium text-stone-700">
-                  Spam folder status
-                  <select value={facebookEvidence.spam} onChange={(event) => setFacebookEvidence((current) => ({ ...current, spam: event.target.value as FacebookEvidence["spam"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
-                    <option value="unknown">Not checked</option>
-                    <option value="clear">Not in Spam</option>
-                    <option value="flagged">In Spam</option>
-                  </select>
-                </label>
-                <label className="text-sm font-medium text-stone-700">
-                  Repeated posting to many groups
-                  <select value={facebookEvidence.groupPosting} onChange={(event) => setFacebookEvidence((current) => ({ ...current, groupPosting: event.target.value as FacebookEvidence["groupPosting"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
-                    <option value="unknown">Not sure</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                  </select>
-                </label>
-                <label className="text-sm font-medium text-stone-700">
-                  Page Quality recommendation
-                  <select value={facebookEvidence.recommendation} onChange={(event) => setFacebookEvidence((current) => ({ ...current, recommendation: event.target.value as FacebookEvidence["recommendation"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
-                    <option value="unknown">Not checked</option>
-                    <option value="recommendable">Recommendable</option>
-                    <option value="not-recommendable">Not recommendable</option>
-                  </select>
-                </label>
-                <label className="text-sm font-medium text-stone-700">
-                  Distribution notice
-                  <select value={facebookEvidence.distribution} onChange={(event) => setFacebookEvidence((current) => ({ ...current, distribution: event.target.value as FacebookEvidence["distribution"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
-                    <option value="unknown">Not checked</option>
-                    <option value="normal">No reduced-distribution notice</option>
-                    <option value="reduced">Reduced distribution shown</option>
-                  </select>
-                </label>
-                <label className="text-sm font-medium text-stone-700">
-                  Comment visibility
-                  <select value={facebookEvidence.comments} onChange={(event) => setFacebookEvidence((current) => ({ ...current, comments: event.target.value as FacebookEvidence["comments"] }))} className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm">
-                    <option value="unknown">Not checked</option>
-                    <option value="visible">Visible in both views</option>
-                    <option value="filtered">Hidden under Most Relevant, visible under All comments</option>
-                  </select>
-                </label>
-                <label className="text-sm font-medium text-stone-700 sm:col-span-2">
-                  External link included in the post (optional)
-                  <input
-                    type="url"
-                    value={facebookEvidence.externalLink}
-                    onChange={(event) => setFacebookEvidence((current) => ({ ...current, externalLink: event.target.value }))}
-                    placeholder="https://example.com/article"
-                    className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-sm outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200"
-                  />
-                </label>
-              </div>
-            </details>
+            <input id="facebook-url" type="url" required value={inputVal} onChange={(event) => {setInputVal(event.target.value); setFacebookError(""); setFacebookReport(null);}} onKeyDown={(event) => event.key === "Enter" && handleCheck()} placeholder="https://www.facebook.com/yourpage" className="w-full rounded-md border border-stone-300 px-3 py-3 text-sm" />
             {facebookError && <p role="alert" className="mt-3 text-sm text-red-700">{facebookError}</p>}
             <div className="mt-6 flex justify-center">
-              <button type="button" onClick={handleCheck} disabled={loading} className="rounded-full border border-stone-300 px-7 py-2.5 text-[13px] font-semibold text-stone-900 transition-colors hover:bg-stone-50 disabled:opacity-50">
+              <button type="button" onClick={handleCheck} disabled={loading} className="rounded-full border border-stone-300 px-7 py-2.5 text-[13px] font-semibold text-stone-900">
                 {loading ? content.loadingLabel : content.buttonLabel}
               </button>
             </div>
@@ -717,188 +585,48 @@ export default function Home({
           </>
         ) : platform === "instagram" && content ? (
           <>
-            {locale === "en" && (
-              <section className="mx-auto mt-9 max-w-3xl border-y border-stone-300 py-6 text-sm leading-7 text-stone-700">
-                <h2 className={`${fraunces.className} mb-4 text-2xl font-bold text-stone-900`}>
-                  Instagram Reach, Hashtags, and Recommendation Eligibility
-                </h2>
-                <div className="space-y-4">
-                  <p>
-                    An Instagram shadowban is an informal name for a possible reduction in how often posts appear in hashtag results, Explore, Reels recommendations, or other discovery surfaces. Instagram does not provide one universal shadowban switch or public status, so a sudden change in views is not enough to diagnose a restriction. Audience habits, content topics, posting cadence, competition, and ranking changes can all affect reach.
-                  </p>
-                  <p>
-                    This Instagram shadowban checker reviews the username and the recent hashtags you provide for limited public risk signals. It is a heuristic, not an account connection: it does not sign in, inspect private analytics, or query Instagram&apos;s internal recommendation systems. A clean result cannot guarantee that every post is eligible for recommendations, and a warning does not prove that Instagram has restricted your account. Treat the score as a prompt to investigate rather than a platform decision.
-                  </p>
-                  <p>
-                    For a fuller check, compare several posts with similar formats and audiences, then look at Account Status and recommendation eligibility in Instagram&apos;s own app. Search each recent hashtag while logged out and see whether your post appears; remember that ranking and personalization can change what different viewers see. Review notices for specific posts, remove tags that are irrelevant or restricted, and avoid repetitive engagement tactics. If Instagram identifies a policy issue, use its review process. These checks help separate ordinary performance variation from a discoverability concern without claiming access to information only Instagram can confirm.
-                  </p>
-                  <p>
-                    Keep a simple record of post dates, formats, hashtags, and reach so you can compare like with like instead of relying on one unusually strong or weak result. Check whether a notice names a particular post or recommendation surface, and make one measured change at a time. This gives you clearer context when discussing an Instagram reach drop and avoids treating a third-party score as proof of a hidden restriction.
-                  </p>
-                </div>
-              </section>
-            )}
           <div className="mt-10 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-[11px] text-stone-500" htmlFor="instagram-username">{content.inputLabel ?? "Instagram username"}</label>
+                <label className="mb-2 block text-[11px] text-stone-500">Instagram username</label>
                 <div className="flex items-end border-b border-stone-300 pb-1">
                   <span className="mr-2 text-[26px] font-bold text-violet-600">@</span>
-                  <input
-                    id="instagram-username"
-                    value={inputVal}
-                    onChange={(event) => setInputVal(event.target.value.replace(/^@/, ""))}
-                    onKeyDown={(event) => event.key === "Enter" && handleCheck()}
-                    className="min-w-0 flex-1 bg-transparent text-[17px] text-violet-600 outline-none"
-                    autoComplete="off"
-                  />
+                  <input id="instagram-username" value={inputVal} onChange={(event) => setInputVal(event.target.value.replace(/^@/, ""))} onKeyDown={(event) => event.key === "Enter" && handleCheck()} className="min-w-0 flex-1 bg-transparent text-[17px] text-violet-600 outline-none" />
                 </div>
               </div>
               <div>
-                <label className="mb-2 block text-[11px] text-stone-500" htmlFor="instagram-hashtags">{content.hashtagInputLabel ?? "Paste your last 5 hashtags"}</label>
-                <textarea
-                  id="instagram-hashtags"
-                  value={hashtagInput}
-                  onChange={(event) => setHashtagInput(event.target.value)}
-                  placeholder={content.hashtagPlaceholder}
-                  rows={3}
-                  className="w-full resize-y rounded-md border border-stone-300 bg-white px-3 py-2 text-sm text-stone-800 outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200"
-                />
+                <label className="mb-2 block text-[11px] text-stone-500">Paste your last 5 hashtags</label>
+                <textarea id="instagram-hashtags" value={hashtagInput} onChange={(event) => setHashtagInput(event.target.value)} placeholder={content.hashtagPlaceholder} rows={3} className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm" />
               </div>
             </div>
             <div className="mt-6 flex justify-center">
-              <button onClick={handleCheck} disabled={loading} className="rounded-full border border-stone-300 px-7 py-2.5 text-[13px] text-stone-900 transition-colors hover:bg-stone-50 disabled:opacity-50">
+              <button onClick={handleCheck} disabled={loading} className="rounded-full border border-stone-300 px-7 py-2.5 text-[13px] text-stone-900">
                 {loading ? content.loadingLabel ?? "CHECKING..." : content.buttonLabel ?? "CHECK NOW"}
               </button>
             </div>
           </div>
           </>
-        ) : (
-         null
-        )}
-
-        {platform === "instagram" && content && instagramResult && (
-          <section aria-live="polite" className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <div className="flex flex-col items-center gap-6 border-b border-stone-200 pb-6 sm:flex-row">
-              <div
-                aria-label={`${content.scoreLabel ?? "Score"}: ${instagramResult.score} / 100`}
-                className={`grid aspect-square w-24 shrink-0 place-items-center rounded-full border-[6px] ${instagramResult.score >= 80 ? "border-emerald-500 text-emerald-700" : instagramResult.score >= 60 ? "border-amber-400 text-amber-700" : "border-red-500 text-red-700"}`}
-              >
-                <div className="text-center"><span className="block text-3xl font-black">{instagramResult.score}</span><span className="text-[10px] font-semibold uppercase">/ 100</span></div>
-              </div>
-              <div className="text-center sm:text-left">
-                <h2 className="text-xl font-bold text-stone-900">{content.resultTitle?.replace("{username}", username) ?? `Results for @${username}`}</h2>
-                <p className="mt-1 text-sm text-stone-500">{content.scoreLabel ?? "Score"}: {instagramResult.score} / 100</p>
-              </div>
-            </div>
-            <div className="grid gap-4 py-6 sm:grid-cols-2">
-              <div className="flex items-center justify-between gap-4 rounded-lg border border-stone-200 p-4">
-                <span className="text-sm font-semibold text-stone-700">{content.visibilityLabel ?? "Hashtag Visibility"}</span>
-                <span className={`rounded-full px-3 py-1 text-sm font-bold ${instagramResult.hashtagVisibility === "ok" ? "bg-emerald-100 text-emerald-800" : instagramResult.hashtagVisibility === "limited" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800"}`}>
-                  {content.visibilityStates?.[instagramResult.hashtagVisibility] ?? instagramResult.hashtagVisibility}
-                </span>
-              </div>
-              <div className="flex items-center justify-between gap-4 rounded-lg border border-stone-200 p-4">
-                <span className="text-sm font-semibold text-stone-700">{content.engagementLabel ?? "Engagement"}</span>
-                <span className={`rounded-full px-3 py-1 text-sm font-bold ${instagramResult.engagement === "ok" ? "bg-emerald-100 text-emerald-800" : instagramResult.engagement === "drop" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800"}`}>
-                  {content.engagementStates?.[instagramResult.engagement] ?? instagramResult.engagement}
-                </span>
-              </div>
-            </div>
-            <div className="border-t border-stone-200 pt-5">
-              <h3 className="mb-3 text-sm font-bold uppercase text-stone-800">{content.reasonsLabel ?? "Reasons"}</h3>
-              <ul className="space-y-2 text-sm leading-6 text-stone-700">
-                {instagramResult.reasons.map((reason) => (
-                  <li key={reason} className="flex gap-2">
-                    <span className={instagramResult.score >= 80 ? "text-emerald-600" : instagramResult.score >= 60 ? "text-amber-600" : "text-red-600"}>✓</span>
-                    <span>{content.reasonLabels ? localizeReason(reason, content.reasonLabels) : reason}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="mt-6 rounded-lg bg-amber-50 p-4">
-              <h3 className="font-bold text-stone-900">{content.fixTitle ?? "How to fix"}</h3>
-              <p className="mt-1 text-sm leading-6 text-stone-700">{content.fixDescription ?? "Remove banned hashtags, use 5-10 relevant hashtags, wait 48h"}</p>
-            </div>
-            {content.resultNote && <p className="mt-5 text-sm leading-6 text-stone-600">{content.resultNote}</p>}
-          </section>
-        )}
-
-        {platform === "facebook" && facebookReport && content && (
-          <section aria-live="polite" className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <h2 className="text-xl font-bold text-stone-900">Facebook visibility results</h2>
-            <p className="mt-3 text-sm leading-6 text-stone-600">{content.resultNote}</p>
-            <p className="mt-2 text-xs leading-5 text-stone-500">{facebookReport.lookupMessage}</p>
-            <a
-              className="mt-3 inline-block break-all text-sm font-semibold text-violet-700 underline underline-offset-2"
-              href={facebookReport.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {facebookReport.url}
-            </a>
-            <ul className="mt-4 divide-y divide-stone-200">
-              {facebookReport.checks.map((check) => (
-                <FacebookResultRow
-                  key={check.id}
-                  check={check}
-                  isOpen={openInfo === `facebook-${check.id}`}
-                  onToggle={() => setOpenInfo(openInfo === `facebook-${check.id}` ? null : `facebook-${check.id}`)}
-                />
-              ))}
-            </ul>
-          </section>
-        )}
+        ) : null}
 
         {result && platform !== "instagram" && platform !== "facebook" && (
           <section aria-live="polite" className="mt-6 rounded-lg border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
             <h2 className="text-xl font-bold text-stone-900">Visibility signals for @{result.username}</h2>
-            <p className="mt-1 text-sm text-stone-600">These logged-out checks are limited signals, not a platform verdict.</p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {xTestKeys.map(([key, fallbackLabel]) => {
                 const test = result.tests[key]
                 const status = test?.status ?? "unknown"
-                const color = status === "clear" ? "border-emerald-300 bg-emerald-50 text-emerald-900" : status === "flagged" ? "border-red-300 bg-red-50 text-red-900" : "border-amber-300 bg-amber-50 text-amber-950"
-const statusLabel = status === "clear"? "OK" : status === "flagged"? "Possible signal" : "Unknown"                
-return (
-                  <article key={key} title={test?.detail} className={`rounded-md border p-4 ${color}`}>
+                const color = status === "clear" ? "border-emerald-300 bg-emerald-50" : status === "flagged" ? "border-red-300 bg-red-50" : "border-amber-300 bg-amber-50"
+                const statusLabel = status === "clear"? "OK" : status === "flagged"? "Possible signal" : "Unknown"
+                return (
+                  <article key={key} className={`rounded-md border p-4 ${color}`}>
                     <h3 className="font-semibold">{test?.label ?? fallbackLabel}</h3>
                     <p className="mt-1 text-sm font-bold">{statusLabel}</p>
-                    <p className="mt-2 text-sm leading-6">{test?.detail ?? "No reliable public result was returned."}</p>
+                    <p className="mt-2 text-sm">{test?.detail ?? "No reliable public result was returned."}</p>
                   </article>
                 )
               })}
             </div>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <button type="button" onClick={handleShare} className="rounded-md border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-50">Share results</button>
-              <button type="button" onClick={() => { setResult(null); setInputVal(""); document.getElementById("handle")?.focus() }} className="rounded-md border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-50">Check another</button>
-              <a href="mailto:contact@shadowbannchecker.vercel.app?subject=Visibility%20check%20alert" className="text-sm font-semibold text-blue-700 underline underline-offset-2">Get alerted if banned again</a>
-              {shareMessage && <span role="status" aria-live="polite" className="text-sm text-stone-600">{shareMessage}</span>}
-            </div>
           </section>
-        )}
-
-        {!content && platform === "x" && (
-          <>
-            <section className="mt-10 border-y border-stone-300 py-8">
-              <h2 className="text-2xl font-bold text-stone-900">Four visibility signals, with clear limits</h2>
-              <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                {xVisibilityCards.map((card) => (
-                  <article key={card.title} className="rounded-md border border-stone-200 bg-white p-5">
-                    <h3 className="text-lg font-semibold text-stone-900">{card.title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-stone-700">{card.description}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-            <section className="mt-8">
-              <h2 className="text-2xl font-bold text-stone-900">What to do if visibility changed</h2>
-              <ol className="mt-4 list-decimal space-y-3 pl-6 text-sm leading-7 text-stone-700">
-                {xFixSteps.map((step) => <li key={step}>{step}</li>)}
-              </ol>
-            </section>
-            <p className="mt-8 text-sm leading-6 text-stone-600">No account login or watchlist. Results may be cached for up to one hour; infrastructure providers may retain technical request logs under their own settings. Last updated October 3, 2026. Built by <a className="font-semibold text-blue-700 underline" href="https://x.com/gutnews247" target="_blank" rel="noreferrer">@gutnews247</a>.</p>
-          </>
         )}
 
         <CryptoDonationButtons />
@@ -917,111 +645,19 @@ return (
           </div>
         </section>
 
-        {!content && (
-          <footer className="mt-12 border-t border-stone-300 pt-8">
-            <h2 className="text-center text-lg font-bold text-stone-900">Other Checkers — Also available in:</h2>
-            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <h3 className="text-sm font-bold text-stone-800">Facebook</h3>
-                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm">
-                  {facebookLocales.map((language) => (
-                    <li key={language}>
-                      <Link className="text-violet-700 underline underline-offset-2" href={new URL(getFacebookUrl(language)).pathname}>
-                        {localeNames[language]}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-stone-800">Instagram</h3>
-                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm">
-                  {instagramLocales.map((language) => (
-                    <li key={language}>
-                      <Link className="text-violet-700 underline underline-offset-2" href={new URL(getInstagramUrl(language)).pathname}>
-                        {localeNames[language]}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-stone-800">TikTok</h3>
-                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm">
-                  {tiktokLocales.map((language) => (
-                    <li key={language}>
-                      <Link className="text-violet-700 underline underline-offset-2" href={new URL(getTikTokUrl(language)).pathname}>
-                        {localeNames[language]}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-stone-800">Reddit</h3>
-                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm">
-                  <li><Link className="text-violet-700 underline underline-offset-2" href="/reddit">English</Link></li>
-                </ul>
-              </div>
-            </div>
-          </footer>
-        )}
-        <div className="text-center text-[12px] text-stone-500 mt-10">By <a href="https://x.com/gutnews247" target="_blank" rel="noreferrer" className="text-blue-700">@gutnews247</a></div>
+        <div className="bg-white shadow-sm border border-stone-200 mt-8 p-6 rounded-2xl">
+          <h3 className="text-center font-semibold tracking-wide mb-4">OUR OFFICIAL ACCOUNTS - TEST THEM</h3>
+          <div className="flex flex-wrap justify-center gap-2">
+            <a href="https://x.com/gutnews247" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text-sm hover:bg-violet-50"><b>Twitter:</b> @gutnews247</a>
+            <a href="https://instagram.com/aljannah.tv" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text-sm hover:bg-violet-50"><b>Instagram:</b> @aljannah.tv</a>
+            <a href="https://tiktok.com/@hownwhen" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text-sm hover:bg-violet-50"><b>TikTok:</b> @hownwhen</a>
+            <a href="https://web.facebook.com/functionSmarterAI" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text-sm hover:bg-violet-50"><b>Facebook:</b> functionSmarterAI</a>
+            <a href="https://youtube.com/@villainaudit" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text-sm hover:bg-violet-50"><b>YouTube:</b> @villainaudit</a>
+          </div>
+        </div>
       </div>
-
-      {!content && (
-        <>
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "SoftwareApplication",
-                name: "Twitter Shadowban Checker",
-                applicationCategory: "Utility",
-                operatingSystem: "Web, Android, iOS",
-                offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-                aggregateRating: {
-                  "@type": "AggregateRating",
-                  ratingValue: "4.8",
-                  ratingCount: "124",
-                },
-              }).replace(/</g, "\\u003c"),
-            }}
-          />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                mainEntity: defaultFaqs.map(({ question, answer }) => ({
-                  "@type": "Question",
-                  name: question,
-                  acceptedAnswer: { "@type": "Answer", text: answer },
-                })),
-              }).replace(/</g, "\\u003c"),
-            }}
-          />
-        </>
-      )}
- <AlertButton handle={inputVal} platform={platform} />
-      <SupportPopup
-        isOpen={showSupportPopup}
-        onClose={() => setShowSupportPopup(false)}
-        isChecking={loading}
-      />
-      {/* OFFICIAL ACCOUNTS - YOUR BOXES */}
-<div className="bg-white shadow-sm border border-stone-200 mt-8 p-6 rounded-2xl max-w- mx-auto">
-  <h3 className="text-center text- font-semibold tracking-wide mb-4">OUR OFFICIAL ACCOUNTS - TEST THEM</h3>
-  <div className="flex flex-wrap justify-center gap-2">
-    <a href="https://x.com/gutnews247" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text- hover:bg-violet-50"><b>Twitter:</b> @gutnews247</a>
-    <a href="https://instagram.com/aljannah.tv" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text- hover:bg-violet-50"><b>Instagram:</b> @aljannah.tv</a>
-    <a href="https://tiktok.com/@hownwhen" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text- hover:bg-violet-50"><b>TikTok:</b> @hownwhen</a>
-    <a href="https://web.facebook.com/functionSmarterAI" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text- hover:bg-violet-50"><b>Facebook:</b> functionSmarterAI</a>
-    <a href="https://youtube.com/@villainaudit" target="_blank" className="border border-stone-200 rounded-full px-4 py-2 text- hover:bg-violet-50"><b>YouTube:</b> @villainaudit</a>
-  </div>
-</div>
+      <AlertButton handle={inputVal} platform={platform} />
+      <SupportPopup isOpen={showSupportPopup} onClose={() => setShowSupportPopup(false)} isChecking={loading} />
     </main>
   )
 }
