@@ -26,7 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const entries: MetadataRoute.Sitemap = [
     ...checkerPages.map((p) => ({
-      url: `${baseUrl}/${p}`.replace(/\/$/, '') || baseUrl,
+      url: `${baseUrl}/${p}`.replace(/([^:]\/)\/+/g, '$1').replace(/\/$/, '') || baseUrl,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: p === '' ? 1 : 0.9,
