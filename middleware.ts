@@ -7,7 +7,10 @@ const mem = new Map<string, { count: number, reset: number }>()
 export async function middleware(req: NextRequest) {
   if (!req.nextUrl.pathname.startsWith('/api/check')) return NextResponse.next()
 
-  const ip = req.ip ?? req.headers.get('x-forwarded-for')?.split(',')[0] ?? 'anon'
+  const forwarded = req.headers.get('x-forwarded-for')
+  const realIp = req.headers.get('x-real-ip')
+  const cfIp = req.headers.get('cf-connecting-ip')
+  const ip = cfIp || forwarded?.split(',')[0]?.trim() || realIp || 'anon'
   const key = `rl:${ip}`
 
   // Try Upstash if configured
