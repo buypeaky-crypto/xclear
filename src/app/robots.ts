@@ -1,8 +1,14 @@
-import { MetadataRoute } from 'next'
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+Disallow: /*?*shadowban*
 
-export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: { userAgent: '*', allow: '/' },
-    sitemap: 'https://shadowban.online/sitemap.xml',
-  }
-}
+# AdSense / Googlebot - allow everything
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://shadowban.online/sitemap.xml
