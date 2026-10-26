@@ -1,4 +1,4 @@
-import { MetadataRoute } from 'next'
+import type { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,13 +6,28 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/_next/', '/*?*shadowban*'],
+        disallow: '/api/',
       },
       {
-        userAgent: 'Mediapartners-Google',
+        userAgent: [
+          'GPTBot',
+          'ChatGPT-User',
+          'OAI-SearchBot',
+          'ClaudeBot',
+          'PerplexityBot',
+          'Google-Extended',
+          'anthropic-ai',
+          'cohere-ai',
+          'Mediapartners-Google',
+          'AdsBot-Google'
+        ],
         allow: '/',
       },
     ],
-    sitemap: 'https://shadowban.online/sitemap.xml',
+    sitemap: [
+      'https://shadowban.online/sitemap.xml',
+      'https://shadowban.site/sitemap.xml'
+    ],
+    host: 'https://shadowban.online',
   }
 }
