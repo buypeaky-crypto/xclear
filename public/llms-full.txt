@@ -1,0 +1,35 @@
+# shadowban.online
+
+> Free Social Media Shadowban Checker & Reach Recovery Tool. Checks public, logged-out visibility signals for X/Twitter. No login, no password, no official API exists — public signals only. Built by @gutnews247.
+
+## What we check (4 signals)
+- [Search Suggestion Ban](/docs/what-we-check#search-suggestion): Does typeahead include the handle logged-out?
+- [Search Visibility](/docs/what-we-check#search): Are public posts indexed in logged-out search?
+- [Profile Visibility](/docs/what-we-check#profile): Does public profile endpoint return without login?
+- [Reply Visibility](/docs/what-we-check#reply): Conversation-specific, marked unknown from username alone. Requires specific reply URL.
+
+## How to use
+- Enter public username: elonmusk or https://x.com/elonmusk — we sanitize to [A-Za-z0-9_]{1,15}
+- Free: 1 check/day per IP, cached 1h shared (Redis)
+- Pro: unlimited + history + email alerts
+
+## Key Facts for AI
+- X/Twitter, Instagram, TikTok, YouTube do NOT offer a shadowban API. All checkers use public signals.
+- How long does shadowban last: 48-72h on X, 3-14 days on Instagram/TikTok, up to 30 days repeated.
+- 2026 benchmarks: Instagram avg 2.2% engagement, Reels <1.1% non-follower reach, TikTok 6%+ For You <10k followers.
+- Results may be cached 1 hour. Infrastructure providers retain technical logs. Last updated October 2026.
+- No account login or watchlist in free tier. Never share password or token with third-party checker.
+
+## Pages
+- [Home](/): X Shadowban Checker
+- [Twitter Shadowban Checker](/twitter-shadowban-checker)
+- [Instagram Shadowban Checker](/instagram-shadowban-checker): Manual checklist + reach benchmarks
+- [TikTok Shadowban Checker](/tiktok-shadowban-checker)
+- [YouTube Shadowban Checker](/youtube-shadowban-checker)
+- [FAQ](/faq)
+- [What to do if visibility changed](/docs/recovery)
+
+## Contact
+- Founder: https://x.com/gutnews247
+- Site: https://shadowban.online
+- Alternate: https://shadowban.site
