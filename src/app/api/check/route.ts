@@ -23,9 +23,9 @@ async function getGuestToken(): Promise<string | null> {
 export async function GET(req: NextRequest) {
   const url = req.nextUrl
   const raw = url.searchParams.get('u') || url.searchParams.get('username') || url.searchParams.get('handle') || url.searchParams.get('q') || ''
-  if (!raw) return NextResponse.json({ error: 'Username required', example: '/api/check?u=elonmusk' }, { status: 400 })
+  if (!raw) return NextResponse.json({ error: 'Username required' }, { status: 400 })
   const username = sanitize(raw)
-  if (!USER_RE.test(username)) return NextResponse.json({ error: 'Invalid username', sanitized: username }, { status: 400 })
+  if (!USER_RE.test(username)) return NextResponse.json({ error: 'Invalid username' }, { status: 400 })
 
   let profile: boolean | null = null
   let search: boolean | null = null
@@ -33,42 +33,62 @@ export async function GET(req: NextRequest) {
   let not_found = false
   let suspended = false
 
+  // 1. Profile - works without guest token
   try {
     const res = await fetch(`https://x.com/${username}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept-Language': 'en-US' },
+      headers: { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'en-US' },
       redirect: 'manual'
     })
     if (res.status === 404) { not_found = true; profile = false }
     else if (res.status === 200) {
-      const text = await res.text()
-      if (text.toLowerCase().includes('account suspended')) { suspended = true; profile = false }
+      const t = await res.text()
+      if (t.toLowerCase().includes('account suspended')) { suspended = true; profile = false }
       else profile = true
-    } else profile = null
+    }
   } catch { profile = null }
 
+  // 2. Try guest token path (may 429 on Vercel IP)
   const guest = await getGuestToken()
   if (guest) {
     try {
-      const res = await fetch(`https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&q=from%3A${username}&query_source=typed_query&result_type=recent&count=10`, {
+      const res = await fetch(`https://api.twitter.com/2/search/adaptive.json?q=from%3A${username}&result_type=recent&count=10`, {
         headers: { Authorization: `Bearer ${BEARER}`, 'x-guest-token': guest }
       })
       if (res.ok) {
         const data: any = await res.json()
         search = JSON.stringify(data).toLowerCase().includes(username.toLowerCase())
-      } else if (res.status !== 429) search = false
+      } else if (res.status === 429) search = null
+      else search = false
     } catch { search = null }
 
     try {
-      const res = await fetch(`https://twitter.com/i/search/typeahead.json?filters=true&result_type=users&q=${username}&src=search_box`, {
+      const res = await fetch(`https://twitter.com/i/search/typeahead.json?result_type=users&q=${username}&src=search_box`, {
         headers: { Authorization: `Bearer ${BEARER}`, 'x-guest-token': guest, 'User-Agent': 'Mozilla/5.0' }
       })
       if (res.ok) {
         const data: any = await res.json()
         suggestion = JSON.stringify(data).toLowerCase().includes(username.toLowerCase())
-      } else if (res.status !== 429) suggestion = false
+      } else if (res.status === 429) suggestion = null
+      else suggestion = false
     } catch { suggestion = null }
   }
 
+  // 3. FALLBACK - no guest token? Scrape search HTML (free, no token needed)
+  if (search === null) {
+    try {
+      const res = await fetch(`https://x.com/search?q=from%3A${username}&f=live`, {
+        headers: { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'en-US' }
+      })
+      if (res.ok) {
+        const html = await res.text()
+        if (html.includes('No results') || html.toLowerCase().includes('no results for')) search = false
+        else if (html.toLowerCase().includes(username.toLowerCase())) search = true
+        // else stay null
+      }
+    } catch {}
+  }
+
+  const isUnknown = suggestion === null && search === null && !not_found && !suspended
   const result = {
     username,
     timestamp: new Date().toISOString(),
@@ -76,18 +96,20 @@ export async function GET(req: NextRequest) {
     search,
     suggestion,
     search_ban: not_found || suspended ? false : (suggestion === false || search === false),
-    unknown: not_found || suspended ? false : (suggestion === null || search === null),
+    unknown: isUnknown,
     not_found,
     suspended,
-    cached: false,
-    cost: '$0 - edge + public X endpoints only'
+    cost: '$0 - edge + public X',
+    note: isUnknown ? 'X rate-limited Vercel IP, retry in 60s - cached 60s only' : 'cached 1h'
   }
 
-  // FREE CDN CACHE - 1h shared on Vercel edge, no Upstash, no billing
+  // Cache unknown only 60s, good results 1h - saves you from burning X quota
+  const cacheAge = isUnknown ? 60 : 3600
+
   return NextResponse.json(result, {
     headers: {
-      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=600',
-      'X-Cache': 'MISS-EDGE-CACHED'
+      'Cache-Control': `public, s-maxage=${cacheAge}, stale-while-revalidate=60`,
+      'X-Cache-Age': String(cacheAge)
     }
   })
 }
