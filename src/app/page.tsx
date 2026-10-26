@@ -1,4 +1,3 @@
-"use client"
 import AdBelowChecker from "@/components/AdBelowChecker";
 import Link from "next/link"
 import { useState } from "react"
@@ -516,7 +515,8 @@ export default function Home({
             </p>
           )}
           {content && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">{content.subtitle}</p>}
-          <PlatformSwitcher activePlatform={(platform === "x" ? "twitter" : platform) as any} />
+          <CheckerIsland />
+          <AdBelowChecker />
           <SupportUsButton />
     {platform === "x" && (
     <div className="bg-white border border-stone-200 shadow-sm mt-6 p-6 sm:p-8 rounded-lg">
