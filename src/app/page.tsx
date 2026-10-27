@@ -142,8 +142,8 @@ export default function Home({ platform = "x", backgroundClassName = "bg-[#fef9e
   return (
     <main className={`${sora.className} min-h-screen ${backgroundClassName} pb-24 text-stone-900`}>
       <div className="max-w-[900px] mx-auto px-4 pt-6">
-        <BrandHomeLink />
-        <PlatformSwitcher current={normalizedPlatform} />
+        <BrandHomeLink locale="en" />
+        <PlatformSwitcher activePlatform={normalizedPlatform} />
         
         <div className="text-center mt-6">
           <h1 className={`${fraunces.className} text-stone-800 tracking-tight font-black italic text-3xl`}>
@@ -240,11 +240,11 @@ export default function Home({ platform = "x", backgroundClassName = "bg-[#fef9e
             )}
 
             {/* TIKTOK */}
-            {normalizedPlatform === "tiktok" && <div className="bg-white border border-stone-200 rounded-2xl p-6"><TikTokChecker /></div>}
+            {normalizedPlatform === "tiktok" && <div className="bg-white border border-stone-200 rounded-2xl p-6"><TikTokChecker locale="en" /></div>}
             {/* YOUTUBE */}
-            {normalizedPlatform === "youtube" && <div className="bg-white border border-stone-200 rounded-2xl p-6"><YouTubeChecker /></div>}
+            {normalizedPlatform === "youtube" && <div className="bg-white border border-stone-200 rounded-2xl p-6"><YouTubeChecker locale="en" /></div>}
             {/* REDDIT */}
-            {normalizedPlatform === "reddit" && <div className="bg-white border border-stone-200 rounded-2xl p-6"><RedditChecker /></div>}
+            {normalizedPlatform === "reddit" && <div className="bg-white border border-stone-200 rounded-2xl p-6"><RedditChecker locale="en" /></div>}
             {/* FACEBOOK */}
             {normalizedPlatform === "facebook" && (
               <div className="bg-white border border-stone-200 rounded-2xl p-6 text-left">
