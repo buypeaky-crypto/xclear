@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
-import InstagramLanding from "../../components/InstagramLanding";
-
-export const dynamic = "force-static";
+import Home from "../page";
 
 export const metadata: Metadata = {
   title: "Instagram Shadowban Checker - Free & Instant | XClear",
-  description: "Check if you're shadowbanned on Instagram in 5 seconds. Tests search, hashtag, story and ghost ban. Free, no login required.",
+  description: "Check if you're shadowbanned on Instagram. Tests hashtag visibility, Explore. Free, no login.",
 };
 
-export default function InstagramPage() {
+export default function Page() {
   return (
     <div className="bg-platform-instagram">
-      <InstagramLanding locale="en" />
+      <Home platform="instagram" backgroundClassName="bg-transparent" />
     </div>
   );
 }
