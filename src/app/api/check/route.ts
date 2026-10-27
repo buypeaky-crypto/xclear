@@ -4,106 +4,121 @@ export const runtime = 'edge'
 const USER_RE = /^[A-Za-z0-9_]{1,15}$/
 const BEARER = 'AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cH5LTvJu4LA33AG9E9BO39HQs'
 
-function sanitize(i: string){ return i.trim().replace(/^@+/, '').replace(/^https?:\/\/(www\.)?(x|twitter)\.com\//i, '').split('/')[0].split('?')[0].trim().toLowerCase() }
-
-async function getGuestToken(): Promise<string|null>{
-  try{
-    const r = await fetch('https://api.twitter.com/1.1/guest/activate.json',{method:'POST', headers:{Authorization:`Bearer ${BEARER}`}})
-    if(!r.ok) return null
-    const j:any = await r.json()
-    return j.guest_token||null
-  }catch{return null}
+function sanitize(input: string): string {
+  return input.trim().replace(/^@+/, '').replace(/^https?:\/\/(www\.)?(x|twitter)\.com\//i, '').split('/')[0].split('?')[0].trim().toLowerCase()
 }
 
-export async function GET(req: NextRequest){
-  const raw = req.nextUrl.searchParams.get('u') || req.nextUrl.searchParams.get('username') || req.nextUrl.searchParams.get('handle') || ''
-  if(!raw) return NextResponse.json({error:'Username required'}, {status:400})
+async function getGuestToken(): Promise<string | null> {
+  try {
+    const res = await fetch('https://api.twitter.com/1.1/guest/activate.json', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${BEARER}` }
+    })
+    if (!res.ok) return null
+    const data: any = await res.json()
+    return data.guest_token || null
+  } catch { return null }
+}
+
+export async function GET(req: NextRequest) {
+  const url = req.nextUrl
+  const raw = url.searchParams.get('u') || url.searchParams.get('username') || url.searchParams.get('handle') || url.searchParams.get('q') || ''
+  if (!raw) return NextResponse.json({ error: 'Username required' }, { status: 400 })
   const username = sanitize(raw)
-  if(!USER_RE.test(username)) return NextResponse.json({error:'Invalid username'}, {status:400})
+  if (!USER_RE.test(username)) return NextResponse.json({ error: 'Invalid username', sanitized: username }, { status: 400 })
 
-  let profile: boolean|null = null
-  let search: boolean|null = null
-  let suggestion: boolean|null = null
-  let not_found=false, suspended=false
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN
+  const cacheKey = `check:${username}`
 
-  // 1. Profile - this works on Vercel
-  try{
-    const r = await fetch(`https://x.com/${username}`,{headers:{'User-Agent':'Mozilla/5.0'}, redirect:'manual'})
-    if(r.status===404){not_found=true; profile=false}
-    else if(r.status===200){
-      const t = await r.text()
-      if(t.toLowerCase().includes('account suspended')){suspended=true; profile=false}
-      else profile=true
-    }
-  }catch{profile=null}
+  if (upstashUrl && upstashToken) {
+    try {
+      const r = await fetch(`${upstashUrl}/get/${cacheKey}`, { headers: { Authorization: `Bearer ${upstashToken}` }, cache: 'no-store' })
+      const j: any = await r.json()
+      if (j.result) return NextResponse.json(JSON.parse(j.result), { headers: { 'X-Cache': 'HIT', 'Cache-Control': 'public, s-maxage=3600' } })
+    } catch {}
+  }
 
-  // 2. Try X API with guest token (often 429 on Vercel)
+  let profile: boolean | null = null
+  let search: boolean | null = null
+  let suggestion: boolean | null = null
+  let not_found = false
+  let suspended = false
+
+  // 1. Profile check - logged out fetch to x.com/{username}
+  try {
+    const res = await fetch(`https://x.com/${username}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'en-US' },
+      redirect: 'manual'
+    })
+    if (res.status === 404) { not_found = true; profile = false }
+    else if (res.status === 200) {
+      const text = await res.text()
+      if (text.includes('Account suspended') || text.includes('suspended')) { suspended = true; profile = false }
+      else profile = true
+    } else profile = null
+  } catch { profile = null }
+
+  // 2. Search + Suggestion need guest token
   const guest = await getGuestToken()
-  if(guest){
-    try{
-      const r = await fetch(`https://api.twitter.com/2/search/adaptive.json?q=from%3A${username}&result_type=recent&count=5`,{headers:{Authorization:`Bearer ${BEARER}`,'x-guest-token':guest}})
-      if(r.ok){ const d:any = await r.json(); search = JSON.stringify(d).toLowerCase().includes(username.toLowerCase()) }
-      else if(r.status!==429) search=false
-    }catch{}
-    try{
-      const r = await fetch(`https://twitter.com/i/search/typeahead.json?result_type=users&q=${username}&src=search_box`,{headers:{Authorization:`Bearer ${BEARER}`,'x-guest-token':guest,'User-Agent':'Mozilla/5.0'}})
-      if(r.ok){ const d:any = await r.json(); suggestion = JSON.stringify(d).toLowerCase().includes(username.toLowerCase()) }
-      else if(r.status!==429) suggestion=false
-    }catch{}
+  if (guest) {
+    // Search visibility
+    try {
+      const res = await fetch(`https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&include_ext_has_nft_avatar=1&include_ext_is_blue_verified=1&include_ext_verified_type=1&q=from%3A${username}&query_source=typed_query&result_type=recent&count=10`, {
+        headers: { Authorization: `Bearer ${BEARER}`, 'x-guest-token': guest }
+      })
+      if (res.ok) {
+        const data: any = await res.json()
+        const jsonStr = JSON.stringify(data).toLowerCase()
+        search = jsonStr.includes(username.toLowerCase())
+      } else if (res.status === 429) search = null
+      else search = false
+    } catch { search = null }
+
+    // Suggestion / typeahead
+    try {
+      const res = await fetch(`https://twitter.com/i/search/typeahead.json?filters=true&result_type=users&q=${username}&src=search_box`, {
+        headers: { Authorization: `Bearer ${BEARER}`, 'x-guest-token': guest, 'User-Agent': 'Mozilla/5.0' }
+      })
+      if (res.ok) {
+        const data: any = await res.json()
+        const users = data.users || data.users || []
+        const lower = username.toLowerCase()
+        const found = JSON.stringify(data).toLowerCase().includes(lower)
+        // More precise: check screen_names
+        const hasExact = users.some((u: any) => (u.screen_name || u.screenName || '').toLowerCase() === lower) || found
+        suggestion = hasExact
+      } else if (res.status === 429) suggestion = null
+      else suggestion = false
+    } catch { suggestion = null }
   }
 
-  // 3. $0 FALLBACK that works on Vercel - Nitter + Syndication (no token, no 429)
-  if(search===null){
-    try{
-      // Syndication endpoint - free, no auth, used by embed widgets
-      const r = await fetch(`https://cdn.syndication.twimg.com/timeline/profile?screen_name=${username}&count=1`,{headers:{'User-Agent':'Mozilla/5.0'}})
-      if(r.ok){
-        const j:any = await r.json()
-        // If it returns tweets, profile is searchable
-        search = !!(j.timeline || j.length || JSON.stringify(j).toLowerCase().includes(username.toLowerCase()))
-      }
-    }catch{}
-  }
-  if(search===null){
-    try{
-      // Nitter instance fallback - public mirror
-      const r = await fetch(`https://nitter.net/${username}`,{headers:{'User-Agent':'Mozilla/5.0'}})
-      if(r.ok){
-        const html = await r.text()
-        if(html.includes('This account has been suspended')||html.toLowerCase().includes('suspended')){suspended=true; profile=false}
-        else if(html.toLowerCase().includes(username.toLowerCase())) search = true
-      }
-    }catch{}
-  }
-
-  // If still null, we have at least profile - don't mark whole thing unknown
-  const isFullyUnknown = profile===null
-  const isPartial = profile===true && search===null
+  const search_ban = suggestion === false || search === false
+  const unknown = suggestion === null || search === null
 
   const result = {
     username,
     timestamp: new Date().toISOString(),
     profile,
-    search: search ?? (isPartial ? true : null), // assume searchable if profile exists and X blocked us
-    suggestion: suggestion ?? (isPartial ? true : null),
-    search_ban: false,
-    unknown: isFullyUnknown,
+    search,
+    suggestion,
+    search_ban: not_found || suspended ? false : search_ban,
+    unknown: not_found || suspended ? false : unknown,
     not_found,
     suspended,
-    vercel_ip_blocked: guest===null,
-    cost: '$0',
-    method: guest ? 'guest-token' : 'fallback-syndication'
+    private: false,
+    cached: false
   }
 
-  // If Vercel IP blocked, we infer search=true when profile=true (best $0 guess)
-  if(isPartial){
-    result.search_ban = false
-    result.unknown = false
-  } else if(search===false || suggestion===false){
-    result.search_ban = true
-    result.unknown = false
+  if (upstashUrl && upstashToken) {
+    try {
+      await fetch(`${upstashUrl}/set/${cacheKey}/${encodeURIComponent(JSON.stringify(result))}/ex/3600`, {
+        method: 'POST', headers: { Authorization: `Bearer ${upstashToken}` }
+      })
+    } catch {}
   }
 
-  const cacheAge = isFullyUnknown ? 30 : 3600
-  return NextResponse.json(result, {headers:{'Cache-Control':`public, s-maxage=${cacheAge}, stale-while-revalidate=60`}})
+  return NextResponse.json(result, {
+    headers: { 'X-Cache': 'MISS', 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=600' }
+  })
 }
