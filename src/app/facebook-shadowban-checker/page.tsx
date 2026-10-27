@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
-import FacebookLanding from "../../components/FacebookLanding";
-
-export const dynamic = "force-static";
+import Home from "../page";
 
 export const metadata: Metadata = {
   title: "Facebook Shadowban Checker - Free & Instant | XClear",
-  description: "Check if you're shadowbanned on Facebook. Test page visibility, search and comment suppression. Free, no login.",
+  description: "Check Facebook Page/profile visibility. Free, no login.",
 };
 
-export default function EnglishFacebookPage() {
-  return <FacebookLanding locale="en" />;
+export default function Page() {
+  return (
+    <div className="bg-platform-facebook">
+      <Home platform="facebook" backgroundClassName="bg-transparent" />
+    </div>
+  );
 }
