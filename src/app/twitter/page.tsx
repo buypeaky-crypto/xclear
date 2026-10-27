@@ -3,13 +3,13 @@ import Home from "../page";
 
 export const metadata: Metadata = {
   title: "X / Twitter Shadowban Checker - Free & Instant | XClear",
-  description: "Check if you're shadowbanned on X (Twitter) in 5 seconds. Tests search ban, ghost ban, reply deboost. Free, no login required.",
+  description: "Check if you're shadowbanned on X (Twitter) in 5 seconds. Real guest-token check. Free.",
 };
 
-export default function TwitterPage() {
+export default function Page() {
   return (
     <div className="bg-platform-twitter">
-      <Home backgroundClassName="bg-transparent" />
+      <Home platform="x" backgroundClassName="bg-transparent" />
     </div>
   );
 }
