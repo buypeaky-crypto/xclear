@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
-import YouTubeLanding from "../../components/YouTubeLanding";
-
-export const dynamic = "force-static";
+import Home from "../page";
 
 export const metadata: Metadata = {
   title: "YouTube Shadowban Checker - Free & Instant | XClear",
-  description: "Check if your YouTube channel is shadowbanned. Test search visibility, recommendations and comment suppression. Free.",
+  description: "Check if you're shadowbanned on YouTube. Tests comment & Shorts visibility. Free.",
 };
 
-export default function YouTubePage() {
-  return <YouTubeLanding locale="en" />;
+export default function Page() {
+  return (
+    <div className="bg-platform-youtube">
+      <Home platform="youtube" backgroundClassName="bg-transparent" />
+    </div>
+  );
 }
