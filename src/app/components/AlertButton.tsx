@@ -1,34 +1,51 @@
 'use client'
 import { useState } from 'react'
+
 export default function AlertButton({ handle, platform }: { handle: string, platform: string }) {
   const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle'|'loading'|'ok'|'error'>('idle')
-  const [msg, setMsg] = useState('')
-  async function submit() {
-    if (!email ||!email.includes('@')) { setMsg('Enter valid email'); return }
-    if (!handle) { setMsg('Enter handle first'); return }
-    setStatus('loading'); setMsg('')
+  const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || !email.includes('@')) { setError('Enter a valid email'); return }
+    if (!handle) { setError('Enter a username first'); return }
+    setLoading(true); setError('')
     try {
       const res = await fetch('/api/alerts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, handle: handle.replace('@',''), platform: platform || 'x' })
+        body: JSON.stringify({ email: email.trim(), handle: handle.replace(/^@/, '').trim(), platform })
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'failed')
-      setStatus('ok'); setMsg('Alert saved! You will get emailed if banned again.'); setEmail('')
-    } catch (e:any) {
-      setStatus('error'); setMsg(e.message || 'Failed to save')
+      if (!res.ok) throw new Error(data.error || 'Failed')
+      setSent(true)
+    } catch (err: any) {
+      setError(err.message || 'Failed to save alert')
     }
+    setLoading(false)
   }
-  return (
-    <div className="mt-6 flex flex-col gap-2 rounded-xl border border-stone-200 bg-stone-50 p-4">
-      <div className="text- font-semibold text-stone-800">Get alerted if banned again</div>
-      <div className="flex gap-2">
-        <input type="email" placeholder="you@email.com" value={email} onChange={e=>setEmail(e.target.value)} className="min-w-0 flex-1 rounded-md border border-stone-300 px-3 py-2 text- outline-none focus:ring-2 focus:ring-blue-500" />
-        <button onClick={submit} disabled={status==='loading'} className="rounded-md bg-blue-700 px-4 py-2 text- font-semibold text-white hover:bg-blue-800 disabled:opacity-50">{status==='loading'? 'Saving...' : 'Alert me'}</button>
+
+  if (sent) {
+    return (
+      <div className="fixed bottom-6 right-6 bg-white border border-stone-200 shadow-xl rounded-2xl p-4 max-w-[320px] text-sm">
+        <p className="font-semibold">✅ Confirmation email sent to {email}</p>
+        <p className="text-xs text-stone-600 mt-1">This is a confirmation only. Ongoing monitoring is coming soon — we will email you when it launches. Check spam folder.</p>
+        <button onClick={()=>setSent(false)} className="mt-2 text-xs underline">Close</button>
       </div>
-      {msg && <div className={`text- ${status==='ok'? 'text-green-700' : status==='error'? 'text-red-600' : 'text-stone-600'}`}>{msg}</div>}
+    )
+  }
+
+  return (
+    <div className="fixed bottom-6 right-6 bg-white border border-stone-200 shadow-xl rounded-2xl p-4 max-w-[320px]">
+      <p className="text-sm font-semibold">Get notified if visibility changes (beta)</p>
+      <p className="text-[11px] text-stone-500 mt-1">We send a confirmation now. Real periodic monitoring is not yet implemented — this saves your request for future alerts. No spam.</p>
+      <form onSubmit={handleSubscribe} className="mt-3 flex gap-2">
+        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="your@email.com" type="email" className="flex-1 rounded-full border border-stone-300 px-3 py-1.5 text-sm" />
+        <button disabled={loading} className="rounded-full bg-black text-white px-4 py-1.5 text-sm font-semibold disabled:opacity-50">{loading ? '...' : 'Notify me'}</button>
+      </form>
+      {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
     </div>
   )
 }
