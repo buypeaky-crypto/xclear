@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
-import TikTokLanding from "../../components/TikTokLanding";
-
-export const dynamic = "force-static";
+import Home from "../page";
 
 export const metadata: Metadata = {
-  title: "TikTok Shadowban Checker - Instant Test | XClear",
-  description: "Test if your TikTok account is shadowbanned. Check visibility, search and For You page suppression.",
+  title: "TikTok Shadowban Checker - Free & Instant | XClear",
+  description: "Check if you're shadowbanned on TikTok. Tests For You visibility. Free, no login.",
 };
 
-export default function TikTokPage() {
+export default function Page() {
   return (
     <div className="bg-platform-tiktok">
-      <TikTokLanding locale="en" />
+      <Home platform="tiktok" backgroundClassName="bg-transparent" />
     </div>
   );
 }
