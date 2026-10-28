@@ -52,11 +52,11 @@ function parseTypeahead(data: any, username: string): SignalStatus {
       })
       return exact ? "observed" : "not_observed"
     }
-    // Fallback: if response valid but no exact match
-    if (data && typeof data === 'object') {
-      return "not_observed"
-    }
-    return "unknown"
+   // Fallback: if response valid but no exact match
+if (data && typeof data === 'object') {
+  return "not_observed"
+}
+return "unknown"
   } catch {
     return "unknown"
   }
