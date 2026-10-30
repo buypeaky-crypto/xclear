@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 export const runtime = 'edge'
 
 const USER_RE = /^[A-Za-z0-9_]{1,15}$/
-const BEARER = 'AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cH5LTvJu4LA33AG9E9B0rHQs'
 
-type SignalStatus = "observed" | "not_observed" | "unknown"
+// Prefer the server-side environment variable. The fallback is the existing
+// public X web-client bearer value used by this integration, not a user token.
+const BEARER = process.env.X_BEARER_TOKEN || 'AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cH5LTvJu4LA33AG9E9B0rHQs'
+
+type SignalStatus = 'observed' | 'not_observed' | 'unknown'
+
 type SignalResult = {
   id: string
   status: SignalStatus
@@ -13,273 +18,598 @@ type SignalResult = {
   source: string
 }
 
-function sanitize(input: string): string {
-  return input.trim().replace(/^@+/, '').replace(/^https?:\/\/(www\.)?(x|twitter)\.com\//i, '').split('/')[0].split('?')[0].trim().toLowerCase()
+type RateLimitResult =
+  | { allowed: true }
+  | { allowed: false; reason: 'limited' | 'unavailable'; retryAfter: number }
+
+type JsonRecord = Record<string, unknown>
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-// In-memory guest token cache - 1h as documented
-let cachedGuest: { token: string, expires: number } | null = null
+function sanitize(input: string): string {
+  const value = input.trim()
+  let candidate = value
 
-async function getGuestToken(): Promise<{ token: string | null, fromCache: boolean }> {
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const parsed = new URL(value)
+      const host = parsed.hostname.toLowerCase()
+      if (!['x.com', 'www.x.com', 'twitter.com', 'www.twitter.com'].includes(host)) {
+        return ''
+      }
+      candidate = parsed.pathname.split('/').filter(Boolean)[0] || ''
+    } catch {
+      return ''
+    }
+  } else {
+    candidate = value.replace(/^@+/, '').split(/[/?#]/)[0]
+  }
+
+  return candidate.trim().toLowerCase()
+}
+
+// In-memory guest-token cache. In Edge/serverless environments this cache is
+// per runtime instance, not a globally shared Redis cache.
+let cachedGuest: { token: string; expires: number } | null = null
+
+async function getGuestToken(): Promise<{ token: string | null; fromCache: boolean }> {
   const now = Date.now()
+
   if (cachedGuest && now < cachedGuest.expires) {
     return { token: cachedGuest.token, fromCache: true }
   }
+
   try {
     const res = await fetch('https://api.twitter.com/1.1/guest/activate.json', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${BEARER}` }
+      headers: { Authorization: `Bearer ${BEARER}` },
+      cache: 'no-store',
     })
-    if (!res.ok) return { token: null, fromCache: false }
-    const data: any = await res.json()
-    const token = data.guest_token || null
-    if (token) {
-      cachedGuest = { token, expires: now + 55 * 60 * 1000 } // 55m cache
+
+    if (!res.ok) {
+      return { token: null, fromCache: false }
     }
+
+    const data: unknown = await res.json()
+    if (!isRecord(data) || typeof data.guest_token !== 'string' || !data.guest_token) {
+      return { token: null, fromCache: false }
+    }
+
+    const token = data.guest_token
+    cachedGuest = { token, expires: now + 55 * 60 * 1000 }
     return { token, fromCache: false }
-  } catch { return { token: null, fromCache: false } }
-}
-
-function parseTypeahead(data: any, username: string): SignalStatus {
-  try {
-    const lower = username.toLowerCase()
-    // Parse actual structure: { users: [{ screen_name }] } or { num_results, users }
-    const users = data?.users || data?.result?.users || []
-    if (Array.isArray(users) && users.length > 0) {
-      const exact = users.some((u: any) => {
-        const sn = (u.screen_name || u.screenName || u.username || '').toLowerCase()
-        return sn === lower
-      })
-      return exact ? "observed" : "not_observed"
-    }
-    // Fallback: if response valid but no exact match
-    if (data && typeof data === 'object') {
-      return "not_observed"
-    }
-    return "unknown"
   } catch {
-    return "unknown"
+    return { token: null, fromCache: false }
   }
 }
 
-function parseSearch(data: any, username: string): SignalStatus {
-  try {
-    const lower = username.toLowerCase()
-    // adaptive.json returns tweets keyed by id, plus globalObjects.users
-    const tweets = data?.globalObjects?.tweets || data?.tweets || {}
-    const users = data?.globalObjects?.users || {}
-    // Check if any tweet author matches username
-    for (const t of Object.values(tweets as any)) {
-      const userId = (t as any)?.user_id_str || (t as any)?.user_id
-      if (userId && users[userId]) {
-        const sn = (users[userId].screen_name || '').toLowerCase()
-        if (sn === lower) return "observed"
-      }
-    }
-    // No tweets found but response valid
-    if (data && typeof data === 'object') {
-      return "not_observed"
-    }
-    return "unknown"
-  } catch {
-    return "unknown"
+/**
+ * Typeahead is valid only when the expected users array is present.
+ * An empty, correctly-shaped array means the target was not returned by this
+ * limited suggestion query; it does NOT prove an account restriction.
+ * An unexpected structure is unknown.
+ */
+function parseTypeahead(data: unknown, username: string): SignalStatus {
+  if (!isRecord(data)) {
+    return 'unknown'
   }
+
+  let users: unknown[] | null = null
+
+  if (Array.isArray(data.users)) {
+    users = data.users
+  } else if (isRecord(data.result) && Array.isArray(data.result.users)) {
+    users = data.result.users
+  }
+
+  if (users === null) {
+    return 'unknown'
+  }
+
+  if (users.length === 0) {
+    return 'not_observed'
+  }
+
+  const target = username.toLowerCase()
+  let malformedEntry = false
+
+  for (const item of users) {
+    if (!isRecord(item)) {
+      malformedEntry = true
+      continue
+    }
+
+    const possibleNames = [item.screen_name, item.screenName, item.username]
+    const names = possibleNames.filter((value): value is string => typeof value === 'string')
+
+    if (names.length === 0) {
+      malformedEntry = true
+      continue
+    }
+
+    if (names.some((name) => name.toLowerCase() === target)) {
+      return 'observed'
+    }
+  }
+
+  return malformedEntry ? 'unknown' : 'not_observed'
 }
 
-async function rateLimitCheck(req: NextRequest): Promise<{ allowed: boolean, retryAfter?: number }> {
+/**
+ * Search is valid only when both tweet and user collections have the expected
+ * object shape. If tweet authors cannot be resolved, the result is unknown.
+ */
+function parseSearch(data: unknown, username: string): SignalStatus {
+  if (!isRecord(data)) {
+    return 'unknown'
+  }
+
+  let tweets: JsonRecord | null = null
+  let users: JsonRecord | null = null
+
+  if (isRecord(data.globalObjects)) {
+    const globalObjects = data.globalObjects
+    if (isRecord(globalObjects.tweets) && isRecord(globalObjects.users)) {
+      tweets = globalObjects.tweets
+      users = globalObjects.users
+    }
+  }
+
+  if (tweets === null && users === null && isRecord(data.tweets) && isRecord(data.users)) {
+    tweets = data.tweets
+    users = data.users
+  }
+
+  if (tweets === null || users === null) {
+    return 'unknown'
+  }
+
+  const target = username.toLowerCase()
+  let unresolvedAuthor = false
+
+  for (const tweetValue of Object.values(tweets)) {
+    if (!isRecord(tweetValue)) {
+      unresolvedAuthor = true
+      continue
+    }
+
+    const rawUserId = tweetValue.user_id_str ?? tweetValue.user_id
+    if (typeof rawUserId !== 'string' && typeof rawUserId !== 'number') {
+      unresolvedAuthor = true
+      continue
+    }
+
+    const author = users[String(rawUserId)]
+    if (!isRecord(author) || typeof author.screen_name !== 'string') {
+      unresolvedAuthor = true
+      continue
+    }
+
+    if (author.screen_name.toLowerCase() === target) {
+      return 'observed'
+    }
+  }
+
+  if (unresolvedAuthor) {
+    return 'unknown'
+  }
+
+  return 'not_observed'
+}
+
+async function hashRateLimitIdentifier(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(value)
+  )
+
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+async function rateLimitCheck(req: NextRequest): Promise<RateLimitResult> {
   const upstashUrl = process.env.UPSTASH_REDIS_REST_URL
   const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN
-  const forwarded = req.headers.get('x-forwarded-for')
-  const cfIp = req.headers.get('cf-connecting-ip')
-  const realIp = req.headers.get('x-real-ip')
-  const ip = cfIp || forwarded?.split(',')[0]?.trim() || realIp || 'anon'
-  const key = `rl:${ip}`
-  const windowSec = 10
-  const limit = 10
 
-  if (upstashUrl && upstashToken) {
-    try {
-      // Atomic INCR + EXPIRE via pipeline
-      const pipeRes = await fetch(`${upstashUrl}/pipeline`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${upstashToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify([["INCR", key], ["TTL", key]]),
-        cache: 'no-store'
-      })
-      if (pipeRes.ok) {
-        const arr: any = await pipeRes.json()
-        const count = arr?.[0]?.result ?? 1
-        const ttl = arr?.[1]?.result ?? -1
-        if (count === 1 || ttl === -1) {
-          await fetch(`${upstashUrl}/expire/${key}/${windowSec}`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${upstashToken}` },
-            cache: 'no-store'
-          })
-        }
-        if (count > limit) {
-          return { allowed: false, retryAfter: 30 }
-        }
-      }
-    } catch {
-      // Fall through to allow but log - don't fail open to abuse
+  // Local development may run without Redis. Production must use the shared
+  // limiter; do not silently fall back to per-instance memory in production.
+  if (!upstashUrl || !upstashToken) {
+    if (process.env.NODE_ENV !== 'production') {
+      return { allowed: true }
     }
+
+    return { allowed: false, reason: 'unavailable', retryAfter: 30 }
   }
-  return { allowed: true }
+
+  // On Vercel, x-real-ip is populated by the Vercel proxy and is equivalent
+  // to its x-forwarded-for client-IP header. Do not trust arbitrary headers
+  // such as a client-supplied cf-connecting-ip unless a trusted proxy is
+  // explicitly configured in front of this deployment.
+  const clientIpHeader = req.headers.get('x-real-ip')
+  const clientIp = clientIpHeader?.split(',')[0]?.trim()
+
+  if (!clientIp) {
+    return { allowed: false, reason: 'unavailable', retryAfter: 30 }
+  }
+
+  let identifier: string
+  try {
+    identifier = await hashRateLimitIdentifier(clientIp)
+  } catch {
+    return { allowed: false, reason: 'unavailable', retryAfter: 30 }
+  }
+
+  // Version the key to avoid inheriting old counters with broken/no expiry.
+  const key = `rl:v2:${identifier}`
+  const limit = 10
+  const windowMilliseconds = 10_000
+
+  // The entire read/check/increment/expiry sequence runs atomically in Redis.
+  // Upstash's /pipeline endpoint is NOT atomic; use EVAL for this operation.
+  const script = `
+    local limit = tonumber(ARGV[1])
+    local window_ms = tonumber(ARGV[2])
+    local current = tonumber(redis.call('GET', KEYS[1]) or '0')
+    local ttl = redis.call('PTTL', KEYS[1])
+
+    if not current then
+      return redis.error_reply('rate limit counter is not an integer')
+    end
+
+    -- Repair an existing counter if an earlier implementation left it
+    -- without an expiration. Do this before checking the limit.
+    if current > 0 and ttl < 0 then
+      redis.call('PEXPIRE', KEYS[1], window_ms)
+      ttl = window_ms
+    end
+
+    if current >= limit then
+      return {0, current, ttl}
+    end
+
+    current = redis.call('INCR', KEYS[1])
+
+    if current == 1 then
+      redis.call('PEXPIRE', KEYS[1], window_ms)
+    end
+
+    ttl = redis.call('PTTL', KEYS[1])
+    return {1, current, ttl}
+  `
+
+  try {
+    const response = await fetch(upstashUrl.replace(/\/+$/, ''), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${upstashToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify([
+        'EVAL',
+        script,
+        1,
+        key,
+        limit,
+        windowMilliseconds,
+      ]),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(3000),
+    })
+
+    if (!response.ok) {
+      return { allowed: false, reason: 'unavailable', retryAfter: 30 }
+    }
+
+    const payload: unknown = await response.json()
+    if (!isRecord(payload) || payload.error || !Array.isArray(payload.result)) {
+      return { allowed: false, reason: 'unavailable', retryAfter: 30 }
+    }
+
+    const [decisionValue, countValue, ttlValue] = payload.result
+    const decision = Number(decisionValue)
+    const count = Number(countValue)
+    const ttlMilliseconds = Number(ttlValue)
+
+    if (
+      (decision !== 0 && decision !== 1) ||
+      !Number.isSafeInteger(count) ||
+      count < 0 ||
+      !Number.isFinite(ttlMilliseconds) ||
+      ttlMilliseconds < 0
+    ) {
+      return { allowed: false, reason: 'unavailable', retryAfter: 30 }
+    }
+
+    if (decision === 0) {
+      return {
+        allowed: false,
+        reason: 'limited',
+        retryAfter: Math.max(1, Math.ceil(ttlMilliseconds / 1000)),
+      }
+    }
+
+    return { allowed: true }
+  } catch {
+    // Redis timeout, network failure, or malformed response: fail closed.
+    return { allowed: false, reason: 'unavailable', retryAfter: 30 }
+  }
+}
+function apiError(message: string, code: string, status: number, retryAfter?: number) {
+  const headers: Record<string, string> = { 'Cache-Control': 'no-store' }
+  if (retryAfter !== undefined) {
+    headers['Retry-After'] = String(retryAfter)
+  }
+
+  return NextResponse.json(
+    { error: message, code, ...(retryAfter !== undefined ? { retryAfter } : {}) },
+    { status, headers }
+  )
 }
 
 export async function GET(req: NextRequest) {
-  // P0: Rate limit BEFORE expensive upstream calls
-  const rl = await rateLimitCheck(req)
-  if (!rl.allowed) {
-    return NextResponse.json({ error: 'Rate limited — 10 checks per 10 seconds. Cached 1h. Try again in 30s.', retryAfter: rl.retryAfter }, { status: 429, headers: { 'Retry-After': '30' } })
-  }
-
   const url = req.nextUrl
   const raw = url.searchParams.get('u') || url.searchParams.get('username') || ''
-  if (!raw) return NextResponse.json({ error: 'Username required', code: 'missing_username' }, { status: 400 })
+
+  if (!raw) {
+    return apiError('Username required', 'missing_username', 400)
+  }
+
   const username = sanitize(raw)
-  if (!USER_RE.test(username)) return NextResponse.json({ error: 'Invalid username — 1-15 chars, letters, numbers, underscore only', sanitized: username, code: 'invalid_username' }, { status: 400 })
+  if (!USER_RE.test(username)) {
+    return apiError(
+      'Invalid username — use 1-15 letters, numbers, or underscores.',
+      'invalid_username',
+      400
+    )
+  }
+
+  // Rate-limit before cache access and before expensive upstream requests.
+  const rl = await rateLimitCheck(req)
+  if (!rl.allowed) {
+    if (rl.reason === 'limited') {
+      return apiError(
+        'Too many checks. Please wait before trying again.',
+        'rate_limited',
+        429,
+        rl.retryAfter
+      )
+    }
+
+    return apiError(
+      'The checker is temporarily unavailable. Please try again later.',
+      'rate_limiter_unavailable',
+      503,
+      rl.retryAfter
+    )
+  }
 
   const upstashUrl = process.env.UPSTASH_REDIS_REST_URL
   const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN
   const cacheKey = `check:${username}`
-  const nowIso = new Date().toISOString()
 
-  // Check cache
+  // Check the server-side cache. A cache failure is not evidence about the
+  // account; continue to a fresh check if rate limiting is still available.
   if (upstashUrl && upstashToken) {
     try {
-      const r = await fetch(`${upstashUrl}/get/${cacheKey}`, { headers: { Authorization: `Bearer ${upstashToken}` }, cache: 'no-store' })
-      const j: any = await r.json()
-      if (j.result) {
-        const cached = JSON.parse(j.result)
-        // Return accurate cache indicator per audit Finding 2.5
-        return NextResponse.json({ 
-          ...cached, 
-          cached: true, 
-          cacheAgeSeconds: Math.floor((Date.now() - new Date(cached.timestamp).getTime())/1000),
-          timestamp: cached.timestamp // original observation time preserved
-        }, { headers: { 'X-Cache': 'HIT', 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=600' } })
+      const cacheRes = await fetch(
+        `${upstashUrl.replace(/\/$/, '')}/get/${encodeURIComponent(cacheKey)}`,
+        {
+          headers: { Authorization: `Bearer ${upstashToken}` },
+          cache: 'no-store',
+        }
+      )
+
+      if (cacheRes.ok) {
+        const cacheData: unknown = await cacheRes.json()
+        if (isRecord(cacheData) && typeof cacheData.result === 'string') {
+          try {
+            const cached: unknown = JSON.parse(cacheData.result)
+            if (
+              isRecord(cached) &&
+              cached.username === username &&
+              typeof cached.timestamp === 'string' &&
+              Array.isArray(cached.results)
+            ) {
+              const originalTime = new Date(cached.timestamp).getTime()
+              if (Number.isFinite(originalTime)) {
+                return NextResponse.json(
+                  {
+                    ...cached,
+                    cached: true,
+                    cacheAgeSeconds: Math.max(0, Math.floor((Date.now() - originalTime) / 1000)),
+                    timestamp: cached.timestamp,
+                    checkedAt: typeof cached.checkedAt === 'string' ? cached.checkedAt : cached.timestamp,
+                  },
+                  { headers: { 'X-Cache': 'HIT', 'Cache-Control': 'private, no-store' } }
+                )
+              }
+            }
+          } catch {
+            // Ignore malformed cache data and perform a fresh check.
+          }
+        }
       }
-    } catch {}
+    } catch {
+      // Cache failure is non-fatal; perform a fresh check.
+    }
   }
 
-  let profileStatus: SignalStatus = "unknown"
-  let profileExplanation = "Profile check could not be completed"
-  let searchStatus: SignalStatus = "unknown"
-  let searchExplanation = "Search check unavailable"
-  let suggestionStatus: SignalStatus = "unknown"
-  let suggestionExplanation = "Typeahead check unavailable"
-  let not_found = false
-  let suspended = false
+  let profileStatus: SignalStatus = 'unknown'
+  let profileExplanation = 'Profile check could not be completed.'
+  let searchStatus: SignalStatus = 'unknown'
+  let searchExplanation = 'Search check unavailable.'
+  let suggestionStatus: SignalStatus = 'unknown'
+  let suggestionExplanation = 'Typeahead check unavailable.'
+  let notFound = false
   let guestFromCache = false
 
-  // 1. Profile check - logged out fetch to x.com/{username}
+  // 1. Public profile endpoint. HTTP 200 means only that the endpoint
+  // responded; it does not establish ranking or recommendation eligibility.
   try {
-    const res = await fetch(`https://x.com/${username}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'en-US' },
-      redirect: 'manual'
+    const res = await fetch(`https://x.com/${encodeURIComponent(username)}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+        'Accept-Language': 'en-US',
+      },
+      redirect: 'manual',
+      cache: 'no-store',
     })
-    if (res.status === 404) { 
-      not_found = true
-      profileStatus = "not_observed"
-      profileExplanation = "Profile not found (404)"
+
+    if (res.status === 404) {
+      notFound = true
+      profileStatus = 'not_observed'
+      profileExplanation = 'X returned HTTP 404. The profile may be unavailable or inaccessible; this does not establish why.'
     } else if (res.status === 200) {
-      const text = await res.text()
-      if (text.includes('Account suspended') || text.includes('suspended')) { 
-        suspended = true
-        profileStatus = "not_observed"
-        profileExplanation = "Account suspended"
+      const contentType = res.headers.get('content-type') || ''
+      if (contentType.toLowerCase().includes('text/html')) {
+        profileStatus = 'observed'
+        profileExplanation = 'The public X profile endpoint returned an HTML response (reachability only; not proof of recommendation eligibility).'
       } else {
-        profileStatus = "observed"
-        profileExplanation = "Public profile reachable (logged-out)"
+        profileStatus = 'unknown'
+        profileExplanation = 'X returned HTTP 200 but not the expected HTML response; profile status could not be verified.'
       }
-    } else if (res.status >= 400 && res.status < 600) {
-      // HTTP error is NOT evidence of ban per audit Finding 2.1
-      profileStatus = "unknown"
-      profileExplanation = `Profile endpoint returned HTTP ${res.status} — treated as unknown, not a ban`
+    } else {
+      profileStatus = 'unknown'
+      profileExplanation = `X profile endpoint returned HTTP ${res.status}; this is not evidence of a restriction.`
     }
-  } catch (e) {
-    profileStatus = "unknown"
-    profileExplanation = "Profile endpoint failed — unknown, not a ban proof"
+  } catch {
+    profileStatus = 'unknown'
+    profileExplanation = 'The X profile request failed; profile status could not be verified.'
   }
 
-  // 2. Search + Suggestion need guest token
-  const { token: guest, fromCache } = await getGuestToken()
-  guestFromCache = fromCache
+  // 2. Search and typeahead checks. A guest-token failure is inconclusive.
+  if (!notFound) {
+    const { token: guest, fromCache } = await getGuestToken()
+    guestFromCache = fromCache
 
-  if (!guest) {
-    searchExplanation = "Guest token unavailable — X rate-limited, marked unknown"
-    suggestionExplanation = "Guest token unavailable — X rate-limited, marked unknown"
-  } else if (!not_found && !suspended) {
-    // Search visibility - only if profile exists
-    try {
-      const res = await fetch(`https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&include_ext_has_nft_avatar=1&include_ext_is_blue_verified=1&include_ext_verified_type=1&q=from%3A${username}&query_source=typed_query&result_type=recent&count=10`, {
-        headers: { Authorization: `Bearer ${BEARER}`, 'x-guest-token': guest }
-      })
-      if (!res.ok) {
-        if (res.status === 429) {
-          searchStatus = "unknown"
-          searchExplanation = "Search rate-limited (429) — unknown"
-        } else {
-          // P0 fix: HTTP error -> unknown, NOT false/flagged
-          searchStatus = "unknown"
-          searchExplanation = `Search endpoint HTTP ${res.status} — unknown, not evidence of restriction`
-        }
-      } else {
-        const data: any = await res.json()
-        const parsed = parseSearch(data, username)
-        searchStatus = parsed
-        searchExplanation = parsed === "observed" ? "Found recent public post from account in logged-out search" : parsed === "not_observed" ? "No recent public posts found for this handle in this limited search window (may be new, quiet, or not indexed)" : "Search response could not be parsed — unknown"
-      }
-    } catch {
-      searchStatus = "unknown"
-      searchExplanation = "Search request failed — unknown"
-    }
+    if (!guest) {
+      searchExplanation = 'X guest token unavailable; search could not be checked.'
+      suggestionExplanation = 'X guest token unavailable; typeahead could not be checked.'
+    } else {
+      // Search visibility
+      try {
+        const searchUrl = new URL('https://api.twitter.com/2/search/adaptive.json')
+        searchUrl.search = new URLSearchParams({
+          include_profile_interstitial_type: '1',
+          include_blocking: '1',
+          include_blocked_by: '1',
+          include_followed_by: '1',
+          include_want_retweets: '1',
+          include_mute_edge: '1',
+          include_can_dm: '1',
+          include_can_media_tag: '1',
+          include_ext_has_nft_avatar: '1',
+          include_ext_is_blue_verified: '1',
+          include_ext_verified_type: '1',
+          q: `from:${username}`,
+          query_source: 'typed_query',
+          result_type: 'recent',
+          count: '10',
+        }).toString()
 
-    // Suggestion / typeahead - exact match required per audit Finding 2.2
-    try {
-      const res = await fetch(`https://twitter.com/i/search/typeahead.json?filters=true&result_type=users&q=${username}&src=search_box`, {
-        headers: { Authorization: `Bearer ${BEARER}`, 'x-guest-token': guest, 'User-Agent': 'Mozilla/5.0' }
-      })
-      if (!res.ok) {
-        if (res.status === 429) {
-          suggestionStatus = "unknown"
-          suggestionExplanation = "Typeahead rate-limited (429) — unknown"
+        const res = await fetch(searchUrl.toString(), {
+          headers: { Authorization: `Bearer ${BEARER}`, 'x-guest-token': guest },
+          cache: 'no-store',
+        })
+
+        if (!res.ok) {
+          searchStatus = 'unknown'
+          searchExplanation = `Search endpoint returned HTTP ${res.status}; no restriction can be inferred.`
         } else {
-          suggestionStatus = "unknown"
-          suggestionExplanation = `Typeahead endpoint HTTP ${res.status} — unknown, not a ban`
+          const data: unknown = await res.json()
+          searchStatus = parseSearch(data, username)
+          searchExplanation = searchStatus === 'observed'
+            ? 'A recent public post from this account was returned by the limited logged-out search query.'
+            : searchStatus === 'not_observed'
+              ? 'No matching post was returned by this limited search query. This can happen for several reasons and does not prove a restriction.'
+              : 'The search response did not contain enough valid data to reach a conclusion.'
         }
-      } else {
-        const data: any = await res.json()
-        const parsed = parseTypeahead(data, username)
-        suggestionStatus = parsed
-        suggestionExplanation = parsed === "observed" ? "Exact username found in typeahead suggestions (logged-out)" : parsed === "not_observed" ? "Username not in top typeahead suggestions — can happen due to personalization, query matching, or popularity" : "Typeahead response could not be parsed — unknown"
+      } catch {
+        searchStatus = 'unknown'
+        searchExplanation = 'The search request failed or returned invalid data.'
       }
-    } catch {
-      suggestionStatus = "unknown"
-      suggestionExplanation = "Typeahead request failed — unknown"
+
+      // Typeahead / suggestion visibility
+      try {
+        const typeaheadUrl = new URL('https://twitter.com/i/search/typeahead.json')
+        typeaheadUrl.search = new URLSearchParams({
+          filters: 'true',
+          result_type: 'users',
+          q: username,
+          src: 'search_box',
+        }).toString()
+
+        const res = await fetch(typeaheadUrl.toString(), {
+          headers: {
+            Authorization: `Bearer ${BEARER}`,
+            'x-guest-token': guest,
+            'User-Agent': 'Mozilla/5.0',
+          },
+          cache: 'no-store',
+        })
+
+        if (!res.ok) {
+          suggestionStatus = 'unknown'
+          suggestionExplanation = `Typeahead endpoint returned HTTP ${res.status}; no restriction can be inferred.`
+        } else {
+          const data: unknown = await res.json()
+          suggestionStatus = parseTypeahead(data, username)
+          suggestionExplanation = suggestionStatus === 'observed'
+            ? 'The exact username appeared in the returned logged-out typeahead suggestions.'
+            : suggestionStatus === 'not_observed'
+              ? 'The username was not returned in this limited typeahead response. Suggestions can be affected by relevance and other factors.'
+              : 'The typeahead response did not contain enough valid data to reach a conclusion.'
+        }
+      } catch {
+        suggestionStatus = 'unknown'
+        suggestionExplanation = 'The typeahead request failed or returned invalid data.'
+      }
     }
+  } else {
+    searchExplanation = 'Search was not run because the profile endpoint returned HTTP 404.'
+    suggestionExplanation = 'Typeahead was not run because the profile endpoint returned HTTP 404.'
   }
 
-  const checkedAt = nowIso
+  const checkedAt = new Date().toISOString()
   const results: SignalResult[] = [
-    { id: "profile", status: profileStatus === "observed" ? "observed" : profileStatus === "not_observed" ? "not_observed" : "unknown", explanation: profileExplanation, checkedAt, source: "https://x.com/{username} logged-out" },
-    { id: "search", status: searchStatus, explanation: searchExplanation, checkedAt, source: "api.twitter.com/2/search/adaptive.json from:{username}" },
-    { id: "suggestion", status: suggestionStatus, explanation: suggestionExplanation, checkedAt, source: "twitter.com/i/search/typeahead.json" },
+    {
+      id: 'profile',
+      status: profileStatus,
+      explanation: profileExplanation,
+      checkedAt,
+      source: 'https://x.com/{username} (logged-out profile endpoint)',
+    },
+    {
+      id: 'search',
+      status: searchStatus,
+      explanation: searchExplanation,
+      checkedAt,
+      source: 'X logged-out adaptive search query from:{username}',
+    },
+    {
+      id: 'suggestion',
+      status: suggestionStatus,
+      explanation: suggestionExplanation,
+      checkedAt,
+      source: 'X logged-out typeahead suggestions',
+    },
   ]
 
-  // P0 fix: Never convert unknown into ban. Only observed/not_observed count
-  const hasNegativeSignal = results.some(r => r.status === "not_observed")
-  const hasUnknown = results.some(r => r.status === "unknown")
-  const allObserved = results.every(r => r.status === "observed")
+  const hasUnknown = results.some((result) => result.status === 'unknown')
+  const allObserved = results.length > 0 && results.every((result) => result.status === 'observed')
 
-  let overall: "clean" | "flagged" | "unknown" | "not_found" | "suspended" = "unknown"
-  if (not_found) overall = "not_found"
-  else if (suspended) overall = "suspended"
-  else if (allObserved) overall = "clean"
-  else if (hasNegativeSignal) overall = "flagged"
-  else overall = "unknown"
+  // A missing result is not a confirmed shadowban. Only use "clean" when all
+  // defined checks returned their expected positive signal; otherwise be
+  // conservative and report unknown. No check here can confirm suspension.
+  let overall: 'clean' | 'flagged' | 'unknown' | 'not_found' | 'suspended' = 'unknown'
+  if (notFound) {
+    overall = 'not_found'
+  } else if (allObserved) {
+    overall = 'clean'
+  }
 
   const result = {
     username,
@@ -289,27 +619,43 @@ export async function GET(req: NextRequest) {
     cacheAgeSeconds: 0,
     guestTokenFromCache: guestFromCache,
     results,
-    // Legacy fields for backward compat but now accurate
-    profile: profileStatus === "observed" ? true : profileStatus === "not_observed" ? false : null,
-    search: searchStatus === "observed" ? true : searchStatus === "not_observed" ? false : null,
-    suggestion: suggestionStatus === "observed" ? true : suggestionStatus === "not_observed" ? false : null,
-    search_ban: overall === "flagged",
-    unknown: overall === "unknown" || hasUnknown,
-    not_found,
-    suspended,
-    private: false,
-    overall
+    // Legacy fields: null means the corresponding condition was not
+    // authoritatively established. The frontend must render null as unknown.
+    profile: profileStatus === 'observed' ? true : profileStatus === 'not_observed' ? false : null,
+    search: searchStatus === 'observed' ? true : searchStatus === 'not_observed' ? false : null,
+    suggestion: suggestionStatus === 'observed' ? true : suggestionStatus === 'not_observed' ? false : null,
+    search_ban: null,
+    unknown: overall === 'unknown' || hasUnknown,
+    not_found: notFound,
+    suspended: null,
+    private: null,
+    overall,
   }
 
+  // Store server-side cache only when Redis is configured. Cache write failure
+  // does not invalidate a result already obtained from the upstream sources.
   if (upstashUrl && upstashToken) {
     try {
-      await fetch(`${upstashUrl}/set/${cacheKey}/${encodeURIComponent(JSON.stringify(result))}/ex/3600`, {
-        method: 'POST', headers: { Authorization: `Bearer ${upstashToken}` }
-      })
-    } catch {}
+      const payload = encodeURIComponent(JSON.stringify(result))
+      await fetch(
+        `${upstashUrl.replace(/\/$/, '')}/set/${encodeURIComponent(cacheKey)}/${payload}/ex/3600`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${upstashToken}` },
+          cache: 'no-store',
+        }
+      )
+    } catch {
+      // Best-effort cache write.
+    }
   }
 
   return NextResponse.json(result, {
-    headers: { 'X-Cache': 'MISS', 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=600', 'X-Guest-Cache': guestFromCache ? 'HIT' : 'MISS' }
+    headers: {
+      'X-Cache': 'MISS',
+      'Cache-Control': 'private, no-store',
+      'X-Guest-Cache': guestFromCache ? 'HIT' : 'MISS',
+    },
   })
 }
+

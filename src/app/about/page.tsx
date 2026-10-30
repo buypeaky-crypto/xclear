@@ -3,9 +3,9 @@ import Link from "next/link";
 import { baseUrl, getEnglishLanguageAlternates } from "../../lib/i18n/config";
 
 export const metadata: Metadata = {
-  title: "About ShadowbanChecker | Our Authors and Method",
-  description:
-    "Meet the authors and learn how ShadowbannChecker researches visibility signals to help creators investigate possible reach restrictions.",
+  title: "About Shadowban.online | Our Authors and Methodology",
+description:
+  "Learn who builds Shadowban.online and how its public visibility checks and local content-pattern reviews work. Understand the limitations of each tool.",
   keywords: [
     "about shadowban checker",
     "instagram shadowban checker",
@@ -40,7 +40,7 @@ const structuredData = {
       name: "How this tester works",
       description:
         "A heuristic review informed by logged-out hashtag research that helps creators investigate possible visibility issues without treating results as an official platform decision.",
-      dateModified: "2026-10-01",
+      dateModified: "2026-10-30",
       author: [
         { "@id": `${baseUrl}/about#author-shadowban-eu` },
         { "@id": `${baseUrl}/about#author-gutnews247` },
@@ -73,10 +73,10 @@ export default function AboutPage() {
         <header className="mb-10 text-center">
           <p className="mb-3 text-sm font-semibold uppercase text-violet-700">Built for creators</p>
           <h1 className="text-4xl font-black tracking-tight sm:text-5xl">
-            About ShadowbannChecker
+            About Shadowban.online
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-7 text-stone-600">
-            Last updated October 1, 2026
+            Last updated October 30, 2026
           </p>
         </header>
 
@@ -125,7 +125,7 @@ export default function AboutPage() {
               Instagram request, and a score cannot reveal Instagram’s internal ranking decisions.
             </p>
             <p className="mt-4">
-              The X/Twitter checker looks up public profile information. Neither checker can
+              The X checker performs selected logged-out public checks. It tests public profile endpoint reachability, whether a recent post appears in a limited logged-out search query, and whether the exact username appears in returned typeahead suggestions. These signals cannot reveal X's internal ranking, recommendation, or enforcement decisions. Neither this checker nor the Instagram checker can confirm an official shadowban status. Neither checker can
               confirm an official shadowban status; results are clues to investigate alongside
               platform account-status notices and changes across multiple posts.
             </p>

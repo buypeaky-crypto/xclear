@@ -23,7 +23,7 @@ export default function YouTubeLanding({ locale }: { locale: YouTubeLocale }) {
         <BrandHomeLink />
         <h1 className="mt-4 text-4xl font-black tracking-tight">{copy.h1}</h1>
         <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">{copy.subtitle}</p>
-        <PlatformSwitcher activePlatform="youtube" />
+        <PlatformSwitcher   activePlatform="youtube"   locale={locale} />
         <SupportUsButton />
         <DonationButtons />
       </section>

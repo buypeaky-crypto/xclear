@@ -5,7 +5,7 @@ export const youtubeLocales = ["en", "de", "id", "es", "fr", "it", "nl", "pl"] a
 export type YouTubeLocale = (typeof youtubeLocales)[number];
 
 export const youtubeSlugs: Record<YouTubeLocale, string> = {
-  en: "youtube-shadowban-checker",
+  en: "youtube",
   de: "de/youtube-shadowban-test",
   id: "id/cek-shadowban-youtube",
   es: "es/comprobar-shadowban-youtube",

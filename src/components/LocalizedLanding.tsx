@@ -13,7 +13,7 @@ export default function LocalizedLanding({ locale }: Props) {
 
   return (
     <>
-      <Checker content={dictionary} />
+      <Checker   content={dictionary}   locale={locale}   platform="x" />
       <CheckerSchemas
         name="Twitter Shadowban Checker"
         url={url}
