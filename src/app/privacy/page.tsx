@@ -55,18 +55,64 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-2xl font-bold text-stone-900">Analytics, pixels, and payments</h2>
-            <p>
-              The site loads Vercel Analytics and Google Analytics. If a public Facebook Pixel ID
-              is configured, it also loads Meta Pixel and sends page-view events. These providers
-              may process device, usage, and network information and may use cookies or similar
-              technologies. Review provider settings and our{" "}
-              <Link className="font-semibold text-violet-700 underline" href="/cookies">Cookie Policy</Link>.
-              Donations may be handled by PayPal. BTC and ETH donations are recorded on public
-              blockchains, where transaction data is visible to anyone. We do not operate an email
-              alert subscription or retain submitted email addresses through this checker.
-            </p>
-          </section>
+           
+<section>
+  <h2 className="mb-3 text-2xl font-bold text-stone-900">
+    Advertising, analytics, pixels, and payments
+  </h2>
+
+  <p>
+    This website uses Google AdSense to display advertisements.
+    Google, as a third-party advertising vendor, uses cookies to
+    serve ads on this website. Google and its advertising partners
+    may use cookies, web beacons, IP addresses, browser information,
+    or other identifiers to serve, measure, and personalize
+    advertisements based on a user's visits to this or other
+    websites, subject to applicable settings and consent choices.
+  </p>
+
+  <p className="mt-4">
+    Users can manage Google's personalized advertising settings
+    at{" "}
+    <a
+      className="font-semibold text-violet-700 underline"
+      href="https://adssettings.google.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Google Ads Settings
+    </a>.
+    Learn more about{" "}
+    <a
+      className="font-semibold text-violet-700 underline"
+      href="https://policies.google.com/technologies/ads"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      how Google uses data on partner websites
+    </a>.
+  </p>
+
+  <p className="mt-4">
+    The site also uses Vercel Analytics and Google Analytics.
+    If a public Facebook Pixel ID is configured, it also loads
+    Meta Pixel and sends page-view events. These providers may
+    process device, usage, and network information. Review their
+    settings and our{" "}
+    <Link
+      className="font-semibold text-violet-700 underline"
+      href="/cookies"
+    >
+      Cookie Policy
+    </Link>.
+    Donations may be handled by PayPal. BTC and ETH donations
+    are recorded on public blockchains, where transaction data
+    is visible to anyone. We do not operate an email alert
+    subscription or retain submitted email addresses through
+    this checker.
+  </p>
+</section>
+
 
           <section>
             <h2 className="mb-3 text-2xl font-bold text-stone-900">Your choices and rights</h2>
