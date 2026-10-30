@@ -148,4 +148,8 @@ for (const entry of [
   ...informationalEntries,
   blogEntry,
 ]) {
-  
+  uniqueEntries.set(entry.url, entry);
+}
+
+return Array.from(uniqueEntries.values());
+}
