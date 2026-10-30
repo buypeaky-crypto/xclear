@@ -3,6 +3,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Fraunces, Sora } from 'next/font/google'
 import CheckerIsland from '@/components/CheckerIsland'
 import AdBelowChecker from '@/components/AdBelowChecker'
@@ -422,7 +423,212 @@ export default function Home({
             </article>
           </div>
         </section>
+{/* Add import near the top: import Link from 'next/link'
+    Insert this section after "Understand what the checker can tell you"
+    and before the "Independent tool" section. This is visible content, not metadata. */}
+<section className="mx-auto mt-14 max-w-5xl" aria-labelledby="methodology-title">
+  <div className="mb-6 max-w-3xl">
+    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500">
+      Methodology and limitations
+    </p>
+    <h2
+      id="methodology-title"
+      className={`${fraunces.className} mt-2 text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl`}
+    >
+      What this {normalizedPlatform === 'x' ? 'X visibility check' : `${normalizedPlatform} review`} can tell you
+    </h2>
+    <p className="mt-3 text-sm leading-7 text-stone-600 sm:text-base">
+      A visibility check is a limited diagnostic, not an official account-status decision.
+      A missing search result, lower engagement, or an unavailable public endpoint does not
+      by itself prove that a platform has restricted an account or post.
+    </p>
+  </div>
 
+  <div className="grid gap-4 md:grid-cols-2">
+    <article className="rounded-2xl border border-stone-200 bg-white p-5">
+      <h3 className="text-base font-semibold text-stone-900">
+        {normalizedPlatform === 'x'
+          ? 'What the X checker tests'
+          : normalizedPlatform === 'instagram'
+            ? 'What the Instagram review tests'
+            : `What the ${normalizedPlatform} review tests`}
+      </h3>
+
+      {normalizedPlatform === 'x' ? (
+        <p className="mt-3 text-sm leading-7 text-stone-600">
+          The X checker makes logged-out public requests to examine profile endpoint
+          reachability, whether a limited recent-search query returns a post from the
+          username, and whether the exact username appears in the returned typeahead
+          suggestions. These are narrow observations from public endpoints. They do not
+          reveal every search, ranking, recommendation, or enforcement decision made by X.
+        </p>
+      ) : normalizedPlatform === 'instagram' ? (
+        <p className="mt-3 text-sm leading-7 text-stone-600">
+          This tool compares the hashtags you enter with a local reference list. It does
+          not sign in to Instagram, inspect your account, query live hashtag search results,
+          or confirm that Instagram has restricted a post or account.
+        </p>
+      ) : (
+        <p className="mt-3 text-sm leading-7 text-stone-600">
+          This tool reviews only the text, tags, or keywords you submit using local pattern
+          rules. It does not connect to {normalizedPlatform}, inspect account analytics,
+          retrieve posts, or measure search and recommendation distribution.
+        </p>
+      )}
+    </article>
+
+    <article className="rounded-2xl border border-stone-200 bg-white p-5">
+      <h3 className="text-base font-semibold text-stone-900">
+        What the result cannot establish
+      </h3>
+      <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-stone-600">
+        <li>It cannot prove that an account has been officially shadowbanned.</li>
+        <li>It cannot determine every ranking or recommendation decision.</li>
+        <li>It cannot explain a drop in views or engagement by itself.</li>
+        <li>An unavailable or malformed source must be treated as inconclusive.</li>
+      </ul>
+    </article>
+  </div>
+
+  <article className="mt-4 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+    <h3 className="text-base font-semibold text-stone-900">
+      How to investigate a visibility problem
+    </h3>
+    <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-7 text-stone-600">
+      <li>Check the platform's own account-status notices, policy messages, and privacy settings.</li>
+      <li>Compare more than one public post and, where appropriate, repeat the check later.</li>
+      <li>Consider ordinary causes such as protected content, search relevance, deleted posts, indexing delays, or temporary service errors.</li>
+      <li>Use the platform's official support or appeal process if it displays an account or content notice.</li>
+    </ol>
+  </article>
+</section>
+
+<section className="mx-auto mt-14 max-w-5xl" aria-labelledby="faq-title">
+  <div className="mb-5 max-w-3xl">
+    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500">
+      Common questions
+    </p>
+    <h2
+      id="faq-title"
+      className={`${fraunces.className} mt-2 text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl`}
+    >
+      Frequently asked questions
+    </h2>
+  </div>
+
+  <div className="space-y-3">
+    <details className="group rounded-xl border border-stone-200 bg-white p-4">
+      <summary className="cursor-pointer list-none font-semibold text-stone-900">
+        Can this checker confirm that my account is shadowbanned?
+      </summary>
+      <p className="mt-3 text-sm leading-7 text-stone-600">
+        No. An independent public checker cannot confirm every platform restriction.
+        It can report only the specific public signals or text patterns described in its
+        methodology. Treat the result as a diagnostic clue, not an official platform verdict.
+      </p>
+    </details>
+
+    <details className="group rounded-xl border border-stone-200 bg-white p-4">
+      <summary className="cursor-pointer list-none font-semibold text-stone-900">
+        Does low reach or low engagement prove a visibility restriction?
+      </summary>
+      <p className="mt-3 text-sm leading-7 text-stone-600">
+        No. Reach and engagement can change for many reasons, including audience interest,
+        posting frequency, content topic, competition, privacy settings, and recommendation
+        systems. A metric by itself does not establish that an account has been restricted.
+      </p>
+    </details>
+
+    <details className="group rounded-xl border border-stone-200 bg-white p-4">
+      <summary className="cursor-pointer list-none font-semibold text-stone-900">
+        What does “signal not observed” mean?
+      </summary>
+      <p className="mt-3 text-sm leading-7 text-stone-600">
+        It means that a specific completed test did not return the expected public signal
+        in that request. It does not explain why the signal was absent and does not, by
+        itself, prove a restriction. If the source fails or returns an unexpected response,
+        the result should be shown as unable to verify.
+      </p>
+    </details>
+
+    <details className="group rounded-xl border border-stone-200 bg-white p-4">
+      <summary className="cursor-pointer list-none font-semibold text-stone-900">
+        Do I need to provide my social media password?
+      </summary>
+      <p className="mt-3 text-sm leading-7 text-stone-600">
+        No. This checker does not ask for a social media password, login code, or session
+        cookie. For X, the username is sent to the site's checker endpoint for limited
+        public lookups. The other pattern-review tools analyze the text you enter in this page.
+        Review the Privacy Policy for details about server requests, logs, and retention.
+      </p>
+    </details>
+
+    <details className="group rounded-xl border border-stone-200 bg-white p-4">
+      <summary className="cursor-pointer list-none font-semibold text-stone-900">
+        What should I do if the result is inconclusive?
+      </summary>
+      <p className="mt-3 text-sm leading-7 text-stone-600">
+        Do not treat an inconclusive result as a restriction. Check the platform's own
+        account-status messages and help resources, review whether the content is public,
+        and try again later if a temporary service problem prevented the check.
+      </p>
+    </details>
+  </div>
+</section>
+
+<section className="mx-auto mt-10 max-w-5xl rounded-2xl border border-stone-200 bg-white/80 p-5 sm:p-6" aria-labelledby="official-resources-title">
+  <h2 id="official-resources-title" className="text-base font-semibold text-stone-900">
+    Official resources
+  </h2>
+  <p className="mt-2 text-sm leading-6 text-stone-600">
+    Use the platform's own help resources to verify account notices and understand search or content visibility.
+  </p>
+  <ul className="mt-3 space-y-2 text-sm">
+    {normalizedPlatform === 'x' && (
+      <>
+        <li>
+          <a className="font-medium text-stone-800 underline decoration-stone-300 underline-offset-4 hover:text-violet-700" href="https://help.x.com/en/using-x/x-search-not-working" target="_blank" rel="noopener noreferrer">
+            X Help: Posts or hashtags not appearing in search
+          </a>
+        </li>
+        <li>
+          <a className="font-medium text-stone-800 underline decoration-stone-300 underline-offset-4 hover:text-violet-700" href="https://help.x.com/en/rules-and-policies/x-search-policies" target="_blank" rel="noopener noreferrer">
+            X Help: Search rules and restrictions
+          </a>
+        </li>
+        <li>
+          <a className="font-medium text-stone-800 underline decoration-stone-300 underline-offset-4 hover:text-violet-700" href="https://help.x.com/en/safety-and-security/public-and-protected-posts" target="_blank" rel="noopener noreferrer">
+            X Help: Public and protected posts
+          </a>
+        </li>
+      </>
+    )}
+    {normalizedPlatform === 'tiktok' && (
+      <li>
+        <a className="font-medium text-stone-800 underline decoration-stone-300 underline-offset-4 hover:text-violet-700" href="https://support.tiktok.com/en/safety-hc/account-and-user-safety" target="_blank" rel="noopener noreferrer">
+          TikTok Help: Account and user safety
+        </a>
+      </li>
+    )}
+    {normalizedPlatform === 'reddit' && (
+      <li>
+        <a className="font-medium text-stone-800 underline decoration-stone-300 underline-offset-4 hover:text-violet-700" href="https://support.reddithelp.com/hc/en-us/articles/360045734591-Account-status-overview" target="_blank" rel="noopener noreferrer">
+          Reddit Help: Account status overview
+        </a>
+      </li>
+    )}
+    <li>
+      <Link className="font-medium text-stone-800 underline decoration-stone-300 underline-offset-4 hover:text-violet-700" href="/about">
+        Read how Shadowban.online works
+      </Link>
+    </li>
+    <li>
+      <Link className="font-medium text-stone-800 underline decoration-stone-300 underline-offset-4 hover:text-violet-700" href="/privacy">
+        Read the Privacy Policy
+      </Link>
+    </li>
+  </ul>
+</section>
         <section className="mx-auto mt-8 max-w-5xl rounded-2xl border border-stone-300/70 bg-white/60 p-5 text-center sm:p-6">
           <h2 className="font-semibold text-stone-900">Independent tool, not an official platform service</h2>
           <p className="mx-auto mt-2 max-w-3xl text-sm leading-6 text-stone-600">
