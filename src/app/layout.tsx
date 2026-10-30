@@ -173,12 +173,12 @@ export default function RootLayout({
             </nav>
 
             <div className="flex shrink-0 items-center gap-2">
-              <Link
-                href="/checker/twitter"
-                className="hidden rounded-full bg-stone-900 px-4 py-2 text-xs font-bold text-white transition hover:bg-black sm:block"
-              >
-                All Checkers
-              </Link>
+             <Link
+  href="/#checker-card-title"
+  className="hidden rounded-full bg-stone-900 px-4 py-2 text-xs font-bold text-white transition hover:bg-black sm:block"
+>
+  Check X Now
+</Link>
 
               <Link
                 href="https://x.com/gutnews247"
