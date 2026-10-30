@@ -130,20 +130,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: path === "/about" ? 0.6 : 0.4,
     }));
 
-  // The old blog article is intentionally excluded until its
-  // canonical URL is corrected from the former xclear.pro domain.
-  // Rewrite aliases and non-canonical duplicate checker routes
-  // are also intentionally excluded.
+  // Include the corrected canonical blog article.
+ // Rewrite aliases and non-canonical duplicate checker routes
+// remain intentionally excluded.
 
   const uniqueEntries = new Map<string, SitemapEntry>();
 
-  for (const entry of [
-    ...localizedEntries,
-    ...canonicalCheckerRoutes,
-    ...informationalEntries,
-  ]) {
-    uniqueEntries.set(entry.url, entry);
-  }
+  const blogEntry: SitemapEntry = {
+  url: `${baseUrl}/blog/what-is-shadowban`,
+  changeFrequency: "monthly",
+  priority: 0.7,
+};
 
-  return Array.from(uniqueEntries.values());
-}
+for (const entry of [
+  ...localizedEntries,
+  ...canonicalCheckerRoutes,
+  ...informationalEntries,
+  blogEntry,
+]) {
+  
