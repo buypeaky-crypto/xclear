@@ -1,10 +1,17 @@
+
 type CheckerSchemasProps = {
   name: string;
   url: string;
   description: string;
   keywords: string[];
   inLanguage: string;
-  faqs: { question: string; answer: string }[];
+
+  // Kept for compatibility with existing landing pages.
+  // Visible FAQs remain on the page, but are not emitted as FAQ schema.
+  faqs?: {
+    question: string;
+    answer: string;
+  }[];
 };
 
 function jsonLd(value: object): string {
@@ -17,45 +24,64 @@ export default function CheckerSchemas({
   description,
   keywords,
   inLanguage,
-  faqs,
 }: CheckerSchemasProps) {
   const softwareApplication = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
+    "@id": `${url}#software`,
     name,
     url,
     description,
     applicationCategory: "SocialNetworkingApplication",
     keywords,
-    operatingSystem: "Web, Android, iOS",
+    operatingSystem: "Web",
     inLanguage,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
     aggregateRating: {
       "@type": "AggregateRating",
-      ratingValue: "4.8",
-      ratingCount: "124",
+      ratingValue: 4.8,
+      ratingCount: 124,
+      bestRating: 5,
+      worstRating: 1,
     },
   };
-  const faqPage = {
+
+  const webPage = {
     "@context": "https://schema.org",
-    "@type": "FAQPage",
+    "@type": "WebPage",
+    "@id": `${url}#webpage`,
+    name,
+    url,
+    description,
     inLanguage,
-    mainEntity: faqs.map(({ question, answer }) => ({
-      "@type": "Question",
-      name: question,
-      acceptedAnswer: { "@type": "Answer", text: answer },
-    })),
+    keywords,
+    mainEntity: {
+      "@id": `${url}#software`,
+    },
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Shadowban.online",
+      url: "https://shadowban.online/",
+    },
   };
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(softwareApplication) }}
+        dangerouslySetInnerHTML={{
+          __html: jsonLd(softwareApplication),
+        }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(faqPage) }}
+        dangerouslySetInnerHTML={{
+          __html: jsonLd(webPage),
+        }}
       />
     </>
   );
