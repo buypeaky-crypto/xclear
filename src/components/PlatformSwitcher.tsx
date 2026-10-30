@@ -37,7 +37,8 @@ type Platform =
   | "facebook"
   | "tiktok"
   | "reddit"
-  | "youtube";
+  | "youtube"
+  | "linkedin";
 
 function includesLocale<T extends readonly string[]>(
   values: T,
@@ -81,6 +82,9 @@ function getPlatformHref(
     case "reddit":
       return "/reddit";
 
+    case "linkedin":
+      return "/linkedin";
+
     default:
       return "/";
   }
@@ -103,6 +107,7 @@ export default function PlatformSwitcher({
     { label: "Facebook", platform: "facebook" },
     { label: "YouTube", platform: "youtube" },
     { label: "Reddit", platform: "reddit" },
+    { label: "LinkedIn", platform: "linkedin" },
   ];
 
   return (
