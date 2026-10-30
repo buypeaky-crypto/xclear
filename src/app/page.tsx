@@ -315,7 +315,7 @@ export default function Home({
         </section>
 
         <div className="mt-8 flex justify-center">
-          <PlatformSwitcher activePlatform={normalizedPlatform} />
+          <PlatformSwitcher   activePlatform={normalizedPlatform}   locale={locale} />
         </div>
 
         <section className="mx-auto mt-7 w-full max-w-3xl" aria-labelledby="checker-card-title">
