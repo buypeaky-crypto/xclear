@@ -48,10 +48,10 @@ function getLocaleLabel(code: string): string {
 export const metadata: Metadata = {
   metadataBase: new URL("https://shadowban.online"),
 
-  title: {
-    default: "Free Social Media Visibility Checker Tools | Shadowban.online",
-    template: "%s | Shadowban.online",
-  },
+title: {
+  default: "X Search Visibility Checker | Shadowban.online",
+  template: "%s | Shadowban.online",
+},
 
   description:
     "Investigate public X profile, search and suggestion signals, or review submitted content patterns for Instagram, TikTok, YouTube, Facebook and Reddit. Free tools, no social media password required. Results are diagnostic, not official platform decisions.",
