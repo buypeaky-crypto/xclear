@@ -1,49 +1,149 @@
-import type { MetadataRoute } from 'next'
 
-// 20+ langs you already support
-const langs = ['en','es','fr','de','it','pt','nl','pl','tr','ar','hi','id','ja','ko','ru','zh','vi','th','ro','sv'] as const
+import type { MetadataRoute } from "next";
 
-const platforms = [
-  '', // home = X checker
-  '/twitter-shadowban-checker',
-  '/instagram-shadowban-checker',
-  '/tiktok-shadowban-checker',
-  '/youtube-shadowban-checker',
-  '/faq',
-  '/docs/what-we-check',
-  '/docs/recovery'
-]
+import { baseUrl, getLocaleUrl, locales } from "@/lib/i18n/config";
+import {
+  getInstagramUrl,
+  instagramLocales,
+} from "@/lib/i18n/instagram";
+import {
+  getTikTokUrl,
+  tiktokLocales,
+} from "@/lib/i18n/tiktok";
+import {
+  getFacebookUrl,
+  facebookLocales,
+} from "@/lib/i18n/facebook";
+import {
+  getYouTubeUrl,
+  youtubeLocales,
+} from "@/lib/i18n/youtube";
 
-const baseUrl = 'https://shadowban.online'
+type LocalizedRoute = {
+  locale: string;
+  url: string;
+};
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date()
-  const entries: MetadataRoute.Sitemap = []
+type SitemapEntry = MetadataRoute.Sitemap[number];
 
-  for (const lang of langs) {
-    for (const path of platforms) {
-      const isRoot = path === ''
-      const url = isRoot 
-        ? (lang === 'en' ? baseUrl : `${baseUrl}/${lang}`)
-        : (lang === 'en' ? `${baseUrl}${path}` : `${baseUrl}/${lang}${path}`)
+function createLocalizedEntries(
+  routes: readonly LocalizedRoute[],
+  priority: number,
+): MetadataRoute.Sitemap {
+  const languages: Record<string, string> = Object.fromEntries(
+    routes.map(({ locale, url }) => [locale, url]),
+  );
 
-      // hreflang alternates
-      const languages: Record<string, string> = {}
-      for (const l of langs) {
-        const altPath = isRoot ? (l === 'en' ? '' : `/${l}`) : (l === 'en' ? path : `/${l}${path}`)
-        languages[l] = `${baseUrl}${altPath}`
-      }
-      languages['x-default'] = `${baseUrl}${path}`
+  const defaultUrl =
+    routes.find(({ locale }) => locale === "en")?.url;
 
-      entries.push({
-        url,
-        lastModified: now,
-        changeFrequency: path === '' ? 'hourly' : 'weekly',
-        priority: isRoot ? 1 : path.includes('twitter') || path.includes('instagram') ? 0.9 : 0.7,
-        alternates: { languages }
-      })
-    }
+  if (defaultUrl) {
+    languages["x-default"] = defaultUrl;
   }
 
-  return entries
+  return routes.map(({ url }) => ({
+    url,
+    changeFrequency: "weekly",
+    priority,
+    alternates: {
+      languages,
+    },
+  }));
+}
+
+function createRouteGroup(
+  supportedLocales: readonly string[],
+  getUrl: (locale: never) => string,
+): LocalizedRoute[] {
+  return supportedLocales.map((locale) => ({
+    locale,
+    url: getUrl(locale as never),
+  }));
+}
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const xRoutes: LocalizedRoute[] = locales.map((locale) => ({
+    locale,
+    url:
+      locale === "en"
+        ? `${baseUrl}/`
+        : getLocaleUrl(locale),
+  }));
+
+  const instagramRoutes = createRouteGroup(
+    instagramLocales,
+    getInstagramUrl as (locale: never) => string,
+  );
+
+  const tiktokRoutes = createRouteGroup(
+    tiktokLocales,
+    getTikTokUrl as (locale: never) => string,
+  );
+
+  const facebookRoutes = createRouteGroup(
+    facebookLocales,
+    getFacebookUrl as (locale: never) => string,
+  );
+
+  const youtubeRoutes = createRouteGroup(
+    youtubeLocales,
+    getYouTubeUrl as (locale: never) => string,
+  );
+
+  const localizedEntries = [
+    ...createLocalizedEntries(xRoutes, 1.0),
+    ...createLocalizedEntries(instagramRoutes, 0.85),
+    ...createLocalizedEntries(tiktokRoutes, 0.85),
+    ...createLocalizedEntries(facebookRoutes, 0.85),
+    ...createLocalizedEntries(youtubeRoutes, 0.85),
+  ];
+
+  // These are the canonical checker routes.
+  // The direct /tiktok and /reddit pages point to these URLs.
+  const canonicalCheckerRoutes: SitemapEntry[] = [
+    {
+      url: `${baseUrl}/checker/tiktok`,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/checker/reddit`,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+  ];
+
+  // These pages currently have no equivalent translated versions.
+  const informationalPaths = [
+    "/about",
+    "/contact",
+    "/cookies",
+    "/imprint",
+    "/privacy",
+    "/terms",
+  ];
+
+  const informationalEntries: SitemapEntry[] =
+    informationalPaths.map((path) => ({
+      url: new URL(path, baseUrl).toString(),
+      changeFrequency: "monthly",
+      priority: path === "/about" ? 0.6 : 0.4,
+    }));
+
+  // The old blog article is intentionally excluded until its
+  // canonical URL is corrected from the former xclear.pro domain.
+  // Rewrite aliases and non-canonical duplicate checker routes
+  // are also intentionally excluded.
+
+  const uniqueEntries = new Map<string, SitemapEntry>();
+
+  for (const entry of [
+    ...localizedEntries,
+    ...canonicalCheckerRoutes,
+    ...informationalEntries,
+  ]) {
+    uniqueEntries.set(entry.url, entry);
+  }
+
+  return Array.from(uniqueEntries.values());
 }
