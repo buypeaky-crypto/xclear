@@ -5,7 +5,7 @@ export const tiktokLocales = ["en", "de", "id", "pt", "es", "it", "th"] as const
 export type TikTokLocale = (typeof tiktokLocales)[number];
 
 const tiktokSlugs: Record<TikTokLocale, string> = {
-  en: "tiktok",
+  en: "checker/tiktok",
   de: "de/tiktok-shadowban-test",
   id: "id/cek-shadowban-tiktok",
   pt: "pt/teste-shadowban-tiktok",
