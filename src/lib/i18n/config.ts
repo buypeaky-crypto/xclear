@@ -10,6 +10,56 @@ export const localeSlugs: Record<Locale, string> = {
   id: "id",
   pt: "pt/teste-shadowban",
   es: "es/comprobar-shadowban",
+export const baseUrl = "https://shadowban.online";
+export const baseUrl1 = "https://shadowban.online";
+
+export const locales = ["en", "de", "id", "pt", "es", "it", "th"] as const;
+
+export type Locale = (typeof locales)[number];
+
+export const localeSlugs: Record<Locale, string> = {
+  en: "",
+  de: "de",
+  id: "id",
+  pt: "pt/teste-shadowban",
+  es: "es/comprobar-shadowban",
+  it: "it/test-shadowban",
+  th: "th/check-shadowban",
+};
+
+export const localeNames: Record<Locale, string> = {
+  en: "English",
+  de: "Deutsch",
+  id: "Bahasa Indonesia",
+  pt: "Português",
+  es: "Español",
+  it: "Italiano",
+  th: "ไทย",
+};
+
+export function getLocaleUrl(locale: Locale): string {
+  const slug = localeSlugs[locale];
+
+  return slug
+    ? `${baseUrl}/${slug.replace(/^\/+/, "")}`
+    : baseUrl;
+}
+
+export const getLocaleUrl1 = getLocaleUrl;
+
+export function getLanguageAlternates(_locale?: any): Record<string, string> {
+  return {
+    ...Object.fromEntries(
+      locales.map((locale) => [locale, getLocaleUrl(locale)])
+    ),
+    "x-default": getLocaleUrl("en"),
+  };
+}
+
+export function getEnglishLanguageAlternates(_locale?: any): Record<string, string> {
+  return getLanguageAlternates();
+}
+
   it: "it/test-shadowban",
   th: "th/check-shadowban",
 };
