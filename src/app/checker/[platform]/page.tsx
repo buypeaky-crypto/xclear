@@ -526,22 +526,30 @@ export default async function Page({
 
   const sectionHeadingClass = isTikTokPlatform
     ? "text-2xl font-bold tracking-tight text-white sm:text-3xl"
-    : "text-2xl font-bold tracking-tight text-stone-900";
+    : isRedditPlatform
+      ? "text-2xl font-bold tracking-tight text-[#292321] sm:text-3xl"
+      : "text-2xl font-bold tracking-tight text-stone-900";
 
   const sectionTextClass = isTikTokPlatform
     ? "text-sm leading-7 text-[#b8b8c5] sm:text-base"
-    : "text-sm leading-7 text-stone-600 sm:text-base";
+    : isRedditPlatform
+      ? "text-sm leading-7 text-[#705d52] sm:text-base"
+      : "text-sm leading-7 text-stone-600 sm:text-base";
 
   const sectionBorderClass = isTikTokPlatform
     ? "border-white/10"
-    : "border-stone-200";
+    : isRedditPlatform
+      ? "border-[#ead8cd]"
+      : "border-stone-200";
 
   return (
     <div
       className={
         isTikTokPlatform
           ? "min-h-screen bg-[#09090d] text-white"
-          : "min-h-screen bg-[#FFFBF0]"
+          : isRedditPlatform
+            ? "min-h-screen bg-[#fff7f1] text-[#292321]"
+            : "min-h-screen bg-[#FFFBF0]"
       }
     >
       {needsPageHeading && (
@@ -549,7 +557,9 @@ export default async function Page({
           className={
             isTikTokPlatform
               ? "mx-auto max-w-6xl px-4 pb-2 pt-12 sm:px-6 sm:pt-16"
-              : "mx-auto max-w-4xl px-4 pt-10 text-center sm:px-6 sm:pt-14"
+              : isRedditPlatform
+                ? "mx-auto max-w-6xl px-4 pt-10 sm:px-6 sm:pt-14"
+                : "mx-auto max-w-4xl px-4 pt-10 text-center sm:px-6 sm:pt-14"
           }
         >
           {isTikTokPlatform ? (
@@ -660,6 +670,111 @@ export default async function Page({
                 </div>
               </aside>
             </div>
+          ) : isRedditPlatform ? (
+            <div className="grid items-center gap-8 rounded-[28px] border border-[#f0d7c8] bg-white p-5 shadow-[0_20px_55px_rgba(80,45,25,0.07)] sm:p-8 lg:grid-cols-[1.08fr_0.92fr]">
+              <div>
+                <p className="inline-flex items-center gap-2 rounded-full border border-[#f0d7c8] bg-[#fff8f2] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#d94112]">
+                  <span className="grid h-5 w-5 place-items-center rounded-md bg-[#ff4500] text-sm font-black text-white">
+                    r
+                  </span>
+                  REDDIT PUBLIC PROFILE VISIBILITY
+                </p>
+
+                <h1 className="mt-6 max-w-3xl text-4xl font-black leading-[1.05] tracking-tight text-[#292321] sm:text-5xl lg:text-6xl">
+                  {content.h1}
+                </h1>
+
+                <p className="mt-5 max-w-2xl text-sm leading-7 text-[#705d52] sm:text-base">
+                  {content.intro}
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <span className="rounded-full border border-[#f0d7c8] bg-[#fff8f2] px-3 py-2 text-xs font-semibold text-[#705d52]">
+                    No Reddit password
+                  </span>
+                  <span className="rounded-full border border-[#f0d7c8] bg-[#fff8f2] px-3 py-2 text-xs font-semibold text-[#705d52]">
+                    Logged-out check
+                  </span>
+                  <span className="rounded-full border border-[#f0d7c8] bg-[#fff8f2] px-3 py-2 text-xs font-semibold text-[#705d52]">
+                    Public profile signals
+                  </span>
+                </div>
+
+                <p className="mt-5 text-xs font-semibold text-[#d94112]">
+                  {content.method}
+                </p>
+              </div>
+
+              <aside className="relative overflow-hidden rounded-[24px] border border-[#f0d7c8] bg-[#fff8f2] p-5 sm:p-6">
+                <div
+                  aria-hidden="true"
+                  className="absolute -right-12 -top-14 h-40 w-40 rounded-full bg-[#ff4500]/10 blur-3xl"
+                />
+
+                <div className="relative">
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-base font-bold text-[#292321]">
+                      What gets checked?
+                    </h2>
+                    <span className="rounded-full bg-[#ff4500]/10 px-3 py-1 text-[10px] font-bold text-[#d94112]">
+                      PUBLIC SIGNALS
+                    </span>
+                  </div>
+
+                  <div className="mt-5 space-y-4">
+                    <div className="flex gap-3 border-b border-[#ead8cd] pb-4">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#ff4500]/10 text-xs font-black text-[#ff4500]">
+                        01
+                      </span>
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#292321]">
+                          Profile response
+                        </h3>
+                        <p className="mt-1 text-xs leading-5 text-[#786c65]">
+                          Checks whether Reddit returns a public profile
+                          response to a logged-out request.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 border-b border-[#ead8cd] pb-4">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#ff4500]/10 text-xs font-black text-[#ff4500]">
+                        02
+                      </span>
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#292321]">
+                          Public account details
+                        </h3>
+                        <p className="mt-1 text-xs leading-5 text-[#786c65]">
+                          Displays available account age and karma details
+                          when Reddit returns them.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#ff4500]/10 text-xs font-black text-[#ff4500]">
+                        03
+                      </span>
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#292321]">
+                          Inconclusive responses
+                        </h3>
+                        <p className="mt-1 text-xs leading-5 text-[#786c65]">
+                          Separates unavailable requests from confirmed
+                          profile responses.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="mt-5 border-t border-[#ead8cd] pt-4 text-xs leading-5 text-[#786c65]">
+                    A logged-out profile check cannot prove every type of
+                    Reddit restriction or explain why content was removed.
+                  </p>
+                </div>
+              </aside>
+            </div>
           ) : (
             <>
               <h1 className="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
@@ -682,14 +797,22 @@ export default async function Page({
 
       <article
         className={`mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14 ${
-          isTikTokPlatform ? "text-white" : ""
+          isTikTokPlatform
+            ? "text-white"
+            : isRedditPlatform
+              ? "text-[#292321]"
+              : ""
         }`}
       >
         {!needsPageHeading && (
           <section className="mb-10 max-w-3xl">
             <p
               className={`text-xs font-semibold uppercase tracking-wider ${
-                isTikTokPlatform ? "text-[#00d9d2]" : "text-violet-700"
+                isTikTokPlatform
+                  ? "text-[#00d9d2]"
+                  : isRedditPlatform
+                    ? "text-[#d94112]"
+                    : "text-violet-700"
               }`}
             >
               {content.method}
@@ -720,12 +843,18 @@ export default async function Page({
                 className={`flex gap-3 rounded-xl border p-4 text-sm leading-6 ${
                   isTikTokPlatform
                     ? "border-white/10 bg-[#15151c] text-[#d5d5df]"
-                    : "border-stone-200 bg-white text-stone-700"
+                    : isRedditPlatform
+                      ? "border-[#f0d7c8] bg-white text-[#705d52]"
+                      : "border-stone-200 bg-white text-stone-700"
                 }`}
               >
                 <span
                   className={`font-bold ${
-                    isTikTokPlatform ? "text-[#00f2ea]" : "text-violet-700"
+                    isTikTokPlatform
+                      ? "text-[#00f2ea]"
+                      : isRedditPlatform
+                        ? "text-[#ff4500]"
+                        : "text-violet-700"
                   }`}
                 >
                   {String(index + 1).padStart(2, "0")}
@@ -754,7 +883,9 @@ export default async function Page({
             className={`mt-5 rounded-xl border p-4 text-sm leading-6 ${
               isTikTokPlatform
                 ? "border-[#f0b44d]/30 bg-[#f0b44d]/10 text-[#f5d8a3]"
-                : "border-amber-200 bg-amber-50 text-amber-900"
+                : isRedditPlatform
+                  ? "border-[#f0d7c8] bg-[#fff8f2] text-[#8d3b1e]"
+                  : "border-amber-200 bg-amber-50 text-amber-900"
             }`}
           >
             Important: An unavailable result, missing search result, or
@@ -793,12 +924,18 @@ export default async function Page({
                 className={`group rounded-xl border p-4 ${
                   isTikTokPlatform
                     ? "border-white/10 bg-[#15151c]"
-                    : "border-stone-200 bg-white"
+                    : isRedditPlatform
+                      ? "border-[#f0d7c8] bg-white"
+                      : "border-stone-200 bg-white"
                 }`}
               >
                 <summary
                   className={`cursor-pointer list-none font-semibold ${
-                    isTikTokPlatform ? "text-white" : "text-stone-900"
+                    isTikTokPlatform
+                      ? "text-white"
+                      : isRedditPlatform
+                        ? "text-[#292321]"
+                        : "text-stone-900"
                   }`}
                 >
                   {faq.question}
@@ -837,7 +974,9 @@ export default async function Page({
                   className={`text-sm font-semibold underline underline-offset-4 ${
                     isTikTokPlatform
                       ? "text-[#00f2ea] decoration-[#00f2ea]/40 hover:text-[#ff6b97]"
-                      : "text-violet-700 decoration-violet-300 hover:text-violet-900"
+                      : isRedditPlatform
+                        ? "text-[#d94112] decoration-[#ffb49c] hover:text-[#a93613]"
+                        : "text-violet-700 decoration-violet-300 hover:text-violet-900"
                   }`}
                 >
                   {resource.label} ↗
@@ -850,7 +989,11 @@ export default async function Page({
         <section className={`border-t py-8 ${sectionBorderClass}`}>
           <h2
             className={`text-xl font-bold ${
-              isTikTokPlatform ? "text-white" : "text-stone-900"
+              isTikTokPlatform
+                ? "text-white"
+                : isRedditPlatform
+                  ? "text-[#292321]"
+                  : "text-stone-900"
             }`}
           >
             Explore other checker tools
@@ -885,7 +1028,9 @@ export default async function Page({
                     className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
                       isTikTokPlatform
                         ? "border-white/15 bg-[#15151c] text-[#d5d5df] hover:border-[#00f2ea] hover:text-[#00f2ea]"
-                        : "border-stone-300 bg-white text-stone-700 hover:border-violet-300 hover:text-violet-700"
+                        : isRedditPlatform
+                          ? "border-[#f0d7c8] bg-white text-[#705d52] hover:border-[#ff4500] hover:text-[#d94112]"
+                          : "border-stone-300 bg-white text-stone-700 hover:border-violet-300 hover:text-violet-700"
                     }`}
                   >
                     {labels[item]}
@@ -899,7 +1044,9 @@ export default async function Page({
           className={`border-t pt-6 text-xs leading-6 ${
             isTikTokPlatform
               ? "border-white/10 text-[#858592]"
-              : "border-stone-200 text-stone-500"
+              : isRedditPlatform
+                ? "border-[#ead8cd] text-[#8a7d75]"
+                : "border-stone-200 text-stone-500"
           }`}
         >
           Shadowban.online is an independent service and is not affiliated
