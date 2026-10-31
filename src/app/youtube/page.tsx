@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import Home from "../page";
+import YouTubeLanding from "@/components/YouTubeLanding";
 
 export const dynamic = "force-dynamic";
 
@@ -40,12 +40,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return (
-    <div className="bg-platform-youtube">
-      <Home
-        platform="youtube"
-        backgroundClassName="bg-transparent"
-      />
-    </div>
-  );
+  return <YouTubeLanding locale="en" />;
 }
