@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import LinkedInVisibilityChecker from "@/components/LinkedInVisibilityChecker";
+import LinkedInVisibilityChecker from "@/app/components/LinkedInVisibilityChecker";
 import AdBelowChecker from "@/components/AdBelowChecker";
 
 const pageUrl = "https://shadowban.online/linkedin";
