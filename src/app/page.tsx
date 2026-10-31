@@ -1,6 +1,6 @@
 
 // Shared homepage and platform landing layout.
-// X has a dedicated visual identity; other platform pages retain their layouts.
+// X and Instagram have dedicated visual identities.
 'use client'
 
 import { useState } from 'react'
@@ -72,17 +72,17 @@ const PLATFORM_COPY: Record<Platform, {
     limitation: 'These public checks cannot reveal every ranking, recommendation, or enforcement decision made by X.',
   },
   instagram: {
-    eyebrow: 'INSTAGRAM HASHTAG REVIEW',
-    title: 'Review Instagram hashtag patterns',
-    description: 'Check a set of hashtags against a local reference list. This tool does not access your Instagram account or confirm account restrictions.',
-    method: 'Local hashtag heuristic · No Instagram login',
-    toolTitle: 'Review hashtags',
-    handleLabel: 'Instagram username (optional context)',
+    eyebrow: 'INSTAGRAM HASHTAG CHECKER',
+    title: 'Instagram Hashtag Checker',
+    description: 'Review hashtags from a recent Instagram post for repeated tags and selected patterns in a local reference list. No Instagram login or password required.',
+    method: 'Local hashtag pattern review · No Instagram connection',
+    toolTitle: 'Review your Instagram hashtags',
+    handleLabel: 'Instagram username (optional)',
     handlePlaceholder: 'yourusername',
-    keywordsLabel: 'Recent hashtags',
-    keywordsPlaceholder: '#example #yourtopic #community',
+    keywordsLabel: 'Hashtags from your post',
+    keywordsPlaceholder: '#yourtopic #community #yourbrand',
     buttonLabel: 'Review hashtags',
-    limitation: 'A hashtag pattern match is not proof that Instagram has restricted a post or account. Context and platform decisions matter.',
+    limitation: 'This is a local hashtag-pattern review. It does not query Instagram, inspect account status, or confirm that a post or account has been restricted.',
   },
   tiktok: {
     eyebrow: 'TIKTOK CONTENT REVIEW',
@@ -103,7 +103,7 @@ const PLATFORM_COPY: Record<Platform, {
     description: 'Review submitted keywords and tags for selected patterns. This tool does not inspect your channel status or video recommendations.',
     method: 'Local content heuristic · No YouTube login',
     toolTitle: 'Review content patterns',
-    handleLabel: 'YouTube channel handle (optional context)',
+    handleLabel: 'YouTube channel handle (optional)',
     handlePlaceholder: '@yourchannel',
     keywordsLabel: 'Recent tags or keywords',
     keywordsPlaceholder: 'your topic, channel, video',
@@ -188,6 +188,7 @@ export default function Home({
 }: Props = {}) {
   const normalizedPlatform = (platform === 'twitter' ? 'x' : platform) as Platform
   const isXPlatform = normalizedPlatform === 'x'
+  const isInstagramPlatform = normalizedPlatform === 'instagram'
   const copy = PLATFORM_COPY[normalizedPlatform] ?? PLATFORM_COPY.x
 
   const [inputVal, setInputVal] = useState(
@@ -346,25 +347,41 @@ export default function Home({
     <main
       lang={locale}
       className={`${sora.className} min-h-screen ${
-        isXPlatform ? 'bg-[#eaf3f9]' : backgroundClassName
+        isXPlatform
+          ? 'bg-[#eaf3f9]'
+          : isInstagramPlatform
+            ? 'bg-[#fff5f7]'
+            : backgroundClassName
       } pb-20 text-stone-900`}
     >
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-        <header className={`flex min-h-[76px] items-center justify-between gap-4 ${
-          isXPlatform
-            ? 'border-b border-[#c9dce9]'
-            : 'border-b border-stone-900/10'
-        }`}>
+        <header
+          className={`flex min-h-[76px] items-center justify-between gap-4 ${
+            isXPlatform
+              ? 'border-b border-[#c9dce9]'
+              : isInstagramPlatform
+                ? 'border-b border-[#f1d5df]'
+                : 'border-b border-stone-900/10'
+          }`}
+        >
           <BrandHomeLink />
 
-          <div className={`hidden items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium sm:flex ${
-            isXPlatform
-              ? 'border border-[#c4dcec] bg-white text-[#34495a]'
-              : 'border border-stone-300/80 bg-white/70 text-stone-600'
-          }`}>
+          <div
+            className={`hidden items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium sm:flex ${
+              isXPlatform
+                ? 'border border-[#c4dcec] bg-white text-[#34495a]'
+                : isInstagramPlatform
+                  ? 'border border-[#f0cbd8] bg-white text-[#8d385d]'
+                  : 'border border-stone-300/80 bg-white/70 text-stone-600'
+            }`}
+          >
             <span
               aria-hidden="true"
-              className="h-2 w-2 rounded-full bg-emerald-500"
+              className={`h-2 w-2 rounded-full ${
+                isInstagramPlatform
+                  ? 'bg-gradient-to-r from-[#f58529] via-[#dd2a7b] to-[#8134af]'
+                  : 'bg-emerald-500'
+              }`}
             />
             Free tool · No social password
           </div>
@@ -375,7 +392,9 @@ export default function Home({
           className={`mx-auto pt-10 sm:pt-14 ${
             isXPlatform
               ? 'grid max-w-5xl items-center gap-8 text-left lg:grid-cols-[1.1fr_0.9fr]'
-              : 'max-w-4xl text-center'
+              : isInstagramPlatform
+                ? 'grid max-w-5xl items-center gap-8 text-left lg:grid-cols-[1.08fr_0.92fr]'
+                : 'max-w-4xl text-center'
           }`}
         >
           {isXPlatform ? (
@@ -483,6 +502,140 @@ export default function Home({
                 </p>
               </aside>
             </>
+          ) : isInstagramPlatform ? (
+            <>
+              <div>
+                <p className="inline-flex items-center gap-2 rounded-full border border-[#f1cada] bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-[#a33c6c]">
+                  <span className="grid h-5 w-5 place-items-center rounded-md bg-gradient-to-br from-[#f58529] via-[#dd2a7b] to-[#8134af] text-[12px] font-bold text-white">
+                    ◎
+                  </span>
+                  INSTAGRAM HASHTAG REVIEW
+                </p>
+
+                <h1
+                  className={`${fraunces.className} mt-6 max-w-2xl text-4xl font-black leading-[1.05] tracking-tight text-[#392235] sm:text-5xl lg:text-6xl`}
+                >
+                  Instagram Hashtag Checker
+                </h1>
+
+                <p className="mt-5 max-w-xl text-sm leading-7 text-[#745d6c] sm:text-base">
+                  Check a hashtag list for duplicate tags and selected
+                  patterns using a local reference list. Review the
+                  findings before publishing your next Instagram post.
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <span className="rounded-full border border-[#efd0dc] bg-white px-3 py-2 text-xs font-semibold text-[#79425d]">
+                    No Instagram login
+                  </span>
+
+                  <span className="rounded-full border border-[#efd0dc] bg-white px-3 py-2 text-xs font-semibold text-[#79425d]">
+                    Duplicate-tag review
+                  </span>
+
+                  <span className="rounded-full border border-[#efd0dc] bg-white px-3 py-2 text-xs font-semibold text-[#79425d]">
+                    Local pattern checks
+                  </span>
+                </div>
+              </div>
+
+              <aside className="relative overflow-hidden rounded-[28px] border border-[#f1cbd9] bg-white p-5 shadow-[0_20px_55px_rgba(165,70,115,0.10)] sm:p-6">
+                <div
+                  aria-hidden="true"
+                  className="absolute -right-12 -top-14 h-40 w-40 rounded-full bg-gradient-to-br from-[#f58529]/20 via-[#dd2a7b]/15 to-[#8134af]/20 blur-2xl"
+                />
+
+                <div className="relative">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#b15a80]">
+                        HASHTAG REVIEW BOARD
+                      </p>
+
+                      <h2 className="mt-1 text-lg font-bold text-[#392235]">
+                        What gets reviewed?
+                      </h2>
+                    </div>
+
+                    <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-[#f58529] via-[#dd2a7b] to-[#8134af] text-2xl font-semibold text-white shadow-sm">
+                      #
+                    </span>
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    <span className="rounded-full bg-[#fff0e5] px-3 py-2 text-xs font-semibold text-[#a85a22]">
+                      #yourtopic
+                    </span>
+
+                    <span className="rounded-full bg-[#fceaf1] px-3 py-2 text-xs font-semibold text-[#a33c6c]">
+                      #community
+                    </span>
+
+                    <span className="rounded-full bg-[#f1eafb] px-3 py-2 text-xs font-semibold text-[#70459c]">
+                      #yourbrand
+                    </span>
+                  </div>
+
+                  <div className="mt-6 space-y-4">
+                    <div className="flex items-start gap-3 border-b border-[#f5e5eb] pb-4">
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#fff0e5] text-sm font-bold text-[#c16a2b]">
+                        01
+                      </span>
+
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#392235]">
+                          Reference-list matches
+                        </h3>
+
+                        <p className="mt-1 text-xs leading-5 text-[#806b78]">
+                          Identifies tags that match entries in the tool's
+                          configured local list.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 border-b border-[#f5e5eb] pb-4">
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#fceaf1] text-sm font-bold text-[#b44278]">
+                        02
+                      </span>
+
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#392235]">
+                          Repeated hashtags
+                        </h3>
+
+                        <p className="mt-1 text-xs leading-5 text-[#806b78]">
+                          Checks whether the same hashtag appears more than
+                          once in the submitted list.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#f1eafb] text-sm font-bold text-[#70459c]">
+                        03
+                      </span>
+
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#392235]">
+                          Hashtag count
+                        </h3>
+
+                        <p className="mt-1 text-xs leading-5 text-[#806b78]">
+                          Flags a submitted list that contains more than
+                          30 hashtags.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="mt-5 border-t border-[#f5e5eb] pt-4 text-xs leading-5 text-[#806b78]">
+                    This is a local text review, not a live Instagram search
+                    or account-status test.
+                  </p>
+                </div>
+              </aside>
+            </>
           ) : (
             <>
               <p className="inline-flex items-center rounded-full border border-stone-300/80 bg-white/70 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-600">
@@ -512,7 +665,7 @@ export default function Home({
         {/* Checker panel */}
         <section
           className={`mx-auto mt-7 w-full ${
-            isXPlatform ? 'max-w-4xl' : 'max-w-3xl'
+            isXPlatform || isInstagramPlatform ? 'max-w-4xl' : 'max-w-3xl'
           }`}
           aria-labelledby="checker-card-title"
         >
@@ -520,25 +673,43 @@ export default function Home({
             className={
               isXPlatform
                 ? 'rounded-[30px] border border-[#cbd9e4] bg-[#e5f0f7] p-3 shadow-[0_20px_60px_rgba(29,70,100,0.10)] sm:p-5'
-                : 'rounded-[26px] border border-stone-200/90 bg-white p-4 shadow-[0_18px_55px_rgba(55,45,25,0.08)] sm:p-7'
+                : isInstagramPlatform
+                  ? 'rounded-[30px] border border-[#f0cad8] bg-white p-4 shadow-[0_20px_60px_rgba(165,70,115,0.10)] sm:p-7'
+                  : 'rounded-[26px] border border-stone-200/90 bg-white p-4 shadow-[0_18px_55px_rgba(55,45,25,0.08)] sm:p-7'
             }
           >
             {!isXPlatform && (
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-4">
+              <div
+                className={`mb-6 flex flex-wrap items-center justify-between gap-3 border-b pb-4 ${
+                  isInstagramPlatform ? 'border-[#f5e5eb]' : 'border-stone-100'
+                }`}
+              >
                 <div className="text-left">
                   <h2
                     id="checker-card-title"
-                    className="text-lg font-bold tracking-tight text-stone-900 sm:text-xl"
+                    className={`text-lg font-bold tracking-tight sm:text-xl ${
+                      isInstagramPlatform ? 'text-[#392235]' : 'text-stone-900'
+                    }`}
                   >
                     {copy.toolTitle}
                   </h2>
 
-                  <p className="mt-1 text-xs text-stone-500">
+                  <p
+                    className={`mt-1 text-xs ${
+                      isInstagramPlatform ? 'text-[#9a7185]' : 'text-stone-500'
+                    }`}
+                  >
                     {copy.method}
                   </p>
                 </div>
 
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    isInstagramPlatform
+                      ? 'bg-gradient-to-r from-[#fff0e5] via-[#fceaf1] to-[#f1eafb] text-[#94446d]'
+                      : 'bg-emerald-50 text-emerald-800'
+                  }`}
+                >
                   Free · No login
                 </span>
               </div>
@@ -564,15 +735,18 @@ export default function Home({
                   <div>
                     <label
                       htmlFor="instagram-handle"
-                      className="mb-2 block text-sm font-semibold text-stone-800"
+                      className="mb-2 block text-sm font-semibold text-[#543448]"
                     >
                       Instagram username
+                      <span className="ml-1 text-xs font-normal text-[#a88798]">
+                        (optional)
+                      </span>
                     </label>
 
-                    <div className="flex h-13 items-center rounded-xl border border-stone-300 bg-white px-3 focus-within:border-stone-900 focus-within:ring-2 focus-within:ring-stone-900/10">
+                    <div className="flex h-13 items-center rounded-xl border border-[#edcfdb] bg-[#fffafd] px-3 transition focus-within:border-[#d84c91] focus-within:ring-2 focus-within:ring-[#d84c91]/15">
                       <span
                         aria-hidden="true"
-                        className="mr-2 font-semibold text-stone-400"
+                        className="mr-2 font-semibold text-[#c17a9a]"
                       >
                         @
                       </span>
@@ -584,68 +758,115 @@ export default function Home({
                           setInputVal(event.target.value.replace(/^@/, ''))
                         }
                         placeholder="yourusername"
-                        className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+                        className="min-w-0 flex-1 bg-transparent text-sm text-[#392235] outline-none placeholder:text-[#c2a9b6]"
                         autoComplete="off"
                       />
                     </div>
+
+                    <p className="mt-2 text-xs leading-5 text-[#9a7185]">
+                      Used only as optional context. The local review does not
+                      look up this account.
+                    </p>
                   </div>
 
                   <div>
                     <label
                       htmlFor="instagram-hashtags"
-                      className="mb-2 block text-sm font-semibold text-stone-800"
+                      className="mb-2 block text-sm font-semibold text-[#543448]"
                     >
-                      Recent hashtags
+                      Hashtags from your post
                     </label>
 
                     <textarea
                       id="instagram-hashtags"
                       value={kwInput}
                       onChange={(event) => setKwInput(event.target.value)}
-                      rows={3}
-                      placeholder="#yourtopic #community"
-                      className="w-full rounded-xl border border-stone-300 bg-white px-3 py-3 text-sm outline-none focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10"
+                      rows={4}
+                      placeholder="#yourtopic #community #yourbrand"
+                      className="min-h-[112px] w-full resize-y rounded-xl border border-[#edcfdb] bg-[#fffafd] px-3 py-3 text-sm text-[#392235] outline-none transition placeholder:text-[#c2a9b6] focus:border-[#d84c91] focus:ring-2 focus:ring-[#d84c91]/15"
                     />
+
+                    <p className="mt-2 text-xs leading-5 text-[#9a7185]">
+                      Separate hashtags with spaces or commas.
+                    </p>
                   </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="h-13 w-full rounded-xl bg-stone-950 px-6 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60 sm:w-auto sm:min-w-48"
+                  className="flex h-13 w-full items-center justify-center rounded-xl bg-gradient-to-r from-[#f58529] via-[#dd2a7b] to-[#8134af] px-6 text-sm font-bold text-white shadow-[0_8px_20px_rgba(213,57,130,0.20)] transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c33e87] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-52"
                 >
-                  {loading ? 'Reviewing…' : copy.buttonLabel}
+                  {loading ? 'Reviewing hashtags…' : copy.buttonLabel}
                 </button>
 
                 {igResult && (
-                  <div
-                    className="rounded-2xl border border-stone-200 bg-stone-50 p-4 sm:p-5"
+                  <section
+                    className="overflow-hidden rounded-2xl border border-[#f0d3df] bg-[#fff9fc]"
                     aria-live="polite"
+                    aria-label="Instagram hashtag review results"
                   >
-                    <h3 className="font-semibold text-stone-900">
-                      Hashtag pattern review completed
-                    </h3>
+                    <div className="flex flex-col gap-4 border-b border-[#f3e0e8] p-4 sm:flex-row sm:items-center sm:p-5">
+                      <div className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#f58529] via-[#dd2a7b] to-[#8134af] text-white shadow-sm">
+                        <div className="text-center">
+                          <div className="text-2xl font-black leading-none">
+                            {igResult.score}
+                          </div>
+                          <div className="mt-1 text-[9px] font-bold uppercase tracking-wide">
+                            / 100
+                          </div>
+                        </div>
+                      </div>
 
-                    <ul className="mt-3 space-y-2 text-sm leading-6 text-stone-700">
-                      {igResult.reasons?.map((reason, index) => (
-                        <li
-                          key={`${index}-${reason}`}
-                          className="flex gap-2"
-                        >
-                          <span
-                            aria-hidden="true"
-                            className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-stone-500"
-                          />
-                          <span>{reason}</span>
-                        </li>
-                      ))}
-                    </ul>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#ad5a80]">
+                          LOCAL PATTERN SCORE
+                        </p>
 
-                    <p className="mt-3 text-xs leading-5 text-stone-500">
-                      This is a local heuristic, not an Instagram
-                      account-status or reach test.
-                    </p>
-                  </div>
+                        <h3 className="mt-1 text-lg font-bold text-[#392235]">
+                          {igResult.hashtagVisibility === 'ok'
+                            ? 'No configured matches found'
+                            : igResult.hashtagVisibility === 'limited'
+                              ? 'Some patterns need review'
+                              : 'Multiple patterns need attention'}
+                        </h3>
+
+                        <p className="mt-1 text-xs leading-5 text-[#806b78]">
+                          This score comes from the tool's local rules. It is
+                          not an Instagram ranking, reach, or account-status
+                          score.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 sm:p-5">
+                      <h4 className="text-sm font-bold text-[#543448]">
+                        Review findings
+                      </h4>
+
+                      <ul className="mt-3 space-y-2 text-sm leading-6 text-[#745d6c]">
+                        {igResult.reasons?.map((reason, index) => (
+                          <li
+                            key={`${index}-${reason}`}
+                            className="flex gap-2"
+                          >
+                            <span
+                              aria-hidden="true"
+                              className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-[#f58529] to-[#dd2a7b]"
+                            />
+                            <span>{reason}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <p className="mt-4 rounded-xl border border-[#f1dce5] bg-white px-3 py-2.5 text-xs leading-5 text-[#896e7d]">
+                        Important: a match in this reference list does not
+                        prove that Instagram has banned a hashtag or restricted
+                        your post. Check Instagram's own notices and guidance
+                        before drawing conclusions.
+                      </p>
+                    </div>
+                  </section>
                 )}
               </form>
             )}
@@ -659,7 +880,9 @@ export default function Home({
             className={`mt-4 rounded-2xl px-4 py-3 text-left ${
               isXPlatform
                 ? 'border border-[#cbdce8] bg-white'
-                : 'border border-stone-300/70 bg-white/60'
+                : isInstagramPlatform
+                  ? 'border border-[#f0d3df] bg-white'
+                  : 'border border-stone-300/70 bg-white/60'
             }`}
           >
             <p className="text-xs leading-5 text-stone-600">
@@ -688,16 +911,22 @@ export default function Home({
             >
               {isXPlatform
                 ? 'How the X visibility check works'
-                : 'Understand what the checker can tell you'}
+                : isInstagramPlatform
+                  ? 'How the Instagram hashtag checker works'
+                  : 'Understand what the checker can tell you'}
             </h2>
           </div>
 
           <div className="grid gap-3 md:grid-cols-3">
-            <article className={`rounded-2xl border p-5 ${
-              isXPlatform
-                ? 'border-[#cbdce8] bg-white'
-                : 'border-stone-200/90 bg-white/80'
-            }`}>
+            <article
+              className={`rounded-2xl border p-5 ${
+                isXPlatform
+                  ? 'border-[#cbdce8] bg-white'
+                  : isInstagramPlatform
+                    ? 'border-[#f0d3df] bg-white'
+                    : 'border-stone-200/90 bg-white/80'
+              }`}
+            >
               <span className="text-xs font-bold text-stone-400">
                 01
               </span>
@@ -705,21 +934,29 @@ export default function Home({
               <h3 className="mt-2 font-semibold text-stone-900">
                 {isXPlatform
                   ? 'Check profile reachability'
-                  : 'Choose a platform'}
+                  : isInstagramPlatform
+                    ? 'Paste your hashtag list'
+                    : 'Choose a platform'}
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-stone-600">
                 {isXPlatform
                   ? 'The checker requests a public X profile endpoint without logging in. A response confirms endpoint availability, not normal account reach.'
-                  : 'Select the network you want to review. Each tool explains whether it uses public signals or a local heuristic.'}
+                  : isInstagramPlatform
+                    ? 'Copy the hashtags from a recent Instagram post and paste them into the review field. Your username is optional.'
+                    : 'Select the network you want to review. Each tool explains whether it uses public signals or a local heuristic.'}
               </p>
             </article>
 
-            <article className={`rounded-2xl border p-5 ${
-              isXPlatform
-                ? 'border-[#cbdce8] bg-white'
-                : 'border-stone-200/90 bg-white/80'
-            }`}>
+            <article
+              className={`rounded-2xl border p-5 ${
+                isXPlatform
+                  ? 'border-[#cbdce8] bg-white'
+                  : isInstagramPlatform
+                    ? 'border-[#f0d3df] bg-white'
+                    : 'border-stone-200/90 bg-white/80'
+              }`}
+            >
               <span className="text-xs font-bold text-stone-400">
                 02
               </span>
@@ -727,21 +964,29 @@ export default function Home({
               <h3 className="mt-2 font-semibold text-stone-900">
                 {isXPlatform
                   ? 'Review limited recent search'
-                  : 'Run the available check'}
+                  : isInstagramPlatform
+                    ? 'Compare against local rules'
+                    : 'Run the available check'}
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-stone-600">
                 {isXPlatform
                   ? 'A limited logged-out search checks whether a recent post from the username appears in returned results. It is not an exhaustive search.'
-                  : 'Enter the requested information. Never provide a social media password or login code.'}
+                  : isInstagramPlatform
+                    ? 'The tool checks for configured reference-list matches, repeated hashtags, and lists containing more than 30 hashtags.'
+                    : 'Enter the requested information. Never provide a social media password or login code.'}
               </p>
             </article>
 
-            <article className={`rounded-2xl border p-5 ${
-              isXPlatform
-                ? 'border-[#cbdce8] bg-white'
-                : 'border-stone-200/90 bg-white/80'
-            }`}>
+            <article
+              className={`rounded-2xl border p-5 ${
+                isXPlatform
+                  ? 'border-[#cbdce8] bg-white'
+                  : isInstagramPlatform
+                    ? 'border-[#f0d3df] bg-white'
+                    : 'border-stone-200/90 bg-white/80'
+              }`}
+            >
               <span className="text-xs font-bold text-stone-400">
                 03
               </span>
@@ -749,13 +994,17 @@ export default function Home({
               <h3 className="mt-2 font-semibold text-stone-900">
                 {isXPlatform
                   ? 'Inspect username suggestions'
-                  : 'Read the evidence'}
+                  : isInstagramPlatform
+                    ? 'Read the pattern findings'
+                    : 'Read the evidence'}
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-stone-600">
                 {isXPlatform
                   ? 'The checker reviews returned typeahead suggestions for the exact username. Missing suggestions alone do not establish an account restriction.'
-                  : 'Review the signals, explanations, and limitations. An inconclusive result is not proof of a restriction.'}
+                  : isInstagramPlatform
+                    ? 'Review the local score and the reasons listed. Treat them as prompts for a closer look, not as an official Instagram verdict.'
+                    : 'Review the signals, explanations, and limitations. An inconclusive result is not proof of a restriction.'}
               </p>
             </article>
           </div>
@@ -775,29 +1024,36 @@ export default function Home({
               id="methodology-title"
               className={`${fraunces.className} mt-2 text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl`}
             >
-              What this {normalizedPlatform === 'x'
+              What this{' '}
+              {normalizedPlatform === 'x'
                 ? 'X visibility check'
-                : `${normalizedPlatform} review`} can tell you
+                : isInstagramPlatform
+                  ? 'Instagram hashtag checker'
+                  : `${normalizedPlatform} review`}{' '}
+              can tell you
             </h2>
 
             <p className="mt-3 text-sm leading-7 text-stone-600 sm:text-base">
-              A visibility check is a limited diagnostic, not an official
-              account-status decision. A missing search result, lower
-              engagement, or an unavailable public endpoint does not by
-              itself prove that a platform has restricted an account or post.
+              {isInstagramPlatform
+                ? 'This Instagram tool reviews only the hashtag text you submit. It applies a local reference list and simple pattern rules; it does not connect to Instagram or inspect account and post visibility.'
+                : 'A visibility check is a limited diagnostic, not an official account-status decision. A missing search result, lower engagement, or an unavailable public endpoint does not by itself prove that a platform has restricted an account or post.'}
             </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <article className={`rounded-2xl border p-5 ${
-              isXPlatform
-                ? 'border-[#cbdce8] bg-white'
-                : 'border-stone-200 bg-white'
-            }`}>
+            <article
+              className={`rounded-2xl border p-5 ${
+                isXPlatform || isInstagramPlatform
+                  ? isInstagramPlatform
+                    ? 'border-[#f0d3df] bg-white'
+                    : 'border-[#cbdce8] bg-white'
+                  : 'border-stone-200 bg-white'
+              }`}
+            >
               <h3 className="text-base font-semibold text-stone-900">
                 {normalizedPlatform === 'x'
                   ? 'What the X checker tests'
-                  : normalizedPlatform === 'instagram'
+                  : isInstagramPlatform
                     ? 'What the Instagram review tests'
                     : `What the ${normalizedPlatform} review tests`}
               </h3>
@@ -812,12 +1068,14 @@ export default function Home({
                   reveal every search, ranking, recommendation, or enforcement
                   decision made by X.
                 </p>
-              ) : normalizedPlatform === 'instagram' ? (
+              ) : isInstagramPlatform ? (
                 <p className="mt-3 text-sm leading-7 text-stone-600">
-                  This tool compares the hashtags you enter with a local
-                  reference list. It does not sign in to Instagram, inspect
-                  your account, query live hashtag search results, or confirm
-                  that Instagram has restricted a post or account.
+                  The Instagram review compares submitted hashtags with a
+                  configured local reference list. It also checks whether
+                  hashtags are repeated and whether more than 30 hashtags
+                  were entered. It does not sign in to Instagram, query live
+                  hashtag search results, inspect your account, or verify
+                  whether a post is eligible for recommendations.
                 </p>
               ) : (
                 <p className="mt-3 text-sm leading-7 text-stone-600">
@@ -830,11 +1088,15 @@ export default function Home({
               )}
             </article>
 
-            <article className={`rounded-2xl border p-5 ${
-              isXPlatform
-                ? 'border-[#cbdce8] bg-white'
-                : 'border-stone-200 bg-white'
-            }`}>
+            <article
+              className={`rounded-2xl border p-5 ${
+                isInstagramPlatform
+                  ? 'border-[#f0d3df] bg-white'
+                  : isXPlatform
+                    ? 'border-[#cbdce8] bg-white'
+                    : 'border-stone-200 bg-white'
+              }`}
+            >
               <h3 className="text-base font-semibold text-stone-900">
                 What the result cannot establish
               </h3>
@@ -856,11 +1118,15 @@ export default function Home({
             </article>
           </div>
 
-          <article className={`mt-4 rounded-2xl border p-5 sm:p-6 ${
-            isXPlatform
-              ? 'border-[#cbdce8] bg-white'
-              : 'border-stone-200 bg-white'
-          }`}>
+          <article
+            className={`mt-4 rounded-2xl border p-5 sm:p-6 ${
+              isInstagramPlatform
+                ? 'border-[#f0d3df] bg-white'
+                : isXPlatform
+                  ? 'border-[#cbdce8] bg-white'
+                  : 'border-stone-200 bg-white'
+            }`}
+          >
             <h3 className="text-base font-semibold text-stone-900">
               How to investigate a visibility problem
             </h3>
@@ -906,92 +1172,113 @@ export default function Home({
           </div>
 
           <div className="space-y-3">
-            <details className={`group rounded-xl border p-4 ${
-              isXPlatform
-                ? 'border-[#cbdce8] bg-white'
-                : 'border-stone-200 bg-white'
-            }`}>
+            <details
+              className={`group rounded-xl border p-4 ${
+                isInstagramPlatform
+                  ? 'border-[#f0d3df] bg-white'
+                  : isXPlatform
+                    ? 'border-[#cbdce8] bg-white'
+                    : 'border-stone-200 bg-white'
+              }`}
+            >
               <summary className="cursor-pointer list-none font-semibold text-stone-900">
-                Can this checker confirm that my account is shadowbanned?
+                {isInstagramPlatform
+                  ? 'Can this Instagram hashtag checker confirm that my account is shadowbanned?'
+                  : 'Can this checker confirm that my account is shadowbanned?'}
               </summary>
 
               <p className="mt-3 text-sm leading-7 text-stone-600">
-                No. An independent public checker cannot confirm every platform
-                restriction. It can report only the specific public signals or
-                text patterns described in its methodology. Treat the result
-                as a diagnostic clue, not an official platform verdict.
+                {isInstagramPlatform
+                  ? 'No. This tool checks the hashtag text you submit against local rules. It does not connect to Instagram, inspect your account, or test whether your posts appear in Instagram search or recommendations.'
+                  : 'No. An independent public checker cannot confirm every platform restriction. It can report only the specific public signals or text patterns described in its methodology. Treat the result as a diagnostic clue, not an official platform verdict.'}
               </p>
             </details>
 
-            <details className={`group rounded-xl border p-4 ${
-              isXPlatform
-                ? 'border-[#cbdce8] bg-white'
-                : 'border-stone-200 bg-white'
-            }`}>
+            <details
+              className={`group rounded-xl border p-4 ${
+                isInstagramPlatform
+                  ? 'border-[#f0d3df] bg-white'
+                  : isXPlatform
+                    ? 'border-[#cbdce8] bg-white'
+                    : 'border-stone-200 bg-white'
+              }`}
+            >
               <summary className="cursor-pointer list-none font-semibold text-stone-900">
-                Does low reach or low engagement prove a visibility restriction?
+                {isInstagramPlatform
+                  ? 'Does a hashtag match prove that Instagram restricted my post?'
+                  : 'Does low reach or low engagement prove a visibility restriction?'}
               </summary>
 
               <p className="mt-3 text-sm leading-7 text-stone-600">
-                No. Reach and engagement can change for many reasons, including
-                audience interest, posting frequency, content topic, competition,
-                privacy settings, and recommendation systems. A metric by itself
-                does not establish that an account has been restricted.
+                {isInstagramPlatform
+                  ? 'No. A match means that a hashtag appears in this tool’s configured reference list. The list is not a live Instagram database or an official list of restricted hashtags. Review the context and Instagram’s own notices before drawing conclusions.'
+                  : 'No. Reach and engagement can change for many reasons, including audience interest, posting frequency, content topic, competition, privacy settings, and recommendation systems. A metric by itself does not establish that an account has been restricted.'}
               </p>
             </details>
 
-            <details className={`group rounded-xl border p-4 ${
-              isXPlatform
-                ? 'border-[#cbdce8] bg-white'
-                : 'border-stone-200 bg-white'
-            }`}>
+            <details
+              className={`group rounded-xl border p-4 ${
+                isInstagramPlatform
+                  ? 'border-[#f0d3df] bg-white'
+                  : isXPlatform
+                    ? 'border-[#cbdce8] bg-white'
+                    : 'border-stone-200 bg-white'
+              }`}
+            >
               <summary className="cursor-pointer list-none font-semibold text-stone-900">
-                What does “signal not observed” mean?
+                {isInstagramPlatform
+                  ? 'What does a hashtag pattern match mean?'
+                  : 'What does “signal not observed” mean?'}
               </summary>
 
               <p className="mt-3 text-sm leading-7 text-stone-600">
-                It means that a specific completed test did not return the
-                expected public signal in that request. It does not explain
-                why the signal was absent and does not, by itself, prove a
-                restriction. If the source fails or returns an unexpected
-                response, the result should be shown as unable to verify.
+                {isInstagramPlatform
+                  ? 'It means that one or more submitted hashtags matched entries in the local reference list, or that a configured list rule was triggered. It does not establish that Instagram has banned the hashtag or limited your content.'
+                  : 'It means that a specific completed test did not return the expected public signal in that request. It does not explain why the signal was absent and does not, by itself, prove a restriction. If the source fails or returns an unexpected response, the result should be shown as unable to verify.'}
               </p>
             </details>
 
-            <details className={`group rounded-xl border p-4 ${
-              isXPlatform
-                ? 'border-[#cbdce8] bg-white'
-                : 'border-stone-200 bg-white'
-            }`}>
+            <details
+              className={`group rounded-xl border p-4 ${
+                isInstagramPlatform
+                  ? 'border-[#f0d3df] bg-white'
+                  : isXPlatform
+                    ? 'border-[#cbdce8] bg-white'
+                    : 'border-stone-200 bg-white'
+              }`}
+            >
               <summary className="cursor-pointer list-none font-semibold text-stone-900">
-                Do I need to provide my social media password?
+                {isInstagramPlatform
+                  ? 'Does this tool connect to my Instagram account?'
+                  : 'Do I need to provide my social media password?'}
               </summary>
 
               <p className="mt-3 text-sm leading-7 text-stone-600">
-                No. This checker does not ask for a social media password,
-                login code, or session cookie. For X, the username is sent
-                to the site's checker endpoint for limited public lookups.
-                The other pattern-review tools analyze the text you enter
-                in this page. Review the Privacy Policy for details about
-                server requests, logs, and retention.
+                {isInstagramPlatform
+                  ? 'No. The Instagram hashtag review runs against the text entered on this page and a local reference list. It does not request your Instagram password, login code, session cookie, or account access.'
+                  : 'No. This checker does not ask for a social media password, login code, or session cookie. For X, the username is sent to the site’s checker endpoint for limited public lookups. The other pattern-review tools analyze the text you enter in this page. Review the Privacy Policy for details about server requests, logs, and retention.'}
               </p>
             </details>
 
-            <details className={`group rounded-xl border p-4 ${
-              isXPlatform
-                ? 'border-[#cbdce8] bg-white'
-                : 'border-stone-200 bg-white'
-            }`}>
+            <details
+              className={`group rounded-xl border p-4 ${
+                isInstagramPlatform
+                  ? 'border-[#f0d3df] bg-white'
+                  : isXPlatform
+                    ? 'border-[#cbdce8] bg-white'
+                    : 'border-stone-200 bg-white'
+              }`}
+            >
               <summary className="cursor-pointer list-none font-semibold text-stone-900">
-                What should I do if the result is inconclusive?
+                {isInstagramPlatform
+                  ? 'What should I do if my Instagram hashtags are not getting reach?'
+                  : 'What should I do if the result is inconclusive?'}
               </summary>
 
               <p className="mt-3 text-sm leading-7 text-stone-600">
-                Do not treat an inconclusive result as a restriction.
-                Check the platform's own account-status messages and
-                help resources, review whether the content is public,
-                and try again later if a temporary service problem
-                prevented the check.
+                {isInstagramPlatform
+                  ? 'Review Instagram’s account-status information and current recommendation guidance. Check that your post and account are public where applicable, review the content itself, and compare results over time. Do not treat this local hashtag score as proof of a restriction.'
+                  : 'Do not treat an inconclusive result as a restriction. Check the platform’s own account-status messages and help resources, review whether the content is public, and try again later if a temporary service problem prevented the check.'}
               </p>
             </details>
           </div>
@@ -1000,9 +1287,11 @@ export default function Home({
         {/* Official resources */}
         <section
           className={`mx-auto mt-10 max-w-5xl rounded-2xl border p-5 sm:p-6 ${
-            isXPlatform
-              ? 'border-[#cbdce8] bg-white'
-              : 'border-stone-200 bg-white/80'
+            isInstagramPlatform
+              ? 'border-[#f0d3df] bg-white'
+              : isXPlatform
+                ? 'border-[#cbdce8] bg-white'
+                : 'border-stone-200 bg-white/80'
           }`}
           aria-labelledby="official-resources-title"
         >
@@ -1056,6 +1345,19 @@ export default function Home({
               </>
             )}
 
+            {normalizedPlatform === 'instagram' && (
+              <li>
+                <a
+                  className="font-medium text-[#a33c6c] underline decoration-[#e9b7cb] underline-offset-4 hover:text-[#8134af]"
+                  href="https://help.instagram.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Instagram Help Center
+                </a>
+              </li>
+            )}
+
             {normalizedPlatform === 'tiktok' && (
               <li>
                 <a
@@ -1084,7 +1386,11 @@ export default function Home({
 
             <li>
               <Link
-                className="font-medium text-stone-800 underline decoration-stone-300 underline-offset-4 hover:text-violet-700"
+                className={`font-medium underline underline-offset-4 ${
+                  isInstagramPlatform
+                    ? 'text-[#a33c6c] decoration-[#e9b7cb] hover:text-[#8134af]'
+                    : 'text-stone-800 decoration-stone-300 hover:text-violet-700'
+                }`}
                 href="/about"
               >
                 Read how Shadowban.online works
@@ -1093,7 +1399,11 @@ export default function Home({
 
             <li>
               <Link
-                className="font-medium text-stone-800 underline decoration-stone-300 underline-offset-4 hover:text-violet-700"
+                className={`font-medium underline underline-offset-4 ${
+                  isInstagramPlatform
+                    ? 'text-[#a33c6c] decoration-[#e9b7cb] hover:text-[#8134af]'
+                    : 'text-stone-800 decoration-stone-300 hover:text-violet-700'
+                }`}
                 href="/privacy"
               >
                 Read the Privacy Policy
@@ -1103,11 +1413,15 @@ export default function Home({
         </section>
 
         {/* Independent service notice */}
-        <section className={`mx-auto mt-8 max-w-5xl rounded-2xl border p-5 text-center sm:p-6 ${
-          isXPlatform
-            ? 'border-[#cbdce8] bg-white'
-            : 'border-stone-300/70 bg-white/60'
-        }`}>
+        <section
+          className={`mx-auto mt-8 max-w-5xl rounded-2xl border p-5 text-center sm:p-6 ${
+            isInstagramPlatform
+              ? 'border-[#f0d3df] bg-white'
+              : isXPlatform
+                ? 'border-[#cbdce8] bg-white'
+                : 'border-stone-300/70 bg-white/60'
+          }`}
+        >
           <h2 className="font-semibold text-stone-900">
             Independent tool, not an official platform service
           </h2>
