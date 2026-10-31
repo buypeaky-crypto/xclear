@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import Home from "../page";
+import FacebookLanding from "@/components/FacebookLanding";
 
 export const dynamic = "force-dynamic";
 
@@ -40,12 +40,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return (
-    <div className="bg-platform-facebook">
-      <Home
-        platform="facebook"
-        backgroundClassName="bg-transparent"
-      />
-    </div>
-  );
+  return <FacebookLanding locale="en" />;
 }
