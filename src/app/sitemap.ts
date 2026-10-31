@@ -45,5 +45,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
+  // English LinkedIn profile visibility checker
+  entries.push({
+    url: `${baseUrl}/linkedin`,
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  })
+
   return entries
 }
