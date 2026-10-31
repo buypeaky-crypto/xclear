@@ -86,7 +86,7 @@ function reviewFacebookText(text: string, pageName: string): FacebookReview {
   };
 }
 
-export default function FacebookLanding() {
+export default function FacebookLanding({   locale = "en", }: {   locale?: string; }) {
   const [pageName, setPageName] = useState("");
   const [postText, setPostText] = useState("");
   const [result, setResult] = useState<FacebookReview | null>(null);
@@ -252,7 +252,7 @@ export default function FacebookLanding() {
         </section>
 
         <div className="mt-8 flex justify-center">
-          <PlatformSwitcher activePlatform="facebook" locale="en" />
+          <PlatformSwitcher activePlatform="facebook" locale={locale} />
         </div>
 
         {/* Facebook text checker */}
