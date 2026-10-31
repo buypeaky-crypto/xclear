@@ -107,6 +107,7 @@ const platforms = [
   },
   { href: "/youtube", label: "YouTube", short: "YT" },
   { href: "/reddit", label: "Reddit", short: "RD" },
+  { href: "/linkedin", label: "LinkedIn", short: "LI" },
 ];
 
 export default function RootLayout({
@@ -300,6 +301,14 @@ export default function RootLayout({
                     </Link>
                   </li>
                 </ul>
+                <li>
+  <Link
+    href="/linkedin"
+    className="transition hover:text-violet-700"
+  >
+    LinkedIn Profile Visibility Checker
+  </Link>
+</li>
               </nav>
 
               {/* Company links */}
